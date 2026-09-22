@@ -1,0 +1,198 @@
+/* ===== Dashboard Header ===== */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-header h1 {
+    font-weight: 600;
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+    color: #1e293b;
+}
+
+.dashboard-updated {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+/* ===== KPI Cards ===== */
+.kpi-card {
+    border-radius: 12px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.kpi-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: #1e293b;
+    margin-bottom: 0.4rem;
+}
+
+.kpi-sub {
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.kpi-link {
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.kpi-alert {
+    border-left: 4px solid #dc2626 !important;
+}
+
+/* ===== Quick Actions ===== */
+.quick-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-quick {
+    background-color: #2563eb;
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.btn-quick:hover {
+    background-color: #1d4ed8;
+    color: #fff;
+}
+
+.btn-quick-outline {
+    background-color: #fff;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.btn-quick-outline:hover {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+}
+
+/* ===== Panels (charts, tables) ===== */
+.panel {
+    border-radius: 12px;
+    height: 100%;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.panel-header h5 {
+    font-weight: 600;
+    margin: 0;
+    color: #1e293b;
+}
+
+.panel-link {
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 500;
+}
+
+.badge-count {
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+}
+
+/* ===== Tables ===== */
+.dashboard-table {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.dashboard-table thead th {
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.6rem;
+}
+
+.dashboard-table td {
+    vertical-align: middle;
+    padding: 0.6rem 0.5rem;
+    color: #334155;
+}
+
+.stock-badge {
+    background-color: #fef2f2;
+    color: #dc2626;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+/* ===== Status Badges ===== */
+.status-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.status-completed {
+    background-color: #f0fdf4;
+    color: #16a34a;
+}
+
+.status-pending {
+    background-color: #fffbeb;
+    color: #d97706;
+}
+
+.status-cancelled,
+.status-refunded {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+/* ===== Empty States ===== */
+.empty-state {
+    text-align: center;
+    color: #94a3b8;
+    padding: 2rem 0;
+    margin-bottom: 0;
+}

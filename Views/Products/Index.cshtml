@@ -1,0 +1,48 @@
+@model IEnumerable<mini_store.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<h1>Products</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add Product</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.ProductName</td>
+                <td>@product.Category?.CategoryName</td>
+                <td>₱@product.Price.ToString("N2")</td>
+                <td>@product.Quantity</td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@product.ProductId"
+                       class="btn btn-warning">
+                        Edit
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@product.ProductId"
+                       class="btn btn-danger">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,312 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Mini Store</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+
+<body>
+
+    <!-- Mobile overlay (shown when sidebar is open on small screens) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="store-layout">
+
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar" id="sidebar">
+
+            <!-- Brand -->
+            <div class="sidebar-brand">
+
+                <div class="brand-icon">
+                    <i class="bi bi-shop"></i>
+                </div>
+
+                <div class="brand-text">
+                    <h5>Mini Store</h5>
+                    <small>Management System</small>
+                </div>
+
+            </div>
+
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+
+                <!-- MAIN -->
+                <div class="nav-section">
+                    Main
+                </div>
+
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   class="sidebar-link active">
+
+                    <span class="nav-icon"><i class="bi bi-grid-1x2-fill"></i></span>
+                    <span>Dashboard</span>
+
+                </a>
+
+
+                <!-- PRODUCT MANAGEMENT -->
+                <div class="nav-section">
+                    Product Management
+                </div>
+
+                <a asp-controller="Products"
+                   asp-action="Index"
+                   class="sidebar-link">
+
+                    <span class="nav-icon"><i class="bi bi-box-seam-fill"></i></span>
+                    <span>Products</span>
+
+                </a>
+
+                <a asp-controller="Categories"
+                   asp-action="Index"
+                   class="sidebar-link">
+
+                    <span class="nav-icon"><i class="bi bi-tags-fill"></i></span>
+                    <span>Categories</span>
+
+                </a>
+
+
+                <!-- CUSTOMERS -->
+                <div class="nav-section">
+                    Customers
+                </div>
+
+                <a asp-controller="Customers"
+                   asp-action="Index"
+                   class="sidebar-link">
+
+                    <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
+                    <span>Customers</span>
+
+                </a>
+
+
+                <!-- TRANSACTIONS -->
+                <div class="nav-section">
+                    Transactions
+                </div>
+
+                <a asp-controller="Sales"
+                   asp-action="Index"
+                   class="sidebar-link">
+
+                    <span class="nav-icon"><i class="bi bi-receipt"></i></span>
+                    <span>Sales</span>
+
+                </a>
+
+                <a asp-controller="CreditRecords"
+                   asp-action="Index"
+                   class="sidebar-link">
+
+                    <span class="nav-icon"><i class="bi bi-cash-coin"></i></span>
+                    <span>Utang Records</span>
+
+                </a>
+
+
+                <!-- INVENTORY -->
+                <div class="nav-section">
+                    Inventory
+                </div>
+
+                <a asp-controller="Inventory"
+                   asp-action="Index"
+                   class="sidebar-link">
+
+                    <span class="nav-icon"><i class="bi bi-boxes"></i></span>
+                    <span>Inventory</span>
+
+                </a>
+
+
+                <!-- REPORTS -->
+                <div class="nav-section">
+                    Reports
+                </div>
+
+                <a asp-controller="Reports"
+                   asp-action="Index"
+                   class="sidebar-link">
+
+                    <span class="nav-icon"><i class="bi bi-bar-chart-line-fill"></i></span>
+                    <span>Reports</span>
+
+                </a>
+
+            </nav>
+
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+
+                <div class="store-info">
+                    <div class="store-status-dot"></div>
+
+                    <div>
+                        <strong>Store Open</strong>
+                        <small>System Online</small>
+                    </div>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ================= MAIN CONTENT ================= -->
+        <main class="main-content">
+
+
+            <!-- TOP BAR -->
+            <header class="topbar">
+
+                <!-- Page Title -->
+                <div class="topbar-left">
+
+                    <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Toggle menu">
+                        <i class="bi bi-list"></i>
+                    </button>
+
+                    <div class="page-heading">
+
+                        <span class="page-label">
+                            Mini Store
+                        </span>
+
+                        <h6>
+                            @ViewData["Title"]
+                        </h6>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Top Right -->
+                <div class="topbar-right">
+
+
+                    <!-- Store Status -->
+                    <div class="store-status">
+
+                        <span class="status-dot"></span>
+
+                        <span>Store Open</span>
+
+                    </div>
+
+
+                    <!-- Notification -->
+                    <button class="topbar-icon"
+                            type="button"
+                            title="Notifications">
+
+                        <i class="bi bi-bell-fill"></i>
+
+                        <span class="notification-badge">
+                            3
+                        </span>
+
+                    </button>
+
+
+                    <!-- Settings -->
+                    <button class="topbar-icon"
+                            type="button"
+                            title="Settings">
+
+                        <i class="bi bi-gear-fill"></i>
+
+                    </button>
+
+
+                    <!-- Divider -->
+                    <div class="topbar-divider"></div>
+
+
+                    <!-- Profile -->
+                    <div class="profile">
+
+                        <div class="profile-avatar">
+                            A
+                        </div>
+
+                        <div class="profile-info">
+
+                            <strong>Administrator</strong>
+
+                            <small>Store Manager</small>
+
+                        </div>
+
+                        <i class="bi bi-chevron-down profile-arrow"></i>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <!-- PAGE CONTENT -->
+            <div class="content-container">
+
+                @RenderBody()
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Mobile sidebar toggle
+        (function () {
+            var toggle = document.getElementById('sidebarToggle');
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            }
+
+            if (toggle && sidebar && overlay) {
+                toggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('show');
+                });
+                overlay.addEventListener('click', closeSidebar);
+            }
+        })();
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
