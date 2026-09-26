@@ -1,7 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -13,6 +17,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
@@ -43,14 +49,11 @@
             <!-- Navigation -->
             <nav class="sidebar-nav">
 
-                <!-- MAIN -->
-                <div class="nav-section">
-                    Main
-                </div>
+               
 
                 <a asp-controller="Dashboard"
                    asp-action="Index"
-                   class="sidebar-link active">
+                   class="sidebar-link @(currentController == "Dashboard" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-grid-1x2-fill"></i></span>
                     <span>Dashboard</span>
@@ -58,14 +61,11 @@
                 </a>
 
 
-                <!-- PRODUCT MANAGEMENT -->
-                <div class="nav-section">
-                    Product Management
-                </div>
+               
 
                 <a asp-controller="Products"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(currentController == "Products" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-box-seam-fill"></i></span>
                     <span>Products</span>
@@ -74,7 +74,7 @@
 
                 <a asp-controller="Categories"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(currentController == "Categories" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-tags-fill"></i></span>
                     <span>Categories</span>
@@ -82,14 +82,9 @@
                 </a>
 
 
-                <!-- CUSTOMERS -->
-                <div class="nav-section">
-                    Customers
-                </div>
-
                 <a asp-controller="Customers"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(currentController == "Customers" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
                     <span>Customers</span>
@@ -97,23 +92,19 @@
                 </a>
 
 
-                <!-- TRANSACTIONS -->
-                <div class="nav-section">
-                    Transactions
-                </div>
-
+              
                 <a asp-controller="Sales"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(currentController == "Sales" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-receipt"></i></span>
                     <span>Sales</span>
 
                 </a>
 
-                <a asp-controller="CreditRecords"
+                <a asp-controller="Utang"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(currentController == "Utang" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-cash-coin"></i></span>
                     <span>Utang Records</span>
@@ -121,14 +112,9 @@
                 </a>
 
 
-                <!-- INVENTORY -->
-                <div class="nav-section">
-                    Inventory
-                </div>
-
                 <a asp-controller="Inventory"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(currentController == "Inventory" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-boxes"></i></span>
                     <span>Inventory</span>
@@ -136,36 +122,17 @@
                 </a>
 
 
-                <!-- REPORTS -->
-                <div class="nav-section">
-                    Reports
-                </div>
-
                 <a asp-controller="Reports"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(currentController == "Reports" ? "active" : "")">
 
                     <span class="nav-icon"><i class="bi bi-bar-chart-line-fill"></i></span>
                     <span>Reports</span>
 
                 </a>
 
+
             </nav>
-
-
-            <!-- Sidebar Footer -->
-            <div class="sidebar-footer">
-
-                <div class="store-info">
-                    <div class="store-status-dot"></div>
-
-                    <div>
-                        <strong>Store Open</strong>
-                        <small>System Online</small>
-                    </div>
-                </div>
-
-            </div>
 
         </aside>
 
@@ -202,15 +169,6 @@
                 <!-- Top Right -->
                 <div class="topbar-right">
 
-
-                    <!-- Store Status -->
-                    <div class="store-status">
-
-                        <span class="status-dot"></span>
-
-                        <span>Store Open</span>
-
-                    </div>
 
 
                     <!-- Notification -->

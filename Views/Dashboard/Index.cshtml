@@ -2,223 +2,493 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<link rel="stylesheet" href="~/css/dashboard.css" />
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/dashboard.css"
+          asp-append-version="true" />
+}
 
-<div class="dashboard-header">
-    <div>
-        <h1>Dashboard</h1>
-        <p class="text-muted">Welcome back! Here's what's happening in your store today.</p>
-    </div>
-    <div class="dashboard-updated">
-        Last updated: @DateTime.Now.ToString("MMM dd, yyyy - h:mm tt")
-    </div>
-</div>
+<div class="dashboard-page">
 
-<!-- KPI Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card kpi-card shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="kpi-label">Today's Sales</h6>
-                <h2 class="kpi-value">₱@ViewBag.TodaySales</h2>
-                <span class="kpi-sub">@ViewBag.TodayTransactionCount transactions</span>
-            </div>
+    <!-- HEADER -->
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">Dashboard</h1>
+
+            <p class="dashboard-subtitle">
+                Welcome back! Here's what's happening in your store today.
+            </p>
+        </div>
+
+        <div class="dashboard-updated">
+            <i class="bi bi-clock-history"></i>
+            Last updated:
+            @DateTime.Now.ToString("MMM dd, yyyy - h:mm tt")
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card kpi-card shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="kpi-label">Inventory Value</h6>
-                <h2 class="kpi-value">₱@ViewBag.TotalInventoryValue</h2>
-                <span class="kpi-sub">Across @ViewBag.TotalProducts products</span>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card kpi-card shadow-sm border-0 kpi-alert">
-            <div class="card-body">
-                <h6 class="kpi-label">Low Stock Items</h6>
-                <h2 class="kpi-value">@ViewBag.LowStockCount</h2>
-                <a asp-controller="Products" asp-action="LowStock" class="kpi-link">
-                    Needs restocking →
-                </a>
-            </div>
-        </div>
-    </div>
+    <!-- SUMMARY CARDS -->
+    <div class="row g-4 mb-4">
 
-    <div class="col-md-3">
-        <div class="card kpi-card shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="kpi-label">Net Profit (This Month)</h6>
-                <h2 class="kpi-value">₱@ViewBag.NetProfitThisMonth</h2>
-                <span class="kpi-sub">@ViewBag.TotalCategories categories</span>
-            </div>
-        </div>
-    </div>
-</div>
+        <!-- Today's Sales -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
 
-<!-- Quick Actions -->
-<div class="quick-actions mb-4">
-    <a asp-controller="Products" asp-action="Create" class="btn btn-quick">+ Add Product</a>
-    <a asp-controller="Sales" asp-action="Create" class="btn btn-quick">+ New Sale</a>
-    <a asp-controller="Products" asp-action="Index" class="btn btn-quick-outline">+ Add Stock</a>
-    <a asp-controller="Reports" asp-action="Index" class="btn btn-quick-outline">📊 View Reports</a>
-</div>
-
-<div class="row g-4">
-    <!-- Sales Trend -->
-    <div class="col-lg-8">
-        <div class="card shadow-sm border-0 panel">
-            <div class="card-body">
-                <div class="panel-header">
-                    <h5>Sales Overview</h5>
-                </div>
-                <canvas id="salesTrendChart" height="90"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sales by Category -->
-    <div class="col-lg-4">
-        <div class="card shadow-sm border-0 panel">
-            <div class="card-body">
-                <div class="panel-header">
-                    <h5>Sales by Category</h5>
-                </div>
-                <canvas id="categoryChart" height="220"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-4 mt-1">
-    <!-- Low Stock Alerts -->
-    <div class="col-lg-6">
-        <div class="card shadow-sm border-0 panel">
-            <div class="card-body">
-                <div class="panel-header">
-                    <h5>Low Stock Alerts</h5>
-                    <span class="badge-count">@ViewBag.LowStockCount items</span>
+                <div class="kpi-icon kpi-icon-primary">
+                    <i class="bi bi-cash-stack"></i>
                 </div>
 
-                @if (ViewBag.LowStockItems != null && ViewBag.LowStockItems.Count > 0)
+                <div>
+                    <h6 class="kpi-label">
+                        Today's Sales
+                    </h6>
+
+                    <h2 class="kpi-value">
+                        ₱@(((decimal)ViewBag.TodaySales).ToString("N2"))
+                    </h2>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Inventory Value -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+
+                <div class="kpi-icon kpi-icon-gold">
+                    <i class="bi bi-box-seam-fill"></i>
+                </div>
+
+                <div>
+                    <h6 class="kpi-label">
+                        Inventory Value
+                    </h6>
+
+                    <h2 class="kpi-value">
+                        ₱@(((decimal)ViewBag.TotalInventoryValue).ToString("N2"))
+                    </h2>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Low Stock -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card kpi-card-alert">
+
+                <div class="kpi-icon kpi-icon-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+
+                <div>
+                    <h6 class="kpi-label">
+                        Low Stock Items
+                    </h6>
+
+                    <h2 class="kpi-value">
+                        @ViewBag.LowStockCount
+                    </h2>
+
+                    <a asp-controller="Inventory"
+                       asp-action="Index"
+                       class="kpi-link">
+
+                        View Inventory
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- This Month's Sales -->
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+
+                <div class="kpi-icon kpi-icon-success">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+
+                <div>
+                    <h6 class="kpi-label">
+                        This Month's Sales
+                    </h6>
+
+                    <h2 class="kpi-value">
+                        ₱@(((decimal)ViewBag.ThisMonthSales).ToString("N2"))
+                    </h2>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- QUICK ACTIONS -->
+    <div class="quick-actions mb-4">
+
+        <a asp-controller="Products"
+           asp-action="Create"
+           class="btn-quick">
+
+            <i class="bi bi-plus-lg"></i>
+            Add Product
+
+        </a>
+
+
+        <a asp-controller="Sales"
+           asp-action="Create"
+           class="btn-quick">
+
+            <i class="bi bi-receipt"></i>
+            New Sale
+
+        </a>
+
+
+        <a asp-controller="Utang"
+           asp-action="Create"
+           class="btn-quick">
+
+            <i class="bi bi-wallet2"></i>
+            Record Utang
+
+        </a>
+
+
+        <a asp-controller="Inventory"
+           asp-action="Index"
+           class="btn-quick-outline">
+
+            <i class="bi bi-boxes"></i>
+            Add Stock
+
+        </a>
+
+
+        <a asp-controller="Reports"
+           asp-action="Index"
+           class="btn-quick-outline">
+
+            <i class="bi bi-bar-chart-line-fill"></i>
+            View Reports
+
+        </a>
+
+    </div>
+
+
+    <!-- CHARTS -->
+    <div class="row g-4 mb-4">
+
+        <!-- SALES OVERVIEW -->
+        <div class="col-lg-8">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h5>Sales Overview</h5>
+
+                        <small>
+                            Sales for this month
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="salesTrendChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CATEGORY BREAKDOWN -->
+        <div class="col-lg-4">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h5>Category Breakdown</h5>
+
+                        <small>
+                            Current inventory
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="category-chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TABLES -->
+    <div class="row g-4">
+
+        <!-- LOW STOCK -->
+        <div class="col-lg-6">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h5>Low Stock Alerts</h5>
+
+                        <small>
+                            Products that may need restocking
+                        </small>
+                    </div>
+
+                    <span class="badge-count">
+                        @ViewBag.LowStockCount items
+                    </span>
+
+                </div>
+
+
+                @if (ViewBag.LowStockItems != null &&
+                     ViewBag.LowStockItems.Count > 0)
                 {
-                    <table class="table table-hover dashboard-table">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Stock</th>
-                                <th>Reorder Level</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in ViewBag.LowStockItems)
-                            {
+                    <div class="table-responsive">
+
+                        <table class="table table-hover dashboard-table">
+
+                            <thead>
                                 <tr>
-                                    <td>@item.Name</td>
-                                    <td><span class="stock-badge">@item.QuantityInStock</span></td>
-                                    <td>@item.ReorderThreshold</td>
-                                    <td>
-                                        <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.Id" class="text-decoration-none">
-                                            Restock
-                                        </a>
-                                    </td>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Stock</th>
+                                    <th>Action</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var item in ViewBag.LowStockItems)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                @item.ProductName
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            @(item.Category?.CategoryName ?? "Uncategorized")
+                                        </td>
+
+                                        <td>
+
+                                            @if (item.Quantity == 0)
+                                            {
+                                                <span class="stock-badge stock-out">
+                                                    Out of Stock
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="stock-badge">
+                                                    @item.Quantity
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                        <td>
+                                            <a asp-controller="Inventory"
+                                               asp-action="Index"
+                                               class="row-link">
+
+                                                Restock
+                                                <i class="bi bi-arrow-right"></i>
+
+                                            </a>
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
                 }
                 else
                 {
-                    <p class="empty-state">🎉 All products are well stocked.</p>
-                }
-            </div>
-        </div>
-    </div>
+                    <div class="empty-state">
 
-    <!-- Recent Transactions -->
-    <div class="col-lg-6">
-        <div class="card shadow-sm border-0 panel">
-            <div class="card-body">
+                        <i class="bi bi-check-circle"></i>
+
+                        <p>
+                            All products are well stocked.
+                        </p>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- RECENT TRANSACTIONS -->
+        <div class="col-lg-6">
+
+            <div class="panel">
+
                 <div class="panel-header">
-                    <h5>Recent Transactions</h5>
-                    <a asp-controller="Sales" asp-action="Index" class="panel-link">View all →</a>
+
+                    <div>
+                        <h5>Recent Transactions</h5>
+
+                        <small>
+                            Latest sales
+                        </small>
+                    </div>
+
+                    <a asp-controller="Sales"
+                       asp-action="Index"
+                       class="panel-link">
+
+                        View all
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
+
                 </div>
 
-                @if (ViewBag.RecentTransactions != null && ViewBag.RecentTransactions.Count > 0)
+
+                @if (ViewBag.RecentTransactions != null &&
+                     ViewBag.RecentTransactions.Count > 0)
                 {
-                    <table class="table table-hover dashboard-table">
-                        <thead>
-                            <tr>
-                                <th>Order</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var tx in ViewBag.RecentTransactions)
-                            {
+                    <div class="table-responsive">
+
+                        <table class="table table-hover dashboard-table">
+
+                            <thead>
                                 <tr>
-                                    <td>#@tx.Id</td>
-                                    <td>₱@tx.TotalAmount</td>
-                                    <td><span class="status-badge status-@tx.Status.ToLower()">@tx.Status</span></td>
-                                    <td>@tx.CreatedAt.ToString("h:mm tt")</td>
+                                    <th>Sale</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var tx in ViewBag.RecentTransactions)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                #@tx.SaleId
+                                            </strong>
+
+                                            <small class="d-block text-muted">
+                                                @tx.SaleDate.ToString("MMM dd, h:mm tt")
+                                            </small>
+                                        </td>
+
+                                        <td>
+                                            @(tx.Customer?.CustomerName ?? "Walk-in Customer")
+                                        </td>
+
+                                        <td>
+                                            ₱@tx.TotalAmount.ToString("N2")
+                                        </td>
+
+                                        <td>
+
+                                            @if (tx.Status == "Paid")
+                                            {
+                                                <span class="status-badge status-paid">
+                                                    Paid
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status-badge status-unpaid">
+                                                    @tx.Status
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
                 }
                 else
                 {
-                    <p class="empty-state">No transactions yet today.</p>
+                    <div class="empty-state">
+
+                        <i class="bi bi-receipt"></i>
+
+                        <p>
+                            No transactions yet.
+                        </p>
+
+                    </div>
                 }
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-    <script>
-        // Sales Trend Chart
-        const salesTrendCtx = document.getElementById('salesTrendChart');
-        new Chart(salesTrendCtx, {
-            type: 'line',
-            data: {
-                labels: @Html.Raw(ViewBag.SalesTrendLabels ?? "[]"),
-                datasets: [{
-                    label: 'Sales',
-                    data: @Html.Raw(ViewBag.SalesTrendData ?? "[]"),
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
 
-        // Category Chart
-        const categoryCtx = document.getElementById('categoryChart');
-        new Chart(categoryCtx, {
-            type: 'doughnut',
-            data: {
-                labels: @Html.Raw(ViewBag.CategoryLabels ?? "[]"),
-                datasets: [{
-                    data: @Html.Raw(ViewBag.CategoryData ?? "[]"),
-                    backgroundColor: ['#2563eb', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6']
-                }]
-            },
-            options: {
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+    <!-- Dashboard data from Controller -->
+    <script>
+        window.dashboardSalesLabels =
+            @Html.Raw(ViewBag.SalesTrendLabels ?? "[]");
+
+        window.dashboardSalesData =
+            @Html.Raw(ViewBag.SalesTrendData ?? "[]");
+
+        window.dashboardCategoryLabels =
+            @Html.Raw(ViewBag.CategoryLabels ?? "[]");
+
+        window.dashboardCategoryData =
+            @Html.Raw(ViewBag.CategoryData ?? "[]");
     </script>
+
+    <!-- Dashboard JavaScript -->
+    <script src="~/js/dashboard.js"
+            asp-append-version="true"></script>
 }

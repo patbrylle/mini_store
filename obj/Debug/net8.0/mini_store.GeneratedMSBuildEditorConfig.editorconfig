@@ -18,18 +18,6 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = /home/brylle/Projects/Csharp_Projects/mini_store
 build_property._RazorSourceGeneratorDebug = 
 
-[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Categories/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmllcy9DcmVhdGUuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Categories/Delete.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmllcy9EZWxldGUuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Categories/Edit.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmllcy9FZGl0LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/Categories/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmllcy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -54,20 +42,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Products/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZHVjdHMvQ3JlYXRlLmNzaHRtbA==
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Inventory/AddStock.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSW52ZW50b3J5L0FkZFN0b2NrLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Products/Delete.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZHVjdHMvRGVsZXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Products/Edit.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZHVjdHMvRWRpdC5jc2h0bWw=
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Inventory/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSW52ZW50b3J5L0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/Products/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvZHVjdHMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Reports/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Sales/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2FsZXMvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Sales/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2FsZXMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/Shared/Error.cshtml]
@@ -76,6 +72,18 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Utang/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXRhbmcvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Utang/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXRhbmcvRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Utang/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXRhbmcvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/_ViewImports.cshtml]

@@ -22,15 +22,15 @@ namespace mini_store.Controllers
                 .Include(p => p.Category)
                 .ToListAsync();
 
+            ViewBag.Categories = new SelectList(
+                await _context.Categories.ToListAsync(),
+                "CategoryId",
+                "CategoryName"
+            );
+
             return View(products);
         }
 
-        // GET: Products/Create
-        public async Task<IActionResult> Create()
-        {
-            await LoadCategories();
-            return View();
-        }
 
         // POST: Products/Create
         [HttpPost]
@@ -45,31 +45,11 @@ namespace mini_store.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await LoadCategories(product.CategoryId);
-            return View(product);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var product = await _context.Products.FindAsync(id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            await LoadCategories(product.CategoryId);
-
-            return View(product);
-        }
-
-        // POST: Products/Edit/5
+        // POST: Products/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Product product)
@@ -87,34 +67,14 @@ namespace mini_store.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await LoadCategories(product.CategoryId);
-            return View(product);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.ProductId == id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        // POST: Products/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // POST: Products/Delete
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var product = await _context.Products.FindAsync(id);
 
@@ -127,6 +87,8 @@ namespace mini_store.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        // Used for the category dropdown
         private async Task LoadCategories(int? selectedCategory = null)
         {
             ViewBag.Categories = new SelectList(

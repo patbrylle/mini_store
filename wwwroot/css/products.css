@@ -1,0 +1,398 @@
+/* ==========================================
+   PRODUCTS PAGE
+========================================== */
+
+.products-page {
+    padding-bottom: 30px;
+}
+
+
+/* ==========================================
+   PRODUCTS HEADER
+========================================== */
+
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 24px;
+}
+
+.products-title {
+    margin: 0;
+    font-weight: 700;
+}
+
+.products-subtitle {
+    margin: 5px 0 0;
+    color: #6c757d;
+}
+
+
+/* ==========================================
+   PRODUCTS CARD
+========================================== */
+
+.products-card {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+
+/* ==========================================
+   PRODUCTS TABLE
+========================================== */
+
+.products-table {
+    vertical-align: middle;
+}
+
+.products-table thead th {
+    padding: 15px 18px;
+
+    background: #f8f9fa;
+
+    border-bottom: 1px solid #e9ecef;
+
+    color: #495057;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.products-table tbody td {
+    padding: 15px 18px;
+
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.products-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ==========================================
+   PRODUCT NAME
+========================================== */
+
+.product-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.product-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #eef4ff;
+    color: #0d6efd;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================
+   CATEGORY
+========================================== */
+
+.category-badge {
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: #f1f3f5;
+    color: #495057;
+
+    font-size: 13px;
+}
+
+
+/* ==========================================
+   STOCK
+========================================== */
+
+.stock-badge {
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.stock-good {
+    background: #eaf7ee;
+    color: #198754;
+}
+
+.stock-low {
+    background: #fff4df;
+    color: #b06b00;
+}
+
+.stock-out {
+    background: #fdecec;
+    color: #dc3545;
+}
+
+
+/* ==========================================
+   PRODUCT ACTIONS
+========================================== */
+
+.product-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+
+/* ==========================================
+   EMPTY STATE
+========================================== */
+
+.products-empty {
+    padding: 70px 20px;
+
+    text-align: center;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+
+    margin: 0 auto 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #eef4ff;
+    color: #0d6efd;
+
+    font-size: 28px;
+}
+
+.products-empty h5 {
+    font-weight: 700;
+}
+
+.products-empty p {
+    color: #6c757d;
+}
+
+
+/* ==========================================
+   PRODUCT FORM PAGE
+========================================== */
+
+.product-form-page {
+    padding: 30px 0;
+}
+
+
+/* ==========================================
+   FORM CARD
+========================================== */
+
+.product-form-card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.product-form-card h4 {
+    font-weight: 700;
+}
+
+.product-form-card .form-label {
+    font-weight: 600;
+}
+
+
+/* ==========================================
+   FORM ICON
+========================================== */
+
+.product-form-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #eef4ff;
+    color: #0d6efd;
+
+    font-size: 22px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================
+   EDIT ICON
+========================================== */
+
+.product-form-icon.edit-icon {
+    background: #fff4df;
+    color: #b06b00;
+}
+
+
+/* ==========================================
+   FORM INPUTS
+========================================== */
+
+.product-form-card .form-control,
+.product-form-card .form-select {
+    min-height: 44px;
+
+    border-radius: 8px;
+}
+
+.product-form-card .input-group-text {
+    border-radius: 8px 0 0 8px;
+}
+
+
+/* ==========================================
+   DELETE PAGE
+========================================== */
+
+.product-delete-page {
+    padding: 50px 0;
+}
+
+
+/* ==========================================
+   DELETE CARD
+========================================== */
+
+.delete-card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+
+/* ==========================================
+   DELETE ICON
+========================================== */
+
+.delete-icon {
+    width: 56px;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto;
+
+    border-radius: 50%;
+
+    background: #fff1f1;
+    color: #dc3545;
+
+    font-size: 24px;
+}
+
+.delete-card h4 {
+    text-align: center;
+    font-weight: 700;
+}
+
+.delete-card > .card-body > p {
+    text-align: center;
+}
+
+
+/* ==========================================
+   PRODUCT INFORMATION
+========================================== */
+
+.product-info {
+    border: 1px solid #e9ecef;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.info-row {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 14px;
+
+    border-bottom: 1px solid #e9ecef;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row span {
+    color: #6c757d;
+}
+
+.info-row strong {
+    text-align: right;
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 576px) {
+
+    .products-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 15px;
+    }
+
+    .products-header .btn {
+        width: 100%;
+    }
+
+    .product-actions {
+        justify-content: flex-start;
+    }
+
+    .product-form-page {
+        padding: 15px 0;
+    }
+
+    .product-delete-page {
+        padding: 20px 0;
+    }
+
+    .info-row {
+        gap: 15px;
+    }
+
+}

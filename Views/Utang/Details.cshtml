@@ -1,0 +1,199 @@
+@model mini_store.Models.Utang
+
+@{
+    ViewData["Title"] = "Customer Utang";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h1 class="fw-bold mb-1">
+            Customer Utang
+        </h1>
+
+        <p class="text-muted mb-0">
+            @(Model.Customer?.CustomerName ?? "Unknown Customer")
+        </p>
+    </div>
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+        ← Back to Utang
+    </a>
+
+</div>
+
+<!-- CUSTOMER INFORMATION -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-4">
+
+                <p class="text-muted mb-1">
+                    Customer
+                </p>
+
+                <h5 class="fw-bold">
+                    @(Model.Customer?.CustomerName ?? "Unknown Customer")
+                </h5>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <p class="text-muted mb-1">
+                    Date
+                </p>
+
+                <h5 class="fw-bold">
+                    @Model.DateCreated.ToString("MMMM dd, yyyy")
+                </h5>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <p class="text-muted mb-1">
+                    Status
+                </p>
+
+                @if (Model.Status == "Partial")
+                {
+                    <span class="badge bg-warning text-dark">
+                        Partial
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">
+                        Unpaid
+                    </span>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PRODUCTS -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body">
+
+        <h5 class="fw-bold mb-4">
+            Products on Utang
+        </h5>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle">
+
+                <thead>
+
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Sale?.SaleItems != null)
+                    {
+                        foreach (var item in Model.Sale.SaleItems)
+                        {
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        @item.Product?.ProductName
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @item.Quantity
+                                </td>
+
+                                <td>
+                                    ₱@item.UnitPrice.ToString("N2")
+                                </td>
+
+                                <td>
+                                    ₱@item.Subtotal.ToString("N2")
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <hr />
+
+        <!-- TOTALS -->
+
+        <div class="row justify-content-end">
+
+            <div class="col-md-5">
+
+                <div class="d-flex justify-content-between mb-2">
+
+                    <span>
+                        Total Amount
+                    </span>
+
+                    <strong>
+                        ₱@Model.Amount.ToString("N2")
+                    </strong>
+
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+
+                    <span class="text-success">
+                        Amount Paid
+                    </span>
+
+                    <strong class="text-success">
+                        ₱@Model.AmountPaid.ToString("N2")
+                    </strong>
+
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+
+                    <span class="fw-bold">
+                        Remaining Balance
+                    </span>
+
+                    <h4 class="fw-bold text-danger">
+                        ₱@Model.Balance.ToString("N2")
+                    </h4>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

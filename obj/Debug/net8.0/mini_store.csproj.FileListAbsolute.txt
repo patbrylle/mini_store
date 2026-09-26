@@ -92,6 +92,7 @@
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/mini_store.MvcApplicationPartsAssemblyInfo.cache
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/mini_store.RazorAssemblyInfo.cache
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/mini_store.RazorAssemblyInfo.cs
+/home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/mini_store.sourcelink.json
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/staticwebassets.build.json
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/staticwebassets.development.json
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/staticwebassets/msbuild.mini_store.Microsoft.AspNetCore.StaticWebAssets.props
