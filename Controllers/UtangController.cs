@@ -1,7 +1,7 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
-using mini_store.Models;
 
 namespace mini_store.Controllers
 {
@@ -14,108 +14,12 @@ namespace mini_store.Controllers
             _context = context;
         }
 
-        // GET: Utang
+        // =========================================================
+        // GET: /Utang
+        // =========================================================
+
         public async Task<IActionResult> Index()
         {
-            var utangs = await _context.Utangs
-                .Include(u => u.Customer)
-                .Include(u => u.Sale)
-                    .ThenInclude(s => s!.SaleItems)
-                        .ThenInclude(si => si.Product)
-                .Where(u => u.Balance > 0)
-                .OrderByDescending(u => u.DateCreated)
-                .ToListAsync();
-
-            return View(utangs);
-        }
-
-        // GET: Utang/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var utang = await _context.Utangs
-                .Include(u => u.Customer)
-                .Include(u => u.Sale)
-                    .ThenInclude(s => s!.SaleItems)
-                        .ThenInclude(si => si.Product)
-                .FirstOrDefaultAsync(u => u.UtangId == id);
-
-            if (utang == null)
-            {
-                return NotFound();
-            }
-
-            return View(utang);
-        }
-        // GET: Utang/Create
-public async Task<IActionResult> Create()
-{
-    ViewBag.Customers = await _context.Customers
-        .OrderBy(c => c.CustomerName)
-        .ToListAsync();
-
-    ViewBag.Products = await _context.Products
-        .Where(p => p.Quantity > 0)
-        .OrderBy(p => p.ProductName)
-        .ToListAsync();
-
-    return View(new CreateUtang());
-}
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Create(CreateUtang model)
-{
-    var selectedProducts = model.Products
-        .Where(p => p.Quantity > 0)
-        .ToList();
-
-    if (selectedProducts.Count == 0)
-    {
-        ModelState.AddModelError("", "Please select at least one product.");
-    }
-
-    if (!ModelState.IsValid)
-    {
-        ViewBag.Customers = await _context.Customers
-            .OrderBy(c => c.CustomerName)
-            .ToListAsync();
-
-        ViewBag.Products = await _context.Products
-            .Where(p => p.Quantity > 0)
-            .OrderBy(p => p.ProductName)
-            .ToListAsync();
-
-        return View(model);
-    }
-
-    decimal totalAmount = 0;
-
-    var sale = new Sale
-    {
-        CustomerId = model.CustomerId,
-        SaleDate = DateTime.Now,
-        PaymentMethod = "Utang",
-        Status = "Unpaid",
-        AmountPaid = model.AmountPaid
-    };
-
-    foreach (var item in selectedProducts)
-    {
-        var product = await _context.Products
-            .FirstOrDefaultAsync(p => p.ProductId == item.ProductId);
-
-        if (product == null)
-            continue;
-
-        if (item.Quantity > product.Quantity)
-        {
-            ModelState.AddModelError("", 
-                $"Not enough stock for {product.ProductName}.");
-
             ViewBag.Customers = await _context.Customers
                 .OrderBy(c => c.CustomerName)
                 .ToListAsync();
@@ -125,44 +29,205 @@ public async Task<IActionResult> Create(CreateUtang model)
                 .OrderBy(p => p.ProductName)
                 .ToListAsync();
 
-            return View(model);
+            var utangs = await _context.Utangs
+                .Include(u => u.Customer)
+                .Include(u => u.Sale)
+                    .ThenInclude(s => s!.SaleItems)
+                        .ThenInclude(si => si.Product)
+                .OrderByDescending(u =>
+                    u.Sale != null
+                        ? u.Sale.SaleDate
+                        : u.DateCreated)
+                .ToListAsync();
+
+            return View(utangs);
         }
 
-        decimal subtotal = product.Price * item.Quantity;
 
-        sale.SaleItems.Add(new SaleItem
+        // =========================================================
+        // POST: /Utang/Pay
+        // =========================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Pay(
+            int id,
+            decimal paymentAmount)
         {
-            ProductId = product.ProductId,
-            Quantity = item.Quantity,
-            UnitPrice = product.Price,
-            Subtotal = subtotal
-        });
+            // Find the utang record
+            var utang = await _context.Utangs
+                .Include(u => u.Sale)
+                .FirstOrDefaultAsync(u => u.UtangId == id);
 
-        product.Quantity -= item.Quantity;
+            if (utang == null)
+            {
+                return NotFound();
+            }
 
-        totalAmount += subtotal;
+
+            // =====================================================
+            // VALIDATE PAYMENT
+            // =====================================================
+
+            if (paymentAmount <= 0)
+            {
+                TempData["UtangError"] =
+                    "Please enter a valid payment amount.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+
+            // =====================================================
+            // PREVENT OVERPAYMENT
+            // =====================================================
+
+            if (paymentAmount > utang.Balance)
+            {
+                TempData["UtangError"] =
+                    "Payment cannot be greater than the remaining balance.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+
+            // =====================================================
+            // UPDATE PAYMENT
+            // =====================================================
+
+            utang.AmountPaid += paymentAmount;
+
+
+            // Recalculate remaining balance
+            utang.Balance =
+                Math.Max(
+                    0,
+                    utang.Amount - utang.AmountPaid
+                );
+
+
+            // =====================================================
+            // UPDATE UTANG STATUS
+            // =====================================================
+
+            if (utang.Balance <= 0)
+            {
+                utang.Balance = 0;
+                utang.Status = "Paid";
+            }
+            else if (utang.AmountPaid > 0)
+            {
+                utang.Status = "Partial";
+            }
+            else
+            {
+                utang.Status = "Unpaid";
+            }
+
+
+            // =====================================================
+            // UPDATE RELATED SALE
+            // =====================================================
+
+            if (utang.Sale != null)
+            {
+                utang.Sale.AmountPaid =
+                    utang.AmountPaid;
+
+                if (utang.Balance <= 0)
+                {
+                    utang.Sale.Status = "Paid";
+                }
+                else if (utang.AmountPaid > 0)
+                {
+                    utang.Sale.Status = "Partial";
+                }
+                else
+                {
+                    utang.Sale.Status = "Unpaid";
+                }
+            }
+
+
+            // =====================================================
+            // SAVE
+            // =====================================================
+
+            await _context.SaveChangesAsync();
+
+
+            TempData["UtangSuccess"] =
+                "Payment recorded successfully.";
+
+
+            return RedirectToAction(nameof(Index));
+        }
+        // =========================================================
+// POST: /Utang/Delete/5
+// =========================================================
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Delete(int id)
+{
+    var utang = await _context.Utangs
+        .Include(u => u.Sale)
+            .ThenInclude(s => s!.SaleItems)
+        .FirstOrDefaultAsync(u => u.UtangId == id);
+
+    if (utang == null)
+    {
+        return NotFound();
     }
 
-    sale.TotalAmount = totalAmount;
-
-    _context.Sales.Add(sale);
-
-    var utang = new Utang
+    // Only allow deletion when the utang is fully paid
+    if (utang.Balance > 0 || utang.Status != "Paid")
     {
-        CustomerId = model.CustomerId,
-        Sale = sale,
-        Amount = totalAmount,
-        AmountPaid = model.AmountPaid,
-        Balance = totalAmount - model.AmountPaid,
-        DateCreated = DateTime.Now,
-        Status = model.AmountPaid >= totalAmount ? "Paid" : "Unpaid"
-    };
+        TempData["ErrorMessage"] =
+            "This utang cannot be deleted because it is not fully paid.";
 
-    _context.Utangs.Add(utang);
+        return RedirectToAction(nameof(Index));
+    }
 
-    await _context.SaveChangesAsync();
+    using var transaction =
+        await _context.Database.BeginTransactionAsync();
 
-    return RedirectToAction(nameof(Index));
+    try
+    {
+        // Remove SaleItems first
+        if (utang.Sale?.SaleItems != null)
+        {
+            _context.SaleItems.RemoveRange(
+                utang.Sale.SaleItems
+            );
+        }
+
+        // Remove the Sale
+        if (utang.Sale != null)
+        {
+            _context.Sales.Remove(utang.Sale);
+        }
+
+        // Remove the Utang record
+        _context.Utangs.Remove(utang);
+
+        await _context.SaveChangesAsync();
+
+        await transaction.CommitAsync();
+
+        TempData["SuccessMessage"] =
+            "Paid utang record deleted successfully.";
+
+        return RedirectToAction(nameof(Index));
+    }
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync();
+
+        TempData["ErrorMessage"] =
+            "Unable to delete the utang record: " + ex.Message;
+
+        return RedirectToAction(nameof(Index));
+    }
 }
     }
 }

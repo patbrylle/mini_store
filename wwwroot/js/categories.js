@@ -1,67 +1,74 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    // ================================
-    // EDIT CATEGORY
-    // ================================
+    // =========================================================
+    // CATEGORY SEARCH
+    // =========================================================
 
-    const editCategoryModal =
-        document.getElementById("editCategoryModal");
+    const searchInput =
+        document.getElementById("categorySearch");
 
-    if (editCategoryModal) {
+    const categoryRows =
+        document.querySelectorAll(".category-row");
 
-        editCategoryModal.addEventListener(
-            "show.bs.modal",
-            function (event) {
 
-                const button = event.relatedTarget;
+    if (searchInput) {
 
-                const categoryId =
-                    button.getAttribute("data-category-id");
+        searchInput.addEventListener("input", function () {
 
-                const categoryName =
-                    button.getAttribute("data-category-name");
+            const searchValue =
+                this.value.toLowerCase().trim();
 
-                document.getElementById("editCategoryId").value =
-                    categoryId;
 
-                document.getElementById("editCategoryName").value =
-                    categoryName;
-            }
-        );
+            categoryRows.forEach(function (row) {
+
+                const categoryText =
+                    row.textContent.toLowerCase();
+
+
+                if (categoryText.includes(searchValue)) {
+
+                    row.style.display = "";
+
+                } else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+        });
+
     }
 
 
-    // ================================
-    // DELETE CATEGORY
-    // ================================
+    // =========================================================
+    // ADD CATEGORY MODAL
+    // =========================================================
 
-    const deleteCategoryModal =
-        document.getElementById("deleteCategoryModal");
+    const addCategoryModal =
+        document.getElementById("addCategoryModal");
 
-    if (deleteCategoryModal) {
 
-        deleteCategoryModal.addEventListener(
-            "show.bs.modal",
-            function (event) {
+    if (addCategoryModal) {
 
-                const button = event.relatedTarget;
+        addCategoryModal.addEventListener(
+            "hidden.bs.modal",
+            function () {
 
-                const categoryId =
-                    button.getAttribute("data-category-id");
+                const form =
+                    addCategoryModal.querySelector("form");
 
-                const categoryName =
-                    button.getAttribute("data-category-name");
 
-                document.getElementById("deleteCategoryId").value =
-                    categoryId;
+                if (form) {
 
-                document.getElementById("deleteCategoryName").textContent =
-                    categoryName;
+                    form.reset();
 
-                document.getElementById("deleteCategoryNameInfo").textContent =
-                    categoryName;
+                }
+
             }
         );
+
     }
 
 });

@@ -1,5 +1,35 @@
+@using System.Globalization
+@using System.Linq
 @{
     ViewData["Title"] = "Reports";
+
+    // ---- Chart data, built from the ViewBag values already used on this page ----
+
+    var totalPaidVal    = Convert.ToDecimal(ViewBag.TotalPaid ?? 0).ToString("F2", CultureInfo.InvariantCulture);
+    var outstandingVal  = Convert.ToDecimal(ViewBag.OutstandingSales ?? 0).ToString("F2", CultureInfo.InvariantCulture);
+
+    int totalProducts = Convert.ToInt32(ViewBag.TotalProducts ?? 0);
+    int lowStockCount = Convert.ToInt32(ViewBag.LowStock ?? 0);
+    int outOfStockCount = Convert.ToInt32(ViewBag.OutOfStock ?? 0);
+    int healthyStockCount = Math.Max(totalProducts - lowStockCount - outOfStockCount, 0);
+
+    var topProducts = new List<dynamic>();
+    if (ViewBag.BestSellingProducts != null)
+    {
+        int c = 0;
+        foreach (var p in ViewBag.BestSellingProducts)
+        {
+            if (c >= 6) break;
+            topProducts.Add(p);
+            c++;
+        }
+    }
+
+    var bestLabelsJs = string.Join(",", topProducts.Select(p =>
+        "\"" + ((string)p.ProductName.ToString()).Replace("\"", "\\\"") + "\""));
+
+    var bestDataJs = string.Join(",", topProducts.Select(p =>
+        Convert.ToInt32(p.QuantitySold).ToString(CultureInfo.InvariantCulture)));
 }
 
 @section Styles {
@@ -9,55 +39,67 @@
 <div class="reports-page">
 
     <!-- PAGE HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">Reports</h2>
-            <p class="text-muted mb-0">
-                View sales, inventory, utang, and product performance.
-            </p>
-        </div>
+    <div class="reports-header">
+        <h2 class="reports-title">Reports</h2>
     </div>
 
 
     <!-- SALES SUMMARY -->
-    <div class="card report-card shadow-sm mb-4">
-        <div class="card-body">
+    <div class="kpi-row">
 
-            <h5 class="fw-bold mb-3">
-                <i class="bi bi-cart-check me-2"></i>
-                Sales Summary
-            </h5>
+        <h5 class="report-section-title">
+            <i class="bi bi-cart-check"></i>
+            Sales Summary
+        </h5>
 
-            <div class="row g-3">
+        <div class="row g-3">
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Total Sales</small>
-                        <h4>₱@Convert.ToDecimal(ViewBag.TotalSales).ToString("N2")</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-primary">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Total Sales</h6>
+                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.TotalSales).ToString("N2")</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Transactions</small>
-                        <h4>@ViewBag.TotalTransactions</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-gold">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Transactions</h6>
+                        <h4 class="kpi-value">@ViewBag.TotalTransactions</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Total Paid</small>
-                        <h4>₱@Convert.ToDecimal(ViewBag.TotalPaid).ToString("N2")</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Total Paid</h6>
+                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.TotalPaid).ToString("N2")</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Outstanding</small>
-                        <h4>₱@Convert.ToDecimal(ViewBag.OutstandingSales).ToString("N2")</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-danger">
+                        <i class="bi bi-exclamation-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Outstanding</h6>
+                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.OutstandingSales).ToString("N2")</h4>
                     </div>
                 </div>
-
             </div>
 
         </div>
@@ -65,44 +107,61 @@
 
 
     <!-- INVENTORY SUMMARY -->
-    <div class="card report-card shadow-sm mb-4">
-        <div class="card-body">
+    <div class="kpi-row">
 
-            <h5 class="fw-bold mb-3">
-                <i class="bi bi-box-seam me-2"></i>
-                Inventory Summary
-            </h5>
+        <h5 class="report-section-title">
+            <i class="bi bi-box-seam"></i>
+            Inventory Summary
+        </h5>
 
-            <div class="row g-3">
+        <div class="row g-3">
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Total Products</small>
-                        <h4>@ViewBag.TotalProducts</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-primary">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Total Products</h6>
+                        <h4 class="kpi-value">@ViewBag.TotalProducts</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Total Stock</small>
-                        <h4>@ViewBag.TotalStock</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-gold">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Total Stock</h6>
+                        <h4 class="kpi-value">@ViewBag.TotalStock</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Low Stock</small>
-                        <h4>@ViewBag.LowStock</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Low Stock</h6>
+                        <h4 class="kpi-value">@ViewBag.LowStock</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="report-stat">
-                        <small class="text-muted">Out of Stock</small>
-                        <h4>@ViewBag.OutOfStock</h4>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-danger">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Out of Stock</h6>
+                        <h4 class="kpi-value">@ViewBag.OutOfStock</h4>
                     </div>
                 </div>
-
             </div>
 
         </div>
@@ -110,132 +169,199 @@
 
 
     <!-- UTANG SUMMARY -->
-    <div class="card report-card shadow-sm mb-4">
-        <div class="card-body">
+    <div class="kpi-row">
 
-            <h5 class="fw-bold mb-3">
-                <i class="bi bi-wallet2 me-2"></i>
-                Utang Summary
-            </h5>
+        <h5 class="report-section-title">
+            <i class="bi bi-wallet2"></i>
+            Utang Summary
+        </h5>
 
-            <div class="row g-3">
+        <div class="row g-3">
 
-                <div class="col-md-4">
-                    <div class="report-stat">
-                        <small class="text-muted">Total Utang</small>
-                        <h4>₱@Convert.ToDecimal(ViewBag.TotalUtang).ToString("N2")</h4>
+            <div class="col-md-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-primary">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Total Utang</h6>
+                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.TotalUtang).ToString("N2")</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="report-stat">
-                        <small class="text-muted">Total Paid</small>
-                        <h4>₱@Convert.ToDecimal(ViewBag.UtangPaid).ToString("N2")</h4>
+            <div class="col-md-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Total Paid</h6>
+                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.UtangPaid).ToString("N2")</h4>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="report-stat">
-                        <small class="text-muted">Remaining Balance</small>
-                        <h4>₱@Convert.ToDecimal(ViewBag.UtangBalance).ToString("N2")</h4>
+            <div class="col-md-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon kpi-icon-danger">
+                        <i class="bi bi-exclamation-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="kpi-label">Remaining Balance</h6>
+                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.UtangBalance).ToString("N2")</h4>
                     </div>
                 </div>
-
             </div>
 
         </div>
+    </div>
+
+
+    <!-- CHARTS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-6">
+            <div class="panel">
+                <div class="panel-header">
+                    <h5><i class="bi bi-pie-chart-fill"></i> Payment Status</h5>
+                </div>
+                <div class="donut-chart-container">
+                    <canvas id="paymentStatusChart"></canvas>
+                </div>
+                <div class="donut-legend">
+                    <span><i style="background:#3c9461"></i> Paid</span>
+                    <span><i style="background:#c0392b"></i> Outstanding</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="panel">
+                <div class="panel-header">
+                    <h5><i class="bi bi-pie-chart-fill"></i> Inventory Status</h5>
+                </div>
+                <div class="donut-chart-container">
+                    <canvas id="inventoryStatusChart"></canvas>
+                </div>
+                <div class="donut-legend">
+                    <span><i style="background:#3c9461"></i> Healthy</span>
+                    <span><i style="background:#d49a21"></i> Low Stock</span>
+                    <span><i style="background:#c0392b"></i> Out of Stock</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 
     <!-- BEST SELLING PRODUCTS -->
-    <div class="card report-card shadow-sm mb-4">
-        <div class="card-body">
+    <div class="panel mb-4">
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h5 class="fw-bold mb-1">
-                        <i class="bi bi-bar-chart-line-fill me-2"></i>
-                        Best-Selling Products
-                    </h5>
+        <div class="panel-header">
+            <h5><i class="bi bi-bar-chart-line-fill"></i> Best-Selling Products</h5>
+        </div>
 
-                    <p class="text-muted mb-0">
-                        Products with the highest quantity sold.
-                    </p>
-                </div>
+        @if (topProducts.Count > 0)
+        {
+            <div class="bar-chart-container">
+                <canvas id="bestSellingChart"></canvas>
             </div>
+        }
 
+        <div class="table-responsive">
 
-            <div class="table-responsive">
+            <table class="table report-table align-middle mb-0">
 
-                <table class="table report-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th>Quantity Sold</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
 
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Product</th>
-                            <th>Quantity Sold</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
+                <tbody>
 
-                    <tbody>
+                    @{
+                        int rank = 1;
+                    }
 
-                        @{
-                            int rank = 1;
-                        }
-
-                        @if (ViewBag.BestSellingProducts != null &&
-                             ViewBag.BestSellingProducts.Count > 0)
-                        {
-                            foreach (var product in ViewBag.BestSellingProducts)
-                            {
-                                <tr>
-                                    <td>
-                                        <span class="fw-semibold">
-                                            @rank
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <span class="fw-semibold">
-                                            @product.ProductName
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        @product.QuantitySold
-                                    </td>
-
-                                    <td>
-                                        <span class="fw-semibold">
-                                            ₱@Convert.ToDecimal(product.Revenue).ToString("N2")
-                                        </span>
-                                    </td>
-                                </tr>
-
-                                rank++;
-                            }
-                        }
-                        else
+                    @if (ViewBag.BestSellingProducts != null &&
+                         ViewBag.BestSellingProducts.Count > 0)
+                    {
+                        foreach (var product in ViewBag.BestSellingProducts)
                         {
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">
-                                    <i class="bi bi-bar-chart fs-3 d-block mb-2"></i>
-                                    No sales data available yet.
+                                <td>
+                                    <span class="rank-badge">@rank</span>
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold">
+                                        @product.ProductName
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @product.QuantitySold
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold">
+                                        ₱@Convert.ToDecimal(product.Revenue).ToString("N2")
+                                    </span>
                                 </td>
                             </tr>
+
+                            rank++;
                         }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <i class="bi bi-bar-chart"></i>
+                                    <p>No sales data available yet.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
 
-                    </tbody>
+                </tbody>
 
-                </table>
-
-            </div>
+            </table>
 
         </div>
+
     </div>
 
 </div>
-@section Scripts{
-    <script src ="~/js/reports.js"></script>
+
+@section Scripts {
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+    <script>
+        window.reportsChartData = {
+            payment: {
+                paid: @Html.Raw(totalPaidVal),
+                outstanding: @Html.Raw(outstandingVal)
+            },
+            inventory: {
+                healthy: @healthyStockCount,
+                lowStock: @lowStockCount,
+                outOfStock: @outOfStockCount
+            },
+            bestSelling: {
+                labels: [@Html.Raw(bestLabelsJs)],
+                data: [@Html.Raw(bestDataJs)]
+            }
+        };
+    </script>
+
+    <script src="~/js/reports.js" asp-append-version="true"></script>
 }

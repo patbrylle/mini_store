@@ -3,69 +3,76 @@
 @{
     ViewData["Title"] = "Sales";
 
-    var totalSales = Model.Sum(s => s.TotalAmount);
-    var totalTransactions = Model.Count();
-    var paidSales = Model.Count(s => s.Status == "Paid");
+    var sales = Model?.ToList() ?? new List<mini_store.Models.Sale>();
+    var utangsBySaleId = ViewBag.UtangsBySaleId as Dictionary<int, mini_store.Models.Utang>
+        ?? new Dictionary<int, mini_store.Models.Utang>();
 
-    var outstanding = Model
-        .Where(s => s.Status != "Paid")
-        .Sum(s => s.TotalAmount - s.AmountPaid);
+    decimal totalSales = sales.Sum(s => s.TotalAmount);
+    int totalTransactions = sales.Count;
+    decimal paidSales = sales.Sum(s => s.AmountPaid);
+    decimal outstanding = sales.Sum(s => Math.Max(0, s.TotalAmount - s.AmountPaid));
+
+    var transactionType = Context.Request.Query["transactionType"].ToString();
+    bool openUtang = string.Equals(transactionType, "Utang", StringComparison.OrdinalIgnoreCase);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/sales.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/utang.css" asp-append-version="true" />
 }
 
 <div class="sales-page">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-        <div>
-            <h1 class="fw-bold mb-1">
-                Sales
-            </h1>
+    <div class="sales-header">
 
-            <p class="text-muted mb-0">
-                Manage and monitor store transactions.
-            </p>
+        <div class="sales-title-area">
+
+            <div class="sales-page-icon">
+                <i class="bi bi-receipt"></i>
+            </div>
+
+            <div>
+                <h1>Sales</h1>
+                <p>Manage your store sales and transactions.</p>
+            </div>
+
         </div>
 
-        <!-- NEW SALE BUTTON -->
         <button type="button"
-                class="btn btn-primary"
+                class="btn sales-new-btn"
                 data-bs-toggle="modal"
                 data-bs-target="#newSaleModal">
 
-            <i class="bi bi-cart-plus"></i>
-            New Sale
+            <i class="bi bi-plus-lg me-1"></i>
+            New Transaction
 
         </button>
 
     </div>
 
 
-    <!-- ===================================================== -->
-    <!-- SUMMARY CARDS -->
-    <!-- ===================================================== -->
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
 
-    <div class="row g-4 mb-4">
+    <div class="row g-3 mb-4">
 
-        <!-- TOTAL SALES -->
-        <div class="col-md-3">
+        <!-- Total Sales -->
+        <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 shadow-sm h-100 sales-summary-card">
+            <div class="sales-summary-card">
 
-                <div class="card-body">
+                <div class="sales-summary-icon sales-icon-blue">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
 
-                    <div class="sales-summary-icon sales-icon-blue">
-                        <i class="bi bi-cash-stack"></i>
-                    </div>
-
-                    <p class="text-muted mb-2">
-                        Total Sales
-                    </p>
-
-                    <h3 class="fw-bold mb-0">
-                        ₱@totalSales.ToString("N2")
-                    </h3>
-
+                <div>
+                    <span>Total Sales</span>
+                    <h3>₱@totalSales.ToString("N2")</h3>
                 </div>
 
             </div>
@@ -73,25 +80,18 @@
         </div>
 
 
-        <!-- TRANSACTIONS -->
-        <div class="col-md-3">
+        <!-- Transactions -->
+        <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 shadow-sm h-100 sales-summary-card">
+            <div class="sales-summary-card">
 
-                <div class="card-body">
+                <div class="sales-summary-icon sales-icon-purple">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </div>
 
-                    <div class="sales-summary-icon sales-icon-purple">
-                        <i class="bi bi-receipt"></i>
-                    </div>
-
-                    <p class="text-muted mb-2">
-                        Transactions
-                    </p>
-
-                    <h3 class="fw-bold mb-0">
-                        @totalTransactions
-                    </h3>
-
+                <div>
+                    <span>Transactions</span>
+                    <h3>@totalTransactions</h3>
                 </div>
 
             </div>
@@ -99,25 +99,18 @@
         </div>
 
 
-        <!-- PAID SALES -->
-        <div class="col-md-3">
+        <!-- Paid Sales -->
+        <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 shadow-sm h-100 sales-summary-card">
+            <div class="sales-summary-card">
 
-                <div class="card-body">
+                <div class="sales-summary-icon sales-icon-green">
+                    <i class="bi bi-check-circle"></i>
+                </div>
 
-                    <div class="sales-summary-icon sales-icon-green">
-                        <i class="bi bi-check-circle"></i>
-                    </div>
-
-                    <p class="text-muted mb-2">
-                        Paid Sales
-                    </p>
-
-                    <h3 class="fw-bold mb-0">
-                        @paidSales
-                    </h3>
-
+                <div>
+                    <span>Paid Sales</span>
+                    <h3>₱@paidSales.ToString("N2")</h3>
                 </div>
 
             </div>
@@ -125,25 +118,18 @@
         </div>
 
 
-        <!-- OUTSTANDING -->
-        <div class="col-md-3">
+        <!-- Outstanding -->
+        <div class="col-xl-3 col-md-6">
 
-            <div class="card border-0 shadow-sm h-100 sales-summary-card">
+            <div class="sales-summary-card">
 
-                <div class="card-body">
+                <div class="sales-summary-icon sales-icon-red">
+                    <i class="bi bi-wallet2"></i>
+                </div>
 
-                    <div class="sales-summary-icon sales-icon-red">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-
-                    <p class="text-muted mb-2">
-                        Outstanding
-                    </p>
-
-                    <h3 class="fw-bold mb-0">
-                        ₱@outstanding.ToString("N2")
-                    </h3>
-
+                <div>
+                    <span>Outstanding</span>
+                    <h3>₱@outstanding.ToString("N2")</h3>
                 </div>
 
             </div>
@@ -153,122 +139,133 @@
     </div>
 
 
-    <!-- ===================================================== -->
-    <!-- SALES TABLE -->
-    <!-- ===================================================== -->
+    <!-- =====================================================
+         SALES TABLE
+    ====================================================== -->
 
-    <div class="card border-0 shadow-sm sales-table-card">
+    <div class="sales-table-card">
 
-        <div class="card-body">
+        <div class="sales-table-header">
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5>Sales Transactions</h5>
+                <p>View and manage your completed transactions.</p>
+            </div>
 
-                <div>
+            <div class="sales-search">
 
-                    <h5 class="fw-bold mb-1">
-                        Sales Transactions
-                    </h5>
+                <i class="bi bi-search"></i>
 
-                    <small class="text-muted">
-                        View your recent store transactions.
-                    </small>
-
-                </div>
-
-
-                <!-- SEARCH -->
-                <div class="sales-search">
-
-                    <i class="bi bi-search"></i>
-
-                    <input type="text"
-                           id="salesSearch"
-                           class="form-control"
-                           placeholder="Search customer...">
-
-                </div>
+                <input type="text"
+                       id="salesSearch"
+                       placeholder="Search sales..." />
 
             </div>
 
-
-            <div class="table-responsive">
-
-                <table class="table align-middle mb-0"
-                       id="salesTable">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Date</th>
-
-                            <th>Customer</th>
-
-                            <th>Items</th>
-
-                            <th>Total</th>
-
-                            <th>Paid</th>
-
-                            <th>Status</th>
-
-                            <th class="text-end">
-                                Action
-                            </th>
-
-                        </tr>
-
-                    </thead>
+        </div>
 
 
-                    <tbody>
+        <div class="table-responsive">
 
-                        @foreach (var sale in Model)
+            <table class="table sales-table"
+                   id="salesTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Status</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (sales.Any())
+                    {
+                        foreach (var sale in sales)
                         {
+                            string statusClass =
+                                sale.Status?.ToLower() switch
+                                {
+                                    "paid" => "paid",
+                                    "partial" => "partial",
+                                    "unpaid" => "unpaid",
+                                    _ => "unpaid"
+                                };
+
+                            int itemCount =
+                                sale.SaleItems?.Sum(i => i.Quantity) ?? 0;
+
                             <tr>
 
-                                <!-- DATE -->
+                                <!-- Date -->
+
                                 <td>
 
                                     <strong>
                                         @sale.SaleDate.ToString("MMM dd, yyyy")
                                     </strong>
 
-                                    <br>
-
-                                    <small class="text-muted">
+                                    <small>
                                         @sale.SaleDate.ToString("hh:mm tt")
                                     </small>
 
                                 </td>
 
 
-                                <!-- CUSTOMER -->
+                                <!-- Customer -->
+
                                 <td>
 
-                                    <div class="d-flex align-items-center gap-2">
+                                    <div class="sales-customer">
 
                                         <div class="sales-customer-icon">
                                             <i class="bi bi-person"></i>
                                         </div>
 
-                                        <span>
-                                            @(sale.Customer?.CustomerName
-                                                ?? "Walk-in Customer")
-                                        </span>
+                                        <div>
+
+                                            @if (sale.Customer != null)
+                                            {
+                                                <strong>
+                                                    @sale.Customer.CustomerName
+                                                </strong>
+                                            }
+                                            else
+                                            {
+                                                <strong>
+                                                    Walk-in Customer
+                                                </strong>
+                                            }
+
+                                        </div>
 
                                     </div>
 
                                 </td>
 
 
-                                <!-- ITEMS -->
+                                <!-- Items -->
+
                                 <td>
-                                    @sale.SaleItems.Count
+
+                                    <span class="items-count">
+                                        @itemCount item@(itemCount != 1 ? "s" : "")
+                                    </span>
+
                                 </td>
 
 
-                                <!-- TOTAL -->
+                                <!-- Total -->
+
                                 <td>
 
                                     <strong>
@@ -278,59 +275,87 @@
                                 </td>
 
 
-                                <!-- PAID -->
+                                <!-- Paid -->
+
                                 <td>
-                                    ₱@sale.AmountPaid.ToString("N2")
+
+                                    <strong>
+                                        ₱@sale.AmountPaid.ToString("N2")
+                                    </strong>
+
                                 </td>
 
 
-                                <!-- STATUS -->
+                                <!-- Status -->
+
                                 <td>
 
-                                    @if (sale.Status == "Paid")
+                                    <span class="sale-status @statusClass">
+
+                                        <span></span>
+
+                                        @(string.IsNullOrWhiteSpace(sale.Status)
+                                            ? "Unpaid"
+                                            : sale.Status)
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- View -->
+                                <td>
+                                    @if (sale.Status?.Equals("Unpaid", StringComparison.OrdinalIgnoreCase) == true &&
+                                         utangsBySaleId.TryGetValue(sale.SaleId, out var matchingUtang))
                                     {
-                                        <span class="badge bg-success">
-                                            Paid
-                                        </span>
-                                    }
-                                    else if (sale.Status == "Partial")
-                                    {
-                                        <span class="badge bg-warning text-dark">
-                                            Partial
-                                        </span>
+                                        <button type="button"
+                                                class="btn view-utang-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#utangDetailsModal-@matchingUtang.UtangId">
+                                            <i class="bi bi-eye me-1"></i>
+                                            View
+                                        </button>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">
-                                            Unpaid
-                                        </span>
+                                        <button type="button"
+                                                class="btn sales-view-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#saleDetailsModal-@sale.SaleId">
+                                            <i class="bi bi-eye me-1"></i>
+                                            View
+                                        </button>
                                     }
-
-                                </td>
-
-
-                                <!-- ACTION -->
-                                <td class="text-end">
-
-                                    <a asp-action="Details"
-                                       asp-route-id="@sale.SaleId"
-                                       class="btn btn-sm btn-outline-primary">
-
-                                        <i class="bi bi-eye"></i>
-                                        View
-
-                                    </a>
-
                                 </td>
 
                             </tr>
                         }
+                    }
+                    else
+                    {
+                        <tr>
 
-                    </tbody>
+                            <td colspan="7"
+                                class="text-center py-5">
 
-                </table>
+                                <div class="text-muted">
 
-            </div>
+                                    <i class="bi bi-receipt fs-2"></i>
+
+                                    <div class="mt-2">
+                                        No sales transactions yet.
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
 
         </div>
 
@@ -339,9 +364,9 @@
 </div>
 
 
-<!-- ========================================================= -->
-<!-- NEW SALE MODAL -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     NEW TRANSACTION MODAL
+========================================================= -->
 
 <div class="modal fade"
      id="newSaleModal"
@@ -349,55 +374,152 @@
      aria-labelledby="newSaleModalLabel"
      aria-hidden="true">
 
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered">
 
-        <div class="modal-content sales-modal">
+        <div class="modal-content transaction-modal">
 
-            <!-- HEADER -->
-            <div class="modal-header">
+            <form asp-controller="Sales"
+                  asp-action="Create"
+                  method="post"
+                  id="saleForm">
 
-                <div>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ReturnTo" value="Sales" />
 
-                    <h5 class="modal-title fw-bold"
-                        id="newSaleModalLabel">
+                <!-- Header -->
 
-                        <i class="bi bi-cart-plus me-2"></i>
-                        New Sale
+                <div class="modal-header transaction-header">
 
-                    </h5>
+                    <div class="transaction-title">
 
-                    <small class="text-muted">
-                        Create a new store transaction.
-                    </small>
+                        <div class="transaction-icon">
+                            <i class="bi bi-cart-plus"></i>
+                        </div>
+
+                        <div>
+
+                            <h5 id="newSaleModalLabel">
+                                New Transaction
+                            </h5>
+
+                            <p>
+                                Create a sale or record an utang.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
 
                 </div>
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
 
-            </div>
+                <!-- Body -->
+
+                <div class="modal-body transaction-body">
 
 
-            <!-- FORM -->
-            <form asp-action="Create"
-                  method="post"
-                  id="newSaleForm">
+                    <!-- =================================================
+                         TRANSACTION TYPE
+                    ================================================== -->
 
-                @Html.AntiForgeryToken()
+                    <div class="transaction-section">
 
-                <div class="modal-body">
-
-                    <!-- CUSTOMER -->
-                    <div class="mb-4">
-
-                        <label class="form-label fw-semibold">
-                            Customer
+                        <label class="transaction-label">
+                            Transaction Type
                         </label>
 
-                        <select name="CustomerId"
-                                class="form-select">
+                        <div class="transaction-type-grid">
+
+                            <!-- Cash -->
+
+                            <label class="transaction-type-option">
+
+                                <input type="radio"
+                                       name="TransactionType"
+                                       value="Cash"
+                                       @(!openUtang ? "checked" : "") />
+
+                                <div class="transaction-type-card">
+
+                                    <div class="transaction-type-icon cash">
+                                        <i class="bi bi-cash"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <strong>Cash Sale</strong>
+
+                                        <small>
+                                            Customer pays immediately
+                                        </small>
+
+                                    </div>
+
+                                    <i class="bi bi-check-circle-fill selected-icon"></i>
+
+                                </div>
+
+                            </label>
+
+
+                            <!-- Utang -->
+
+                            <label class="transaction-type-option">
+
+                                <input type="radio"
+                                       name="TransactionType"
+                                       value="Utang" 
+                                        @(openUtang ? "checked" : "") />
+
+                                <div class="transaction-type-card">
+
+                                    <div class="transaction-type-icon utang">
+                                        <i class="bi bi-wallet2"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <strong>Utang</strong>
+
+                                        <small>
+                                            Record customer balance
+                                        </small>
+
+                                    </div>
+
+                                    <i class="bi bi-check-circle-fill selected-icon"></i>
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         CUSTOMER
+                    ================================================== -->
+
+                    <div class="transaction-section">
+
+                        <label for="customerSelect"
+                               class="transaction-label">
+
+                            Customer
+
+                        </label>
+
+                        <select id="customerSelect"
+                                name="CustomerId"
+                                class="form-select transaction-select">
 
                             <option value="">
                                 Walk-in Customer
@@ -411,96 +533,112 @@
                                         @customer.CustomerName
                                     </option>
                                 }
+
                             }
 
                         </select>
 
-                        <small class="text-muted">
-                            Leave as Walk-in Customer if the buyer is not registered.
+                        <small class="transaction-help">
+                            Customer is required when recording an utang.
                         </small>
 
                     </div>
 
 
-                    <!-- PRODUCTS -->
-                    <div class="mb-3">
+                    <!-- =================================================
+                         PRODUCT SELECTOR
+                    ================================================== -->
 
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="transaction-section">
 
-                            <label class="form-label fw-semibold mb-0">
-                                Products
+                        <label for="productSelector"
+                               class="transaction-label">
+
+                            Add Product
+
+                        </label>
+
+                        <!--
+                            IMPORTANT:
+                            This is the ONLY product selector.
+
+                            Selecting a product automatically adds it
+                            to the product list below.
+                        -->
+
+                        <select id="productSelector"
+                                class="form-select transaction-select">
+
+                            <option value="">
+                                Select a product to add...
+                            </option>
+
+                            @if (ViewBag.Products != null)
+                            {
+                                foreach (var product in ViewBag.Products)
+                                {
+                                    <option value="@product.ProductId"
+                                            data-price="@product.Price"
+                                            data-stock="@product.Quantity">
+
+                                        @product.ProductName
+                                        — ₱@product.Price.ToString("N2")
+                                        (@product.Quantity in stock)
+
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                        <small class="transaction-help">
+                            Select a product and it will be added automatically.
+                        </small>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         SELECTED PRODUCTS
+                    ================================================== -->
+
+                    <div class="transaction-section">
+
+                        <div class="transaction-section-header">
+
+                            <label class="transaction-label mb-0">
+                                Selected Products
                             </label>
-
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-primary"
-                                    id="addSaleProduct">
-
-                                <i class="bi bi-plus-lg"></i>
-                                Add Product
-
-                            </button>
 
                         </div>
 
 
-                        <div id="saleProductsContainer">
+                        <div class="transaction-products">
 
-                            <!-- PRODUCT ROW -->
-                            <div class="sale-product-row row g-2 mb-2">
+                            <!-- Table Header -->
 
-                                <div class="col-md-7">
+                            <div class="product-table-head">
 
-                                    <select name="ProductId"
-                                            class="form-select sale-product-select"
-                                            required>
+                                <div>Product</div>
+                                <div>Quantity</div>
+                                <div>Subtotal</div>
+                                <div></div>
 
-                                        <option value="">
-                                            -- Select Product --
-                                        </option>
-
-                                        @if (ViewBag.Products != null)
-                                        {
-                                            foreach (var product in ViewBag.Products)
-                                            {
-                                                <option value="@product.ProductId"
-                                                        data-price="@product.Price"
-                                                        data-stock="@product.Quantity">
-
-                                                    @product.ProductName
-                                                    -
-                                                    ₱@product.Price.ToString("N2")
-                                                    (@product.Quantity stock)
-
-                                                </option>
-                                            }
-                                        }
-
-                                    </select>
-
-                                </div>
+                            </div>
 
 
-                                <div class="col-md-3">
+                            <!--
+                                JavaScript will add product rows here.
+                            -->
 
-                                    <input type="number"
-                                           name="Quantity"
-                                           class="form-control"
-                                           min="1"
-                                           value="1"
-                                           placeholder="Quantity"
-                                           required />
+                            <div id="saleProductsContainer">
 
-                                </div>
+                                <div id="emptyProductMessage"
+                                     class="text-center text-muted py-3"
+                                     style="font-size: 11px;">
 
-
-                                <div class="col-md-2">
-
-                                    <button type="button"
-                                            class="btn btn-outline-danger w-100 remove-sale-product">
-
-                                        <i class="bi bi-trash"></i>
-
-                                    </button>
+                                    <i class="bi bi-cart3 me-1"></i>
+                                    No products added yet.
 
                                 </div>
 
@@ -511,37 +649,112 @@
                     </div>
 
 
-                    <!-- SALE NOTE -->
-                    <div class="sale-modal-note">
+                    <!-- =================================================
+                         PAYMENT
+                    ================================================== -->
 
-                        <i class="bi bi-info-circle"></i>
+                    <div class="transaction-section">
 
-                        <span>
-                            Product stock will automatically decrease after the sale is saved.
-                        </span>
+                        <div class="transaction-payment">
+
+                            <div class="payment-summary">
+
+
+                                <!-- Total -->
+
+                                <div class="payment-total">
+
+                                    <span>
+                                        Total Amount
+                                    </span>
+
+                                    <strong id="saleTotal">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- Amount Paid -->
+
+                                <div class="payment-input-group">
+
+                                    <label for="amountPaid">
+                                        Amount Paid
+                                    </label>
+
+                                    <div class="money-input">
+
+                                        <span>₱</span>
+
+                                        <input type="number"
+                                               id="amountPaid"
+                                               name="AmountPaid"
+                                               min="0"
+                                               step="0.01"
+                                               value="0" />
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Change / Balance -->
+
+                                <div class="payment-result">
+
+                                    <span id="paymentResultLabel">
+                                        Change
+                                    </span>
+
+                                    <strong id="paymentResult">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Utang information -->
+
+                            <div id="utangPaymentInfo"
+                                 class="transaction-note"
+                                 style="display: none;">
+
+                                <i class="bi bi-info-circle"></i>
+
+                                <div>
+                                    The remaining amount will be recorded
+                                    as the customer's utang balance.
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
                 </div>
 
 
-                <!-- FOOTER -->
-                <div class="modal-footer">
+                <!-- Footer -->
+
+                <div class="modal-footer transaction-footer">
 
                     <button type="button"
-                            class="btn btn-light border"
+                            class="btn transaction-cancel-btn"
                             data-bs-dismiss="modal">
 
-                        <i class="bi bi-x-lg"></i>
                         Cancel
 
                     </button>
 
-
                     <button type="submit"
-                            class="btn btn-primary">
+                            class="btn transaction-submit-btn">
 
-                        <i class="bi bi-check-lg"></i>
+                        <i class="bi bi-check-lg me-1"></i>
+
                         Complete Sale
 
                     </button>
@@ -557,18 +770,378 @@
 </div>
 
 
-@section Styles {
+<!-- =========================================================
+     SALE DETAILS MODALS
+========================================================= -->
 
-    <link rel="stylesheet"
-          href="~/css/sales.css"
-          asp-append-version="true" />
+@if (sales.Any())
+{
+    foreach (var sale in sales)
+    {
+        int itemCount =
+            sale.SaleItems?.Sum(i => i.Quantity) ?? 0;
 
+        decimal balance =
+            Math.Max(0, sale.TotalAmount - sale.AmountPaid);
+
+        string statusClass =
+            sale.Status?.ToLower() switch
+            {
+                "paid" => "paid",
+                "partial" => "partial",
+                _ => "unpaid"
+            };
+
+        <div class="modal fade"
+             id="saleDetailsModal-@sale.SaleId"
+             tabindex="-1"
+             aria-labelledby="saleDetailsLabel-@sale.SaleId"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content sale-details-modal">
+
+                    <!-- =================================================
+                         DETAILS HEADER
+                    ================================================== -->
+
+                    <div class="modal-header sale-details-header">
+
+                        <div class="sale-details-title">
+
+                            <div class="sale-details-icon">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+
+                            <div>
+
+                                <h5 id="saleDetailsLabel-@sale.SaleId">
+                                    Sale Details
+                                </h5>
+
+                                <p>
+                                    Transaction #@sale.SaleId
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                        </button>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         DETAILS BODY
+                    ================================================== -->
+
+                    <div class="modal-body sale-details-body">
+
+                        <!-- Transaction Information -->
+
+                        <div class="sale-detail-info-grid">
+
+                            <!-- Date -->
+
+                            <div class="sale-detail-info">
+
+                                <span>Date</span>
+
+                                <strong>
+                                    @sale.SaleDate.ToString("MMM dd, yyyy")
+                                </strong>
+
+                                <small class="d-block text-muted">
+                                    @sale.SaleDate.ToString("hh:mm tt")
+                                </small>
+
+                            </div>
+
+
+                            <!-- Customer -->
+
+                            <div class="sale-detail-info">
+
+                                <span>Customer</span>
+
+                                <strong>
+                                    @(sale.Customer?.CustomerName
+                                        ?? "Walk-in Customer")
+                                </strong>
+
+                            </div>
+
+
+                            <!-- Status -->
+
+                            <div class="sale-detail-info">
+
+                                <span>Status</span>
+
+                                <strong>
+
+                                    <span class="sale-status @statusClass">
+
+                                        <span></span>
+
+                                        @(sale.Status ?? "Unpaid")
+
+                                    </span>
+
+                                </strong>
+
+                            </div>
+
+
+                            <!-- Payment Method -->
+
+                            <div class="sale-detail-info">
+
+                                <span>Payment</span>
+
+                                <strong>
+                                    @(sale.PaymentMethod ?? "Cash")
+                                </strong>
+
+                            </div>
+
+
+                            <!-- Items -->
+
+                            <div class="sale-detail-info">
+
+                                <span>Items</span>
+
+                                <strong>
+                                    @itemCount item@(itemCount != 1 ? "s" : "")
+                                </strong>
+
+                            </div>
+
+
+                            <!-- Sale ID -->
+
+                            <div class="sale-detail-info">
+
+                                <span>Transaction ID</span>
+
+                                <strong>
+                                    #@sale.SaleId
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             PRODUCTS
+                        ================================================== -->
+
+                        <div class="sale-details-products">
+
+                            <div class="sale-details-section-header">
+
+                                <div>
+
+                                    <h6>
+                                        Purchased Products
+                                    </h6>
+
+                                    <p>
+                                        Products included in this transaction.
+                                    </p>
+
+                                </div>
+
+                                <span class="sale-item-count">
+                                    @itemCount item@(itemCount != 1 ? "s" : "")
+                                </span>
+
+                            </div>
+
+
+                            <div class="table-responsive">
+
+                                <table class="table sale-details-table">
+
+                                    <thead>
+
+                                        <tr>
+
+                                            <th>Product</th>
+                                            <th>Qty</th>
+                                            <th>Price</th>
+                                            <th>Subtotal</th>
+
+                                        </tr>
+
+                                    </thead>
+
+                                    <tbody>
+
+                                        @if (sale.SaleItems != null &&
+                                             sale.SaleItems.Any())
+                                        {
+                                            foreach (var item in sale.SaleItems)
+                                            {
+                                                <tr>
+
+                                                    <td>
+
+                                                        <div class="sale-product-name">
+
+                                                            <div class="sale-product-icon">
+                                                                <i class="bi bi-box"></i>
+                                                            </div>
+
+                                                            <strong>
+                                                                @(item.Product?.ProductName
+                                                                    ?? "Product")
+                                                            </strong>
+
+                                                        </div>
+
+                                                    </td>
+
+                                                    <td>
+                                                        @item.Quantity
+                                                    </td>
+
+                                                    <td>
+                                                        ₱@item.UnitPrice.ToString("N2")
+                                                    </td>
+
+                                                    <td>
+                                                        <strong>
+                                                            ₱@item.Subtotal.ToString("N2")
+                                                        </strong>
+                                                    </td>
+
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+
+                                                <td colspan="4"
+                                                    class="text-center text-muted py-3">
+
+                                                    No product details available.
+
+                                                </td>
+
+                                            </tr>
+                                        }
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             PAYMENT SUMMARY
+                        ================================================== -->
+
+                        <div class="sale-details-payment">
+
+                            <div class="sale-payment-row">
+
+                                <span>
+                                    Total Amount
+                                </span>
+
+                                <strong>
+                                    ₱@sale.TotalAmount.ToString("N2")
+                                </strong>
+
+                            </div>
+
+
+                            <div class="sale-payment-row">
+
+                                <span>
+                                    Amount Paid
+                                </span>
+
+                                <strong class="paid-value">
+                                    ₱@sale.AmountPaid.ToString("N2")
+                                </strong>
+
+                            </div>
+
+
+                            <div class="sale-payment-row sale-balance-row">
+
+                                <span>
+                                    Balance
+                                </span>
+
+                                <strong class="balance-value">
+                                    ₱@balance.ToString("N2")
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         DETAILS FOOTER
+                    ================================================== -->
+
+                    <div class="modal-footer sale-details-footer">
+
+                        <button type="button"
+                                class="btn transaction-cancel-btn"
+                                data-bs-dismiss="modal">
+
+                            Close
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
 }
 
 
+<!-- =========================================================
+     UTANG DETAILS MODALS
+========================================================= -->
+
+@foreach (var sale in sales)
+{
+    if (sale.Status?.Equals(
+            "Unpaid",
+            StringComparison.OrdinalIgnoreCase) == true &&
+        utangsBySaleId.TryGetValue(
+            sale.SaleId,
+            out var matchingUtang))
+    {
+        <partial name="UtangDetailsModal"
+                 model="matchingUtang" />
+    }
+}
+
 @section Scripts {
-
-    <script src="~/js/sales.js"
-            asp-append-version="true"></script>
-
+    <script src="~/js/sales.js" asp-append-version="true"></script>
 }

@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Rendering
 
-@{string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+@{string currentController = ViewContext.RouteData.Values["controller"]?.ToString()??"";
 }
 <!DOCTYPE html>
 <html lang="en">

@@ -1,0 +1,174 @@
+<div class="modal fade"
+     id="addCustomerModal"
+     tabindex="-1"
+     aria-labelledby="addCustomerModalLabel"
+     aria-hidden="true">
+
+
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content customer-modal">
+
+        <form asp-controller="Customers"
+              asp-action="Create"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <!-- HEADER -->
+            <div class="modal-header customer-modal-header">
+
+                <div class="customer-modal-title">
+
+                    <div class="customer-modal-icon">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+
+                    <div>
+
+                        <h5 id="addCustomerModalLabel">
+                            Add Customer
+                        </h5>
+
+                        <p>
+                            Create a new customer record.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+            <div class="modal-body customer-modal-body">
+
+
+                <!-- CUSTOMER NAME -->
+                <div class="customer-form-group">
+
+                    <label for="CustomerName">
+                        Customer Name
+                    </label>
+
+                    <div class="customer-input">
+
+                        <i class="bi bi-person"></i>
+
+                        <input type="text"
+                               id="CustomerName"
+                               name="CustomerName"
+                               class="form-control"
+                               placeholder="Enter customer name"
+                               required />
+
+                    </div>
+
+                </div>
+
+
+                <!-- EMAIL -->
+                <div class="customer-form-group">
+
+                    <label for="Email">
+                        Email
+                    </label>
+
+                    <div class="customer-input">
+
+                        <i class="bi bi-envelope"></i>
+
+                        <input type="email"
+                               id="Email"
+                               name="Email"
+                               class="form-control"
+                               placeholder="Enter email address" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONTACT -->
+                <div class="customer-form-group">
+
+                    <label for="ContactNumber">
+                        Contact Number
+                    </label>
+
+                    <div class="customer-input">
+
+                        <i class="bi bi-telephone"></i>
+
+                        <input type="text"
+                               id="ContactNumber"
+                               name="ContactNumber"
+                               class="form-control"
+                               placeholder="Enter contact number" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- ADDRESS -->
+                <div class="customer-form-group">
+
+                    <label for="Address">
+                        Address
+                    </label>
+
+                    <div class="customer-input customer-textarea">
+
+                        <i class="bi bi-geo-alt"></i>
+
+                        <textarea id="Address"
+                                  name="Address"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Enter customer address"></textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="modal-footer customer-modal-footer">
+
+                <button type="button"
+                        class="btn customer-cancel-btn"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn customer-save-btn">
+
+                    <i class="bi bi-check-lg me-1"></i>
+
+                    Save Customer
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+</div>

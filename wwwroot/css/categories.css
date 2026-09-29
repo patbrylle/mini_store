@@ -1,161 +1,1086 @@
-.categories-page {
+/* ==========================================================================
+   Categories — theme matched to customers.css / reports.css
+========================================================================== */
+
+:root {
+
+    --color-primary: #e4772e;
+    --color-primary-dark: #c95f1d;
+    --color-primary-soft: #fff0e6;
+
+    --color-gold: #d49a21;
+    --color-gold-soft: #fff7df;
+
+    --color-success: #3c9461;
+    --color-success-soft: #e8f6ed;
+
+    --color-danger: #c0392b;
+    --color-danger-soft: #fdeaea;
+
+    --color-text: #222;
+    --color-text-muted: #777;
+    --color-border: #eee;
+
+}
+
+
+/* ==========================================================================
+   Page
+========================================================================== */
+
+.category-page {
+
     padding-bottom: 30px;
+
 }
 
-.categories-header {
+
+/* ==========================================================================
+   Header
+========================================================================== */
+
+.category-header {
+
     display: flex;
+
     justify-content: space-between;
+
+    align-items: flex-start;
+
+    margin-bottom: 28px;
+
+}
+
+.category-title-area {
+
+    display: flex;
+
     align-items: center;
-    margin-bottom: 24px;
+
+    gap: 14px;
+
 }
 
-.categories-title {
+.category-page-icon {
+
+    width: 48px;
+    height: 48px;
+
+    min-width: 48px;
+
+    border-radius: 13px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 21px;
+
+}
+
+.category-title-area h1 {
+
     margin: 0;
-    font-weight: 700;
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    color: var(--color-text);
+
 }
 
-.categories-subtitle {
-    margin: 5px 0 0;
-    color: #6c757d;
-}
+.category-title-area p {
 
-.categories-card {
-    border-radius: 14px;
-    overflow: hidden;
-}
+    margin: 4px 0 0;
 
-.categories-table {
-    vertical-align: middle;
-}
+    color: var(--color-text-muted);
 
-.categories-table thead th {
-    padding: 15px 18px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    color: #495057;
     font-size: 13px;
-    font-weight: 600;
+
 }
 
-.categories-table tbody td {
-    padding: 15px 18px;
-    border-bottom: 1px solid #f0f0f0;
+
+/* ==========================================================================
+   Primary Button
+========================================================================== */
+
+.category-primary-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    background: var(--color-primary);
+
+    color: #fff;
+
+    border: 1px solid var(--color-primary);
+
+    border-radius: 9px;
+
+    padding: 10px 16px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+
 }
 
-.categories-table tbody tr:last-child td {
-    border-bottom: none;
+.category-primary-btn:hover {
+
+    background: var(--color-primary-dark);
+
+    border-color: var(--color-primary-dark);
+
+    color: #fff;
+
+    transform: translateY(-1px);
+
+}
+
+
+/* ==========================================================================
+   KPI Cards
+========================================================================== */
+
+.category-kpi-row {
+
+    margin-bottom: 32px;
+
+}
+
+.category-stat-card {
+
+    height: 100%;
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+.category-stat-card:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+
+}
+
+
+/* ==========================================================================
+   Stat Icons
+========================================================================== */
+
+.category-stat-icon {
+
+    width: 46px;
+    height: 46px;
+
+    min-width: 46px;
+
+    border-radius: 13px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 19px;
+
+}
+
+.stat-primary {
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+}
+
+.stat-gold {
+
+    background: var(--color-gold-soft);
+
+    color: var(--color-gold);
+
+}
+
+
+/* ==========================================================================
+   Stat Text
+========================================================================== */
+
+.category-stat-label {
+
+    display: block;
+
+    color: var(--color-text-muted);
+
+    font-size: 12.5px;
+
+    margin: 0 0 4px;
+
+}
+
+.category-stat-card h3 {
+
+    margin: 0;
+
+    font-size: 21px;
+
+    font-weight: 800;
+
+    color: var(--color-text);
+
+}
+
+.category-stat-card small {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: var(--color-text-muted);
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================================
+   Category Directory
+========================================================================== */
+
+.category-table-card {
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================================
+   Directory Header
+========================================================================== */
+
+.category-table-header {
+
+    padding: 20px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    border-bottom: 1px solid var(--color-border);
+
+}
+
+.category-section-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.category-section-icon {
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 11px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 17px;
+
+}
+
+.category-section-title h5 {
+
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    color: var(--color-text);
+
+}
+
+.category-section-title p {
+
+    margin: 3px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 12.5px;
+
+}
+
+
+/* ==========================================================================
+   Search
+========================================================================== */
+
+.category-search {
+
+    position: relative;
+
+    width: 260px;
+
+}
+
+.category-search i {
+
+    position: absolute;
+
+    left: 13px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #aaa;
+
+    font-size: 14px;
+
+    pointer-events: none;
+
+}
+
+.category-search input {
+
+    width: 100%;
+
+    padding: 9px 12px 9px 37px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 9px;
+
+    background: #fff;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+.category-search input::placeholder {
+
+    color: #aaa;
+
+}
+
+.category-search input:focus {
+
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px var(--color-primary-soft);
+
+}
+
+
+/* ==========================================================================
+   Category Table
+========================================================================== */
+
+.category-table {
+
+    margin: 0;
+
+}
+
+.category-table thead th {
+
+    background: #fafafa;
+
+    color: var(--color-text-muted);
+
+    font-size: 11.5px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.03em;
+
+    white-space: nowrap;
+
+    padding: 13px 18px;
+
+    border-bottom: 1px solid var(--color-border);
+
+}
+
+.category-table tbody td {
+
+    padding: 14px 18px;
+
+    vertical-align: middle;
+
+    border-bottom: 1px solid var(--color-border);
+
+    font-size: 13px;
+
+    color: var(--color-text);
+
+}
+
+.category-table tbody tr:last-child td {
+
+    border-bottom: 0;
+
+}
+
+.category-table tbody tr {
+
+    transition: background 0.15s ease;
+
+}
+
+.category-table tbody tr:hover {
+
+    background: #fffaf6;
+
+}
+
+
+/* ==========================================================================
+   Category Name
+========================================================================== */
+
+.category-cell {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+}
+
+.category-avatar {
+
+    width: 38px;
+    height: 38px;
+
+    min-width: 38px;
+
+    border-radius: 50%;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 15px;
+
 }
 
 .category-name {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+
+    font-weight: 700;
+
+    color: var(--color-text);
+
 }
 
-.category-icon {
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9px;
-    background: #eef4ff;
-    color: #0d6efd;
+.category-product-count {
+
+    color: var(--color-text-muted);
+
+    font-weight: 500;
+
 }
+
+
+/* ==========================================================================
+   Status
+========================================================================== */
+
+.category-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: var(--color-success);
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+.category-status-dot {
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--color-success);
+
+}
+
+
+/* ==========================================================================
+   Actions
+========================================================================== */
 
 .category-actions {
+
     display: flex;
+
     justify-content: flex-end;
+
+    align-items: center;
+
     gap: 6px;
+
 }
 
-.categories-empty {
-    padding: 70px 20px;
+.category-action-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    border-radius: 7px;
+
+    padding: 6px 10px;
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+
+/* View Products */
+
+.category-view-btn {
+
+    color: var(--color-primary);
+
+}
+
+.category-view-btn:hover {
+
+    background: var(--color-primary-soft);
+
+    border-color: #f0c5a6;
+
+    color: var(--color-primary-dark);
+
+}
+
+
+/* Edit */
+
+.category-edit-btn {
+
+    color: var(--color-gold);
+
+}
+
+.category-edit-btn:hover {
+
+    background: var(--color-gold-soft);
+
+    border-color: #efdca9;
+
+    color: #b27d0e;
+
+}
+
+
+/* Delete */
+
+.category-delete-btn {
+
+    color: var(--color-danger);
+
+}
+
+.category-delete-btn:hover {
+
+    background: var(--color-danger-soft);
+
+    border-color: #f2c5c0;
+
+    color: #a93226;
+
+}
+
+
+/* ==========================================================================
+   Empty State
+========================================================================== */
+
+.category-empty {
+
+    min-height: 210px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #999;
+
     text-align: center;
+
 }
 
-.categories-empty .empty-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 15px;
+.category-empty-icon {
+
+    width: 58px;
+    height: 58px;
+
+    margin-bottom: 12px;
+
+    border-radius: 14px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
-    border-radius: 50%;
-    background: #eef4ff;
-    color: #0d6efd;
-    font-size: 28px;
+
+    font-size: 23px;
+
 }
 
-.categories-empty h5 {
+.category-empty h5 {
+
+    margin: 0 0 5px;
+
+    color: var(--color-text);
+
+    font-size: 15px;
+
     font-weight: 700;
+
 }
 
-.categories-empty p {
-    color: #6c757d;
+.category-empty p {
+
+    margin: 0 0 17px;
+
+    color: var(--color-text-muted);
+
+    font-size: 12.5px;
+
 }
 
-.category-modal,
-.delete-modal {
-    border: 0;
-    border-radius: 16px;
+
+/* ==========================================================================
+   Add Category Modal
+========================================================================== */
+
+.category-modal {
+
+    border: none;
+
+    border-radius: 14px;
+
     overflow: hidden;
+
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+
 }
 
-.category-modal .modal-header,
-.delete-modal .modal-header {
-    border-bottom: 1px solid #e9ecef;
+.category-modal-header {
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid var(--color-border);
+
+    background: #fff;
+
 }
 
-.category-modal .modal-footer,
-.delete-modal .modal-footer {
-    border-top: 1px solid #e9ecef;
-}
+.category-modal-title {
 
-.delete-icon {
-    width: 56px;
-    height: 56px;
     display: flex;
+
     align-items: center;
+
+    gap: 12px;
+
+}
+
+.category-modal-icon {
+
+    width: 42px;
+    height: 42px;
+
+    min-width: 42px;
+
+    border-radius: 11px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
     justify-content: center;
-    margin: 0 auto;
-    border-radius: 50%;
-    background: #fff1f1;
-    color: #dc3545;
-    font-size: 24px;
+
+    font-size: 18px;
+
 }
 
-.category-info {
-    border: 1px solid #e9ecef;
-    border-radius: 10px;
-    overflow: hidden;
+.category-modal-title h5 {
+
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 17px;
+
+    font-weight: 700;
+
 }
 
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 14px;
+.category-modal-title p {
+
+    margin: 3px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 12px;
+
 }
 
-.info-row span {
-    color: #6c757d;
+
+/* ==========================================================================
+   Modal Body
+========================================================================== */
+
+.category-modal-body {
+
+    padding: 22px;
+
 }
+
+.category-form-group {
+
+    margin-bottom: 0;
+
+}
+
+.category-form-group label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+.category-input {
+
+    position: relative;
+
+}
+
+.category-input > i {
+
+    position: absolute;
+
+    left: 13px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--color-text-muted);
+
+    font-size: 14px;
+
+    z-index: 2;
+
+}
+
+.category-input .form-control {
+
+    min-height: 42px;
+
+    padding-left: 38px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 9px;
+
+    background: #fff;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+
+    box-shadow: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+.category-input .form-control::placeholder {
+
+    color: #aaa;
+
+}
+
+.category-input .form-control:focus {
+
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px var(--color-primary-soft);
+
+}
+
+
+/* ==========================================================================
+   Modal Footer
+========================================================================== */
+
+.category-modal-footer {
+
+    padding: 15px 22px;
+
+    border-top: 1px solid var(--color-border);
+
+    background: #fafafa;
+
+}
+
+.category-cancel-btn {
+
+    padding: 9px 16px;
+
+    background: #fff;
+
+    color: var(--color-text-muted);
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+.category-cancel-btn:hover {
+
+    background: #f5f5f5;
+
+    color: var(--color-text);
+
+}
+
+.category-save-btn {
+
+    padding: 9px 17px;
+
+    background: var(--color-primary);
+
+    color: #fff;
+
+    border: 1px solid var(--color-primary);
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+.category-save-btn:hover {
+
+    background: var(--color-primary-dark);
+
+    border-color: var(--color-primary-dark);
+
+    color: #fff;
+
+}
+
+
+/* ==========================================================================
+   Responsive
+========================================================================== */
+
+@media (max-width: 768px) {
+
+    .category-header {
+
+        flex-direction: column;
+
+        gap: 14px;
+
+    }
+
+    .category-title-area h1 {
+
+        font-size: 24px;
+
+    }
+
+    .category-primary-btn {
+
+        width: 100%;
+
+    }
+
+    .category-table-header {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+    .category-search {
+
+        width: 100%;
+
+    }
+
+    .category-table {
+
+        min-width: 760px;
+
+    }
+
+}
+
+
+/* ==========================================================================
+   Modal Responsive
+========================================================================== */
 
 @media (max-width: 576px) {
 
-    .categories-header {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 15px;
+    .category-modal-header {
+
+        padding: 17px 18px;
+
     }
 
-    .categories-header .btn {
-        width: 100%;
+    .category-modal-body {
+
+        padding: 18px;
+
     }
 
-    .category-actions {
-        justify-content: flex-start;
+    .category-modal-footer {
+
+        padding: 13px 18px;
+
     }
 
 }

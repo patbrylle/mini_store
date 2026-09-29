@@ -100,9 +100,7 @@
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.mini_store.props
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.mini_store.props
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/staticwebassets.pack.json
-/home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/scopedcss/bundle/mini_store.styles.css
-/home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/scopedcss/projectbundle/mini_store.bundle.scp.css
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/mini_store.csproj.CopyComplete
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/mini_store.dll
 /home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/refint/mini_store.dll

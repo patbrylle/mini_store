@@ -1,28 +1,44 @@
 {
   "Files": [
     {
-      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/obj/Debug/net8.0/scopedcss/projectbundle/mini_store.bundle.scp.css",
-      "PackagePath": "staticwebassets/mini_store.bundle.scp.css"
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/_Layout.css",
+      "PackagePath": "staticwebassets/css/_Layout.css"
     },
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/categories.css",
       "PackagePath": "staticwebassets/css/categories.css"
     },
     {
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/customer.css",
+      "PackagePath": "staticwebassets/css/customer.css"
+    },
+    {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/dashboard.css",
       "PackagePath": "staticwebassets/css/dashboard.css"
+    },
+    {
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/inventory.css",
+      "PackagePath": "staticwebassets/css/inventory.css"
     },
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/products.css",
       "PackagePath": "staticwebassets/css/products.css"
     },
     {
-      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/report.css",
-      "PackagePath": "staticwebassets/css/report.css"
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/reports.css",
+      "PackagePath": "staticwebassets/css/reports.css"
+    },
+    {
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/sales.css",
+      "PackagePath": "staticwebassets/css/sales.css"
     },
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/site.css",
       "PackagePath": "staticwebassets/css/site.css"
+    },
+    {
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/css/utang.css",
+      "PackagePath": "staticwebassets/css/utang.css"
     },
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/favicon.ico",
@@ -31,6 +47,10 @@
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/js/categories.js",
       "PackagePath": "staticwebassets/js/categories.js"
+    },
+    {
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/js/customer.js",
+      "PackagePath": "staticwebassets/js/customer.js"
     },
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/js/dashboard.js",
@@ -55,6 +75,10 @@
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/js/site.js",
       "PackagePath": "staticwebassets/js/site.js"
+    },
+    {
+      "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/js/utang.js",
+      "PackagePath": "staticwebassets/js/utang.js"
     },
     {
       "Id": "/home/brylle/Projects/Csharp_Projects/mini_store/wwwroot/lib/bootstrap/LICENSE",

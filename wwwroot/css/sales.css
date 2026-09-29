@@ -1,0 +1,1545 @@
+/* =========================================================
+   SALES — MATCHED TO REPORT.CSS
+========================================================= */
+
+:root {
+    --color-primary: #e4772e;
+    --color-primary-dark: #c95f1d;
+    --color-primary-soft: #fff0e6;
+
+    --color-gold: #d49a21;
+    --color-gold-soft: #fff7df;
+
+    --color-success: #3c9461;
+    --color-success-soft: #e8f6ed;
+
+    --color-danger: #c0392b;
+    --color-danger-soft: #fdeaea;
+
+    --color-text: #222;
+    --color-text-muted: #777;
+    --color-border: #eee;
+}
+
+
+/* =========================================================
+   SALES PAGE
+========================================================= */
+
+.sales-page {
+    padding-bottom: 25px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.sales-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.sales-title-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sales-page-icon {
+    width: 44px;
+    height: 44px;
+
+    border-radius: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+
+    font-size: 19px;
+}
+
+.sales-title-area h1 {
+    margin: 0;
+
+    font-size: 25px;
+    font-weight: 750;
+
+    color: var(--color-text);
+}
+
+.sales-title-area p {
+    margin: 3px 0 0;
+
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   NEW TRANSACTION BUTTON
+========================================================= */
+
+.sales-new-btn {
+    background: var(--color-primary);
+    color: #fff;
+
+    border: 0;
+    border-radius: 8px;
+
+    padding: 9px 15px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.sales-new-btn:hover {
+    background: var(--color-primary-dark);
+    color: #fff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 15px rgba(228, 119, 46, 0.18);
+}
+
+
+/* =========================================================
+   SUMMARY CARDS
+========================================================= */
+
+.sales-summary-card {
+    height: 100%;
+
+    padding: 15px 16px;
+
+    border-radius: 12px;
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.sales-summary-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.sales-summary-icon {
+    width: 40px;
+    height: 40px;
+
+    min-width: 40px;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+
+/* Primary */
+
+.sales-icon-blue {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+
+/* Gold */
+
+.sales-icon-purple {
+    background: var(--color-gold-soft);
+    color: var(--color-gold);
+}
+
+
+/* Success */
+
+.sales-icon-green {
+    background: var(--color-success-soft);
+    color: var(--color-success);
+}
+
+
+/* Danger */
+
+.sales-icon-red {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+
+.sales-summary-card span {
+    color: var(--color-text-muted);
+
+    font-size: 11.5px;
+}
+
+.sales-summary-card h3 {
+    margin: 3px 0 0;
+
+    font-size: 19px;
+    font-weight: 750;
+
+    color: var(--color-text);
+}
+
+
+/* =========================================================
+   SALES TABLE CARD
+========================================================= */
+
+.sales-table-card {
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.025);
+}
+
+.sales-table-header {
+    padding: 17px 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sales-table-header h5 {
+    margin: 0;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    color: var(--color-text);
+}
+
+.sales-table-header p {
+    margin: 3px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.sales-search {
+    position: relative;
+    width: 230px;
+}
+
+.sales-search i {
+    position: absolute;
+
+    left: 12px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #aaa;
+
+    font-size: 13px;
+}
+
+.sales-search input {
+    width: 100%;
+
+    height: 36px;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 8px;
+
+    padding: 7px 11px 7px 34px;
+
+    outline: none;
+
+    color: var(--color-text);
+
+    background: #fff;
+
+    font-size: 12px;
+}
+
+.sales-search input:focus {
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px rgba(228, 119, 46, 0.08);
+}
+
+
+/* =========================================================
+   SALES TABLE
+========================================================= */
+
+.sales-table {
+    margin-bottom: 0;
+}
+
+.sales-table thead th {
+    background: #fafafa;
+
+    color: var(--color-text-muted);
+
+    font-size: 10.5px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    padding: 11px 18px;
+
+    border-bottom: 1px solid var(--color-border);
+
+    white-space: nowrap;
+}
+
+.sales-table tbody td {
+    padding: 12px 18px;
+
+    border-bottom: 1px solid var(--color-border);
+
+    color: var(--color-text);
+
+    font-size: 12.5px;
+
+    vertical-align: middle;
+}
+
+.sales-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.sales-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.sales-table tbody tr:hover {
+    background: #fffaf6;
+}
+
+.sales-table td small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #999;
+
+    font-size: 10.5px;
+}
+
+
+/* =========================================================
+   CUSTOMER
+========================================================= */
+
+.sales-customer {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.sales-customer-icon {
+    width: 30px;
+    height: 30px;
+
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+
+    font-size: 13px;
+}
+
+.items-count {
+    color: var(--color-text-muted);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   VIEW BUTTON
+========================================================= */
+
+.sales-view-btn {
+    border: 1px solid #e3e3e3;
+
+    background: #fff;
+
+    color: var(--color-primary);
+
+    border-radius: 7px;
+
+    padding: 6px 10px;
+
+    font-size: 11.5px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.sales-view-btn:hover {
+    background: var(--color-primary-soft);
+
+    border-color: #f1c5a4;
+
+    color: var(--color-primary-dark);
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.sale-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    font-size: 11.5px;
+
+    font-weight: 600;
+}
+
+.sale-status span {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+}
+
+
+/* Paid */
+
+.sale-status.paid {
+    color: var(--color-success);
+}
+
+.sale-status.paid span {
+    background: var(--color-success);
+}
+
+
+/* Partial */
+
+.sale-status.partial {
+    color: var(--color-gold);
+}
+
+.sale-status.partial span {
+    background: var(--color-gold);
+}
+
+
+/* Unpaid */
+
+.sale-status.unpaid {
+    color: var(--color-danger);
+}
+
+.sale-status.unpaid span {
+    background: var(--color-danger);
+}
+
+
+/* =========================================================
+   BOOTSTRAP MODAL BACKDROP
+========================================================= */
+
+.modal-backdrop.show {
+    opacity: 0.45;
+}
+
+
+/* =========================================================
+   NEW TRANSACTION MODAL
+========================================================= */
+
+.transaction-modal {
+    border: 0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+
+/* Normal modal size */
+
+#newSaleModal .modal-dialog {
+    max-width: 780px;
+}
+
+
+/* =========================================================
+   TRANSACTION HEADER
+========================================================= */
+
+.transaction-header {
+    padding: 15px 20px;
+
+    border-bottom: 1px solid var(--color-border);
+
+    background: #fff;
+}
+
+.transaction-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+}
+
+.transaction-icon {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    font-size: 17px;
+}
+
+.transaction-title h5 {
+    margin: 0;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: var(--color-text);
+}
+
+.transaction-title p {
+    margin: 2px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   MODAL BODY
+========================================================= */
+
+.transaction-body {
+    padding: 18px 20px;
+
+    background: #fcfcfc;
+
+    max-height: 70vh;
+
+    overflow-y: auto;
+}
+
+.transaction-section {
+    margin-bottom: 16px;
+}
+
+.transaction-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 12px;
+
+    font-weight: 650;
+
+    color: var(--color-text);
+}
+
+.transaction-help {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #999;
+
+    font-size: 10.5px;
+}
+
+.transaction-select {
+    height: 39px;
+
+    border-color: #ddd;
+
+    border-radius: 8px;
+
+    font-size: 12px;
+}
+
+.transaction-select:focus {
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px rgba(228, 119, 46, 0.08);
+}
+
+
+/* =========================================================
+   TRANSACTION TYPE
+========================================================= */
+
+.transaction-type-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+}
+
+.transaction-type-option {
+    cursor: pointer;
+
+    margin: 0;
+}
+
+.transaction-type-option input {
+    display: none;
+}
+
+.transaction-type-card {
+    position: relative;
+
+    min-height: 58px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #e2e2e2;
+
+    background: #fff;
+
+    border-radius: 9px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    transition: 0.2s ease;
+}
+
+.transaction-type-card:hover {
+    border-color: #d8b79d;
+}
+
+.transaction-type-option input:checked
++ .transaction-type-card {
+    border-color: var(--color-primary);
+
+    background: var(--color-primary-soft);
+
+    box-shadow:
+        0 0 0 2px rgba(228, 119, 46, 0.06);
+}
+
+.transaction-type-icon {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 8px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 15px;
+}
+
+
+/* Cash */
+
+.transaction-type-icon.cash {
+    background: var(--color-success-soft);
+
+    color: var(--color-success);
+}
+
+
+/* Utang */
+
+.transaction-type-icon.utang {
+    background: var(--color-gold-soft);
+
+    color: var(--color-gold);
+}
+
+.transaction-type-card strong {
+    display: block;
+
+    color: var(--color-text);
+
+    font-size: 12.5px;
+}
+
+.transaction-type-card small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: var(--color-text-muted);
+
+    font-size: 10.5px;
+}
+
+.selected-icon {
+    display: none;
+
+    margin-left: auto;
+
+    color: var(--color-primary);
+
+    font-size: 14px;
+}
+
+.transaction-type-option input:checked
++ .transaction-type-card
+.selected-icon {
+    display: block;
+}
+
+
+/* =========================================================
+   PRODUCTS
+========================================================= */
+
+.transaction-section-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 7px;
+}
+
+
+/*
+   Add Product button intentionally removed.
+   Product rows are added automatically by sales.js.
+*/
+
+.transaction-products {
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.product-table-head,
+.sale-product-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(250px, 1fr)
+        90px
+        110px
+        38px;
+
+    gap: 10px;
+
+    align-items: center;
+}
+
+.product-table-head {
+    padding: 9px 12px;
+
+    background: #fafafa;
+
+    color: var(--color-text-muted);
+
+    font-size: 9.5px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.sale-product-row {
+    padding: 9px 12px;
+
+    border-top: 1px solid var(--color-border);
+}
+
+.sale-product-row .form-select,
+.sale-product-row .form-control {
+    height: 37px;
+
+    border-color: #ddd;
+
+    border-radius: 7px;
+
+    font-size: 11.5px;
+}
+
+.sale-product-row .form-select:focus,
+.sale-product-row .form-control:focus {
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px rgba(228, 119, 46, 0.07);
+}
+
+.sale-subtotal {
+    font-weight: 650;
+
+    color: var(--color-text);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   REMOVE PRODUCT X
+========================================================= */
+
+.remove-sale-product {
+    width: 32px;
+    height: 32px;
+
+    padding: 0;
+
+    border: 0;
+
+    border-radius: 7px;
+
+    background: var(--color-danger-soft);
+
+    color: var(--color-danger);
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+}
+
+.remove-sale-product:hover {
+    background: #fbdada;
+
+    color: #a93226;
+}
+
+
+/* =========================================================
+   PAYMENT
+========================================================= */
+
+.transaction-payment {
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 10px;
+
+    padding: 14px;
+}
+
+.payment-summary {
+    display: grid;
+
+    grid-template-columns:
+        1.2fr
+        1fr
+        1fr;
+
+    gap: 14px;
+
+    align-items: end;
+}
+
+.payment-total span,
+.payment-input-group label,
+.payment-result span {
+    display: block;
+
+    color: var(--color-text-muted);
+
+    font-size: 10.5px;
+
+    margin-bottom: 4px;
+}
+
+.payment-total strong {
+    font-size: 20px;
+
+    font-weight: 800;
+
+    color: var(--color-text);
+}
+
+.money-input {
+    display: flex;
+
+    align-items: center;
+
+    border: 1px solid #ddd;
+
+    border-radius: 7px;
+
+    overflow: hidden;
+
+    height: 37px;
+
+    background: #fff;
+}
+
+.money-input span {
+    margin: 0;
+
+    padding: 0 9px;
+
+    color: var(--color-text-muted);
+
+    background: #fafafa;
+
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    font-size: 12px;
+}
+
+.money-input input {
+    border: 0;
+
+    outline: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    padding: 0 8px;
+
+    color: var(--color-text);
+
+    font-size: 12px;
+}
+
+.money-input:focus-within {
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px rgba(228, 119, 46, 0.07);
+}
+
+.payment-result strong {
+    display: block;
+
+    color: var(--color-success);
+
+    font-size: 15px;
+}
+
+.utang-result strong {
+    color: var(--color-gold);
+}
+
+
+/* =========================================================
+   NOTE
+========================================================= */
+
+.transaction-note {
+    margin-top: 12px;
+
+    padding: 9px 11px;
+
+    background: var(--color-primary-soft);
+
+    border: 1px solid #f3d5bf;
+
+    border-radius: 8px;
+
+    display: flex;
+
+    gap: 7px;
+
+    align-items: flex-start;
+
+    color: #8a5a3a;
+
+    font-size: 10.5px;
+}
+
+.transaction-note i {
+    color: var(--color-primary);
+
+    margin-top: 1px;
+}
+
+
+/* =========================================================
+   TRANSACTION FOOTER
+========================================================= */
+
+.transaction-footer {
+    padding: 12px 20px;
+
+    border-top: 1px solid var(--color-border);
+
+    background: #fff;
+}
+
+.transaction-cancel-btn {
+    border: 1px solid #ddd;
+
+    background: #fff;
+
+    color: var(--color-text-muted);
+
+    border-radius: 7px;
+
+    padding: 7px 13px;
+
+    font-size: 12px;
+}
+
+.transaction-cancel-btn:hover {
+    background: #fafafa;
+
+    color: var(--color-text);
+}
+
+.transaction-submit-btn {
+    background: var(--color-primary);
+
+    color: #fff;
+
+    border: 0;
+
+    border-radius: 7px;
+
+    padding: 7px 14px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.transaction-submit-btn:hover {
+    background: var(--color-primary-dark);
+
+    color: #fff;
+}
+
+
+/* =========================================================
+   SALE DETAILS MODAL
+========================================================= */
+
+.sale-details-modal {
+    border: 0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+
+/* Normal details modal */
+
+.sale-details-modal .modal-dialog {
+    max-width: 760px;
+}
+
+
+/* =========================================================
+   SALE DETAILS HEADER
+========================================================= */
+
+.sale-details-header {
+    padding: 15px 20px;
+
+    border-bottom: 1px solid var(--color-border);
+
+    background: #fff;
+}
+
+.sale-details-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+}
+
+.sale-details-icon {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    font-size: 16px;
+}
+
+.sale-details-title h5 {
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+.sale-details-title p {
+    margin: 2px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 10.5px;
+}
+
+
+/* =========================================================
+   SALE DETAILS BODY
+========================================================= */
+
+.sale-details-body {
+    padding: 18px 20px;
+
+    background: #fcfcfc;
+
+    max-height: 70vh;
+
+    overflow-y: auto;
+}
+
+
+/* =========================================================
+   TRANSACTION INFO
+========================================================= */
+
+.sale-detail-info-grid {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1fr
+        1fr;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+}
+
+.sale-detail-info {
+    padding: 11px 12px;
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 9px;
+}
+
+.sale-detail-info > span:first-child {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: var(--color-text-muted);
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    font-weight: 700;
+}
+
+.sale-detail-info strong {
+    color: var(--color-text);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   PURCHASED PRODUCTS
+========================================================= */
+
+.sale-details-products {
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    margin-bottom: 14px;
+}
+
+.sale-details-section-header {
+    padding: 12px 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sale-details-section-header h6 {
+    margin: 0;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: var(--color-text);
+}
+
+.sale-details-section-header p {
+    margin: 2px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 10.5px;
+}
+
+.sale-item-count {
+    padding: 5px 8px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    border-radius: 6px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   SALE DETAILS TABLE
+========================================================= */
+
+.sale-details-table {
+    margin: 0;
+}
+
+.sale-details-table thead th {
+    background: #fafafa;
+
+    color: var(--color-text-muted);
+
+    font-size: 9.5px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    padding: 9px 12px;
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sale-details-table tbody td {
+    padding: 10px 12px;
+
+    border-bottom: 1px solid var(--color-border);
+
+    font-size: 11.5px;
+
+    vertical-align: middle;
+}
+
+.sale-details-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+/* =========================================================
+   PRODUCT NAME
+========================================================= */
+
+.sale-product-name {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+.sale-product-icon {
+    width: 28px;
+    height: 28px;
+
+    border-radius: 7px;
+
+    background: #f5f5f5;
+
+    color: #777;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+}
+
+.sale-product-name strong {
+    font-size: 11.5px;
+
+    color: var(--color-text);
+}
+
+
+/* =========================================================
+   SALE PAYMENT SUMMARY
+========================================================= */
+
+.sale-details-payment {
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 10px;
+
+    padding: 12px 14px;
+}
+
+.sale-payment-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 7px 0;
+
+    font-size: 11.5px;
+
+    color: var(--color-text-muted);
+}
+
+.sale-payment-row strong {
+    color: var(--color-text);
+
+    font-size: 12px;
+}
+
+.sale-payment-row .paid-value {
+    color: var(--color-success);
+}
+
+.sale-balance-row {
+    margin-top: 4px;
+
+    padding-top: 10px;
+
+    border-top: 1px solid var(--color-border);
+}
+
+.sale-balance-row .balance-value {
+    color: var(--color-danger);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   SALE DETAILS FOOTER
+========================================================= */
+
+.sale-details-footer {
+    padding: 11px 20px;
+
+    border-top: 1px solid var(--color-border);
+
+    background: #fff;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .sales-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+    .sales-new-btn {
+        width: auto;
+    }
+
+    .sales-table-header {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .sales-search {
+        width: 100%;
+    }
+
+    .transaction-type-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-table-head {
+        display: none;
+    }
+
+    .sale-product-row {
+        grid-template-columns: 1fr;
+
+        gap: 7px;
+
+        padding: 12px;
+    }
+
+    .sale-product-row .remove-sale-product {
+        width: 32px;
+    }
+
+    .payment-summary {
+        grid-template-columns: 1fr;
+
+        gap: 12px;
+    }
+
+    .sale-detail-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #newSaleModal .modal-dialog,
+    .sale-details-modal .modal-dialog {
+        margin: 10px;
+    }
+
+    .transaction-body,
+    .sale-details-body {
+        max-height: 75vh;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .sales-title-area h1 {
+        font-size: 22px;
+    }
+
+    .sales-page-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .sales-summary-card {
+        padding: 13px;
+    }
+
+    .sales-table thead th,
+    .sales-table tbody td {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .transaction-header,
+    .transaction-footer,
+    .sale-details-header,
+    .sale-details-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .transaction-body,
+    .sale-details-body {
+        padding: 14px;
+    }
+}

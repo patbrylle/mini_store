@@ -23,5 +23,8 @@ namespace mini_store.Models
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal Subtotal { get; set; }
+                public DateTime AddedAt { get; set; } = DateTime.Now;
+
     }
+
 }

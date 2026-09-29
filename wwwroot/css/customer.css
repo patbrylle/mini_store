@@ -1,0 +1,1094 @@
+/* ==========================================================================
+   Customers — theme matched to dashboard.css / reports.css
+========================================================================== */
+
+:root {
+
+    --color-primary: #e4772e;
+    --color-primary-dark: #c95f1d;
+    --color-primary-soft: #fff0e6;
+
+    --color-gold: #d49a21;
+    --color-gold-soft: #fff7df;
+
+    --color-success: #3c9461;
+    --color-success-soft: #e8f6ed;
+
+    --color-danger: #c0392b;
+    --color-danger-soft: #fdeaea;
+
+    --color-text: #222;
+    --color-text-muted: #777;
+    --color-border: #eee;
+
+}
+
+
+/* ==========================================================================
+   Page
+========================================================================== */
+
+.customer-page {
+
+    padding-bottom: 30px;
+
+}
+
+
+/* ==========================================================================
+   Header
+========================================================================== */
+
+.customer-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    margin-bottom: 28px;
+
+}
+
+.customer-title-area {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+}
+
+.customer-page-icon {
+
+    width: 48px;
+    height: 48px;
+
+    min-width: 48px;
+
+    border-radius: 13px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 21px;
+
+}
+
+.customer-title-area h1 {
+
+    margin: 0;
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    color: var(--color-text);
+
+}
+
+.customer-title-area p {
+
+    margin: 4px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 13px;
+
+}
+
+
+/* ==========================================================================
+   Primary Button
+========================================================================== */
+
+.customer-primary-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    background: var(--color-primary);
+
+    color: #fff;
+
+    border: 1px solid var(--color-primary);
+
+    border-radius: 9px;
+
+    padding: 10px 16px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+
+}
+
+.customer-primary-btn:hover {
+
+    background: var(--color-primary-dark);
+
+    border-color: var(--color-primary-dark);
+
+    color: #fff;
+
+    transform: translateY(-1px);
+
+}
+
+
+/* ==========================================================================
+   Summary / KPI Cards
+========================================================================== */
+
+.customer-kpi-row {
+
+    margin-bottom: 32px;
+
+}
+
+.customer-stat-card {
+
+    height: 100%;
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+.customer-stat-card:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+
+}
+
+
+/* ==========================================================================
+   Stat Icons
+========================================================================== */
+
+.customer-stat-icon {
+
+    width: 46px;
+    height: 46px;
+
+    min-width: 46px;
+
+    border-radius: 13px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 19px;
+
+}
+
+.stat-primary {
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+}
+
+.stat-gold {
+
+    background: var(--color-gold-soft);
+
+    color: var(--color-gold);
+
+}
+
+.stat-success {
+
+    background: var(--color-success-soft);
+
+    color: var(--color-success);
+
+}
+
+
+/* ==========================================================================
+   Stat Text
+========================================================================== */
+
+.customer-stat-label {
+
+    display: block;
+
+    color: var(--color-text-muted);
+
+    font-size: 12.5px;
+
+    margin: 0 0 4px;
+
+}
+
+.customer-stat-card h3 {
+
+    margin: 0;
+
+    font-size: 21px;
+
+    font-weight: 800;
+
+    color: var(--color-text);
+
+}
+
+.customer-stat-card small {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: var(--color-text-muted);
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================================
+   Customer Directory Panel
+========================================================================== */
+
+.customer-table-card {
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================================
+   Directory Header
+========================================================================== */
+
+.customer-table-header {
+
+    padding: 20px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    border-bottom: 1px solid var(--color-border);
+
+}
+
+.customer-section-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.customer-section-icon {
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 11px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 17px;
+
+}
+
+.customer-section-title h5 {
+
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    color: var(--color-text);
+
+}
+
+.customer-section-title p {
+
+    margin: 3px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 12.5px;
+
+}
+
+
+/* ==========================================================================
+   Search
+========================================================================== */
+
+.customer-search {
+
+    position: relative;
+
+    width: 260px;
+
+}
+
+.customer-search i {
+
+    position: absolute;
+
+    left: 13px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #aaa;
+
+    font-size: 14px;
+
+    pointer-events: none;
+
+}
+
+.customer-search input {
+
+    width: 100%;
+
+    padding: 9px 12px 9px 37px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 9px;
+
+    background: #fff;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+.customer-search input::placeholder {
+
+    color: #aaa;
+
+}
+
+.customer-search input:focus {
+
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px var(--color-primary-soft);
+
+}
+
+
+/* ==========================================================================
+   Customer Table
+========================================================================== */
+
+.customer-table {
+
+    margin: 0;
+
+}
+
+.customer-table thead th {
+
+    background: #fafafa;
+
+    color: var(--color-text-muted);
+
+    font-size: 11.5px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.03em;
+
+    white-space: nowrap;
+
+    padding: 13px 18px;
+
+    border-bottom: 1px solid var(--color-border);
+
+}
+
+.customer-table tbody td {
+
+    padding: 14px 18px;
+
+    vertical-align: middle;
+
+    border-bottom: 1px solid var(--color-border);
+
+    font-size: 13px;
+
+    color: var(--color-text);
+
+}
+
+.customer-table tbody tr:last-child td {
+
+    border-bottom: 0;
+
+}
+
+.customer-table tbody tr {
+
+    transition: background 0.15s ease;
+
+}
+
+.customer-table tbody tr:hover {
+
+    background: #fffaf6;
+
+}
+
+
+/* ==========================================================================
+   Customer Name
+========================================================================== */
+
+.customer-cell {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+}
+
+.customer-avatar {
+
+    width: 38px;
+    height: 38px;
+
+    min-width: 38px;
+
+    border-radius: 50%;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 15px;
+
+}
+
+.customer-name {
+
+    font-weight: 700;
+
+    color: var(--color-text);
+
+}
+
+.customer-email {
+
+    color: var(--color-text-muted);
+
+}
+
+.customer-contact {
+
+    color: var(--color-text);
+
+    font-weight: 500;
+
+}
+
+.customer-address {
+
+    color: var(--color-text-muted);
+
+    max-width: 220px;
+
+}
+
+
+/* ==========================================================================
+   Action Buttons
+========================================================================== */
+
+.customer-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 6px;
+
+}
+
+.customer-action-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    border-radius: 7px;
+
+    padding: 6px 10px;
+
+    background: #fff;
+
+    border: 1px solid var(--color-border);
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+.customer-edit-btn {
+
+    color: var(--color-gold);
+
+}
+
+.customer-edit-btn:hover {
+
+    background: var(--color-gold-soft);
+
+    border-color: #efdca9;
+
+    color: #b27d0e;
+
+}
+
+.customer-delete-btn {
+
+    color: var(--color-danger);
+
+}
+
+.customer-delete-btn:hover {
+
+    background: var(--color-danger-soft);
+
+    border-color: #f2c5c0;
+
+    color: #a93226;
+
+}
+
+
+/* ==========================================================================
+   Empty State
+========================================================================== */
+
+.customer-empty {
+
+    min-height: 210px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #999;
+
+    text-align: center;
+
+}
+
+.customer-empty-icon {
+
+    width: 58px;
+    height: 58px;
+
+    margin-bottom: 12px;
+
+    border-radius: 14px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 23px;
+
+}
+
+.customer-empty h5 {
+
+    margin: 0 0 5px;
+
+    color: var(--color-text);
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+}
+
+.customer-empty p {
+
+    margin: 0 0 17px;
+
+    color: var(--color-text-muted);
+
+    font-size: 12.5px;
+
+}
+
+
+/* ==========================================================================
+   Add Customer Modal
+========================================================================== */
+
+.customer-modal {
+
+    border: none;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+
+}
+
+
+/* ==========================================================================
+   Modal Header
+========================================================================== */
+
+.customer-modal-header {
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid var(--color-border);
+
+    background: #fff;
+
+}
+
+.customer-modal-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.customer-modal-icon {
+
+    width: 42px;
+    height: 42px;
+
+    min-width: 42px;
+
+    border-radius: 11px;
+
+    background: var(--color-primary-soft);
+
+    color: var(--color-primary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 18px;
+
+}
+
+.customer-modal-title h5 {
+
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+}
+
+.customer-modal-title p {
+
+    margin: 3px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================================
+   Modal Body
+========================================================================== */
+
+.customer-modal-body {
+
+    padding: 22px;
+
+}
+
+.customer-form-group {
+
+    margin-bottom: 17px;
+
+}
+
+.customer-form-group:last-child {
+
+    margin-bottom: 0;
+
+}
+
+.customer-form-group label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================================
+   Modal Inputs
+========================================================================== */
+
+.customer-input {
+
+    position: relative;
+
+}
+
+.customer-input > i {
+
+    position: absolute;
+
+    left: 13px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--color-text-muted);
+
+    font-size: 14px;
+
+    z-index: 2;
+
+}
+
+.customer-input .form-control {
+
+    min-height: 42px;
+
+    padding-left: 38px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 9px;
+
+    background: #fff;
+
+    color: var(--color-text);
+
+    font-size: 13px;
+
+    box-shadow: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+.customer-input .form-control::placeholder {
+
+    color: #aaa;
+
+}
+
+.customer-input .form-control:focus {
+
+    border-color: var(--color-primary);
+
+    box-shadow:
+        0 0 0 3px var(--color-primary-soft);
+
+}
+
+
+/* ==========================================================================
+   Textarea
+========================================================================== */
+
+.customer-textarea > i {
+
+    top: 17px;
+
+    transform: none;
+
+}
+
+.customer-textarea textarea {
+
+    min-height: 90px;
+
+    resize: vertical;
+
+}
+
+
+/* ==========================================================================
+   Modal Footer
+========================================================================== */
+
+.customer-modal-footer {
+
+    padding: 15px 22px;
+
+    border-top: 1px solid var(--color-border);
+
+    background: #fafafa;
+
+}
+
+
+/* ==========================================================================
+   Cancel Button
+========================================================================== */
+
+.customer-cancel-btn {
+
+    padding: 9px 16px;
+
+    background: #fff;
+
+    color: var(--color-text-muted);
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+.customer-cancel-btn:hover {
+
+    background: #f5f5f5;
+
+    color: var(--color-text);
+
+}
+
+
+/* ==========================================================================
+   Save Button
+========================================================================== */
+
+.customer-save-btn {
+
+    padding: 9px 17px;
+
+    background: var(--color-primary);
+
+    color: #fff;
+
+    border: 1px solid var(--color-primary);
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+.customer-save-btn:hover {
+
+    background: var(--color-primary-dark);
+
+    border-color: var(--color-primary-dark);
+
+    color: #fff;
+
+}
+
+
+/* ==========================================================================
+   Responsive
+========================================================================== */
+
+@media (max-width: 768px) {
+
+    .customer-header {
+
+        flex-direction: column;
+
+        gap: 14px;
+
+    }
+
+    .customer-title-area h1 {
+
+        font-size: 24px;
+
+    }
+
+    .customer-primary-btn {
+
+        width: 100%;
+
+        justify-content: center;
+
+    }
+
+    .customer-table-header {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+    .customer-search {
+
+        width: 100%;
+
+    }
+
+    .customer-table {
+
+        min-width: 760px;
+
+    }
+
+}
+
+
+/* ==========================================================================
+   Modal Responsive
+========================================================================== */
+
+@media (max-width: 576px) {
+
+    .customer-modal-header {
+
+        padding: 17px 18px;
+
+    }
+
+    .customer-modal-body {
+
+        padding: 18px;
+
+    }
+
+    .customer-modal-footer {
+
+        padding: 13px 18px;
+
+    }
+
+}

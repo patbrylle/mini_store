@@ -1,0 +1,641 @@
+
+@model mini_store.Models.Utang
+
+@{
+    var utang = Model;
+
+    var balance = Math.Max(0, utang.Balance);
+
+    string statusClass =
+        utang.Status?.ToLower() switch
+        {
+            "paid" => "status-paid",
+            "partial" => "status-partial",
+            _ => "status-unpaid"
+        };
+
+    var saleDate =
+        utang.Sale?.SaleDate ?? utang.DateCreated;
+}
+
+    <div class="modal fade"
+         id="utangDetailsModal-@utang.UtangId"
+         tabindex="-1"
+         aria-labelledby="utangDetailsLabel-@utang.UtangId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content utang-details-modal">
+
+
+                <!-- MODAL HEADER -->
+                <div class="modal-header utang-details-header">
+
+                    <div class="utang-details-title">
+
+                        <div class="utang-details-icon">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+
+                        <div>
+
+                            <h5 id="utangDetailsLabel-@utang.UtangId">
+                                Utang Details
+                            </h5>
+
+                            <p>
+                                Customer credit transaction
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+                <!-- MODAL BODY -->
+                <div class="modal-body utang-details-body">
+
+
+                    <!-- CUSTOMER / TRANSACTION INFO -->
+                    <div class="utang-detail-info-grid">
+
+
+                        <div class="utang-detail-info">
+
+                            <span>Customer</span>
+
+                            <strong>
+                                @(utang.Customer?.CustomerName
+                                    ?? "Unknown Customer")
+                            </strong>
+
+                        </div>
+
+
+                        <div class="utang-detail-info">
+
+                            <span>Credit Started</span>
+
+                            <strong>
+                                @saleDate.ToString("MMM dd, yyyy")
+                            </strong>
+
+                            <small>
+                                @saleDate.ToString("hh:mm tt")
+                            </small>
+
+                        </div>
+
+
+                        <div class="utang-detail-info">
+
+                            <span>Status</span>
+
+                            <strong>
+
+                                <span class="utang-status @statusClass">
+
+                                    <span></span>
+
+                                    @(utang.Status ?? "Unpaid")
+
+                                </span>
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="utang-detail-info">
+
+                            <span>Transaction</span>
+
+                            <strong>
+
+                                @(utang.Sale != null
+                                    ? "#" + utang.Sale.SaleId
+                                    : "Credit Record")
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- PURCHASE HISTORY -->
+                    <!-- ================================================= -->
+
+                    <div class="utang-products-section">
+
+                        <div class="utang-details-section-header">
+
+                            <div>
+
+                                <h6>Purchase History</h6>
+
+                                <p>
+                                    Products grouped by the date they were added.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        @if (utang.Sale?.SaleItems != null &&
+                             utang.Sale.SaleItems.Any())
+                        {
+
+                            /*
+                             * Group products by the DATE they were added.
+                             *
+                             * Example:
+                             *
+                             * September 27, 2026
+                             *      10:15 AM - Rice
+                             *      02:35 PM - Coffee
+                             *
+                             * September 28, 2026
+                             *      09:20 AM - Sugar
+                             */
+
+                            var groupedProducts =
+                                utang.Sale.SaleItems
+                                    .OrderByDescending(x => x.AddedAt)
+                                    .GroupBy(x => x.AddedAt.Date)
+                                    .OrderByDescending(x => x.Key)
+                                    .ToList();
+
+
+                            <div class="utang-date-list">
+
+                                @foreach (var dateGroup in groupedProducts)
+                                {
+
+                                    var dateId =
+                                        $"utang-date-{utang.UtangId}-{dateGroup.Key:yyyyMMdd}";
+
+                                    var dateTotal =
+                                        dateGroup.Sum(x => x.Subtotal);
+
+
+                                    <div class="utang-date-group">
+
+
+                                        <!-- DATE DROPDOWN BUTTON -->
+                                        <button type="button"
+                                                class="utang-date-toggle"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#@dateId"
+                                                aria-expanded="false"
+                                                aria-controls="@dateId">
+
+
+                                            <div class="utang-date-left">
+
+                                                <div class="utang-calendar-icon">
+
+                                                    <i class="bi bi-calendar3"></i>
+
+                                                </div>
+
+
+                                                <div>
+
+                                                    <div class="utang-date">
+
+                                                        @dateGroup.Key.ToString("MMMM dd, yyyy")
+
+                                                    </div>
+
+                                                    <div class="utang-date-count">
+
+                                                        @dateGroup.Count()
+                                                        @(dateGroup.Count() == 1
+                                                            ? "product"
+                                                            : "products")
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="utang-date-right">
+
+                                                <span class="utang-date-total">
+
+                                                    ₱@dateTotal.ToString("N2")
+
+                                                </span>
+
+                                                <i class="bi bi-chevron-down utang-date-chevron"></i>
+
+                                            </div>
+
+
+                                        </button>
+
+
+                                        <!-- PRODUCTS FOR THIS DATE -->
+                                        <div id="@dateId"
+                                             class="collapse">
+
+
+                                            <div class="utang-product-ledger">
+
+
+                                                <!-- LEDGER HEADER -->
+                                                <div class="utang-ledger-header">
+
+                                                    <span>
+                                                        Date & Time
+                                                    </span>
+
+                                                    <span>
+                                                        Product
+                                                    </span>
+
+                                                    <span>
+                                                        Qty
+                                                    </span>
+
+                                                    <span>
+                                                        Subtotal
+                                                    </span>
+
+                                                </div>
+
+
+                                                <!-- PRODUCTS -->
+                                                @foreach (var item in dateGroup.OrderBy(x => x.AddedAt))
+                                                {
+
+                                                    <div class="utang-ledger-row">
+
+
+                                                        <!-- DATE + TIME -->
+                                                        <div class="utang-item-time">
+
+                                                            <strong>
+
+                                                                @item.AddedAt.ToString("hh:mm tt")
+
+                                                            </strong>
+
+                                                            <small>
+
+                                                                @item.AddedAt.ToString("MMM dd, yyyy")
+
+                                                            </small>
+
+                                                        </div>
+
+
+                                                        <!-- PRODUCT -->
+                                                        <div class="utang-item-product">
+
+                                                            <div class="utang-product-name">
+
+                                                                <div class="utang-product-icon">
+
+                                                                    <i class="bi bi-box"></i>
+
+                                                                </div>
+
+                                                                <strong>
+
+                                                                    @(item.Product?.ProductName
+                                                                        ?? "Product")
+
+                                                                </strong>
+
+                                                            </div>
+
+                                                        </div>
+
+
+                                                        <!-- QUANTITY -->
+                                                        <div>
+
+                                                            @item.Quantity
+
+                                                        </div>
+
+
+                                                        <!-- SUBTOTAL -->
+                                                        <div class="utang-item-subtotal">
+
+                                                            ₱@item.Subtotal.ToString("N2")
+
+                                                        </div>
+
+
+                                                    </div>
+
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                }
+
+                            </div>
+
+                        }
+                        else
+                        {
+
+                            <div class="utang-empty-products">
+
+                                <i class="bi bi-bag-x"></i>
+
+                                <span>
+                                    No product details available.
+                                </span>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+
+                    <!-- PAYMENT SUMMARY -->
+                    <div class="utang-payment-summary">
+
+                        <div class="utang-payment-row">
+
+                            <span>
+                                Total Utang
+                            </span>
+
+                            <strong>
+                                ₱@utang.Amount.ToString("N2")
+                            </strong>
+
+                        </div>
+
+
+                        <div class="utang-payment-row">
+
+                            <span>
+                                Amount Paid
+                            </span>
+
+                            <strong class="paid-value">
+                                ₱@utang.AmountPaid.ToString("N2")
+                            </strong>
+
+                        </div>
+
+
+                        <div class="utang-payment-row utang-balance-row">
+
+                            <span>
+                                Remaining Balance
+                            </span>
+
+                            <strong>
+                                ₱@balance.ToString("N2")
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MODAL FOOTER -->
+                <div class="modal-footer utang-details-footer">
+
+                    <button type="button"
+                            class="btn transaction-cancel-btn"
+                            data-bs-dismiss="modal">
+
+                        Close
+
+                    </button>
+
+
+                    @if (balance > 0)
+                    {
+
+                        <button type="button"
+                                class="btn utang-pay-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#payUtangModal-@utang.UtangId"
+                                data-bs-dismiss="modal">
+
+                            <i class="bi bi-cash-coin me-1"></i>
+
+                            Pay Utang
+
+                        </button>
+
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- PAYMENT MODAL -->
+    <!-- ================================================= -->
+
+    @if (balance > 0)
+    {
+
+        <div class="modal fade"
+             id="payUtangModal-@utang.UtangId"
+             tabindex="-1"
+             aria-labelledby="payUtangLabel-@utang.UtangId"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content utang-payment-modal">
+
+
+                    <form asp-controller="Utang"
+                          asp-action="Pay"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@utang.UtangId" />
+
+
+                        <!-- PAYMENT HEADER -->
+                        <div class="modal-header">
+
+                            <div class="utang-pay-title">
+
+                                <div class="utang-pay-icon">
+
+                                    <i class="bi bi-cash-coin"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <h5 id="payUtangLabel-@utang.UtangId">
+                                        Pay Utang
+                                    </h5>
+
+                                    <p>
+                                        Record a payment for this customer.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                            </button>
+
+                        </div>
+
+
+                        <!-- PAYMENT BODY -->
+                        <div class="modal-body">
+
+
+                            <div class="utang-pay-customer">
+
+                                <span>
+                                    Customer
+                                </span>
+
+                                <strong>
+
+                                    @(utang.Customer?.CustomerName
+                                        ?? "Unknown Customer")
+
+                                </strong>
+
+                            </div>
+
+
+                            <div class="utang-pay-balance">
+
+                                <span>
+                                    Remaining Balance
+                                </span>
+
+                                <strong>
+                                    ₱@balance.ToString("N2")
+                                </strong>
+
+                            </div>
+
+
+                            <div class="utang-pay-input">
+
+                                <label for="paymentAmount-@utang.UtangId">
+                                    Amount to Pay
+                                </label>
+
+                                <div class="money-input">
+
+                                    <span>₱</span>
+
+                                    <input type="number"
+                                           id="paymentAmount-@utang.UtangId"
+                                           name="paymentAmount"
+                                           class="form-control"
+                                           min="0.01"
+                                           max="@balance"
+                                           step="0.01"
+                                           placeholder="0.00"
+                                           required />
+
+                                </div>
+
+                                <small>
+
+                                    Maximum payment:
+                                    ₱@balance.ToString("N2")
+
+                                </small>
+
+                            </div>
+
+
+                            <div class="utang-pay-note">
+
+                                <i class="bi bi-info-circle"></i>
+
+                                <span>
+
+                                    The payment will automatically update
+                                    the customer's remaining balance.
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PAYMENT FOOTER -->
+                        <div class="modal-footer">
+
+                            <button type="button"
+                                    class="btn transaction-cancel-btn"
+                                    data-bs-dismiss="modal">
+
+                                Cancel
+
+                            </button>
+
+
+                            <button type="submit"
+                                    class="btn utang-confirm-pay-btn">
+
+                                <i class="bi bi-check-lg me-1"></i>
+
+                                Confirm Payment
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    }
+
+}
+

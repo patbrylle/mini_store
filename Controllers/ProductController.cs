@@ -15,21 +15,68 @@ namespace mini_store.Controllers
             _context = context;
         }
 
-        // GET: Products
-        public async Task<IActionResult> Index()
+       // GET: Products
+public async Task<IActionResult> Index(
+    int? categoryId,
+    string? stockStatus,
+    decimal? minPrice,
+    decimal? maxPrice)
+{
+    var products = _context.Products
+        .Include(p => p.Category)
+        .AsQueryable();
+
+    // CATEGORY FILTER
+    if (categoryId.HasValue)
+    {
+        products = products.Where(p => p.CategoryId == categoryId.Value);
+    }
+
+    // STOCK FILTER
+    if (!string.IsNullOrEmpty(stockStatus))
+    {
+        if (stockStatus == "InStock")
         {
-            var products = await _context.Products
-                .Include(p => p.Category)
-                .ToListAsync();
-
-            ViewBag.Categories = new SelectList(
-                await _context.Categories.ToListAsync(),
-                "CategoryId",
-                "CategoryName"
-            );
-
-            return View(products);
+            products = products.Where(p => p.Quantity > 10);
         }
+        else if (stockStatus == "LowStock")
+        {
+            products = products.Where(p => p.Quantity > 0 && p.Quantity <= 10);
+        }
+        else if (stockStatus == "OutOfStock")
+        {
+            products = products.Where(p => p.Quantity == 0);
+        }
+    }
+
+    // MINIMUM PRICE
+    if (minPrice.HasValue)
+    {
+        products = products.Where(p => p.Price >= minPrice.Value);
+    }
+
+    // MAXIMUM PRICE
+    if (maxPrice.HasValue)
+    {
+        products = products.Where(p => p.Price <= maxPrice.Value);
+    }
+
+    // CATEGORY DROPDOWN
+    ViewBag.Categories = new SelectList(
+        await _context.Categories.ToListAsync(),
+        "CategoryId",
+        "CategoryName",
+        categoryId
+    );
+
+    // KEEP FILTER VALUES
+    ViewBag.SelectedCategory = categoryId;
+    ViewBag.SelectedStock = stockStatus;
+    ViewBag.MinPrice = minPrice;
+    ViewBag.MaxPrice = maxPrice;
+
+    return View(await products.ToListAsync());
+}
 
 
         // POST: Products/Create

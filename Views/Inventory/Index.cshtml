@@ -1,4 +1,3 @@
-
 @model IEnumerable<mini_store.Models.Product>
 
 @{
@@ -10,160 +9,371 @@
     var outOfStock = Model.Count(p => p.Quantity == 0);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="fw-bold mb-1">Inventory</h1>
-        <p class="text-muted mb-0">
-            Monitor your store's current stock.
-        </p>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/inventory.css" asp-append-version="true" />
+}
 
-    <a asp-controller="Products"
-       asp-action="Create"
-       class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i>
-        Add Product
-    </a>
-</div>
+<div class="inventory-page">
 
-<!-- SUMMARY CARDS -->
-<div class="row g-4 mb-4">
+    <!-- PAGE HEADER -->
+    <div class="inventory-header">
 
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <p class="text-muted mb-2">Total Products</p>
-                <h3 class="fw-bold">@totalProducts</h3>
+        <div>
+            <div class="inventory-title-row">
+                <div class="inventory-page-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div>
+                    <h1>Inventory</h1>
+                    <p>Monitor and manage your store's current stock.</p>
+                </div>
             </div>
         </div>
+
+        <a asp-controller="Products"
+           asp-action="Index"
+           class="btn inventory-primary-btn">
+            <i class="bi bi-box-seam me-1"></i>
+            Manage Products
+        </a>
+
     </div>
 
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <p class="text-muted mb-2">Total Stock</p>
-                <h3 class="fw-bold">@totalStock</h3>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 inventory-summary">
+
+        <!-- TOTAL PRODUCTS -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="inventory-stat-card">
+
+                <div class="stat-icon stat-icon-primary">
+                    <i class="bi bi-boxes"></i>
+                </div>
+
+                <div class="stat-content">
+
+                    <span class="stat-label">
+                        Total Products
+                    </span>
+
+                    <h3>
+                        @totalProducts
+                    </h3>
+
+                    <span class="stat-description">
+                        Products in catalog
+                    </span>
+
+                </div>
+
             </div>
-        </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <p class="text-muted mb-2">Low Stock</p>
-                <h3 class="fw-bold text-warning">@lowStock</h3>
+        </div>
+
+
+        <!-- TOTAL STOCK -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="inventory-stat-card">
+
+                <div class="stat-icon stat-icon-blue">
+                    <i class="bi bi-stack"></i>
+                </div>
+
+                <div class="stat-content">
+
+                    <span class="stat-label">
+                        Total Stock
+                    </span>
+
+                    <h3>
+                        @totalStock
+                    </h3>
+
+                    <span class="stat-description">
+                        Items currently available
+                    </span>
+
+                </div>
+
             </div>
-        </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <p class="text-muted mb-2">Out of Stock</p>
-                <h3 class="fw-bold text-danger">@outOfStock</h3>
+        </div>
+
+
+        <!-- LOW STOCK -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="inventory-stat-card">
+
+                <div class="stat-icon stat-icon-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+
+                <div class="stat-content">
+
+                    <span class="stat-label">
+                        Low Stock
+                    </span>
+
+                    <h3 class="text-warning">
+                        @lowStock
+                    </h3>
+
+                    <span class="stat-description">
+                        Products need attention
+                    </span>
+
+                </div>
+
             </div>
+
         </div>
+
+
+        <!-- OUT OF STOCK -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="inventory-stat-card">
+
+                <div class="stat-icon stat-icon-danger">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+
+                <div class="stat-content">
+
+                    <span class="stat-label">
+                        Out of Stock
+                    </span>
+
+                    <h3 class="text-danger">
+                        @outOfStock
+                    </h3>
+
+                    <span class="stat-description">
+                        Products unavailable
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
-</div>
 
-<!-- INVENTORY TABLE -->
-<div class="card border-0 shadow-sm">
+    <!-- INVENTORY TABLE CARD -->
+    <div class="inventory-card">
 
-    <div class="card-body">
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- CARD HEADER -->
+        <div class="inventory-card-header">
 
             <div>
-                <h5 class="fw-bold mb-1">Stock Inventory</h5>
-                <p class="text-muted mb-0">
-                    Current quantity of every product.
-                </p>
+
+                <div class="section-title">
+
+                    <div class="section-title-icon">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+
+                    <div>
+                        <h5>Stock Inventory</h5>
+
+                        <p>
+                            View and update the current quantity of every product.
+                        </p>
+                    </div>
+
+                </div>
+
             </div>
 
-            <input type="text"
-                   id="inventorySearch"
-                   class="form-control"
-                   placeholder="Search product..."
-                   style="max-width: 250px;">
+
+            <!-- SEARCH -->
+            <div class="inventory-search">
+
+                <i class="bi bi-search"></i>
+
+                <input type="text"
+                       id="inventorySearch"
+                       placeholder="Search product or category..."
+                       autocomplete="off" />
+
+            </div>
+
         </div>
 
+
+        <!-- TABLE -->
         <div class="table-responsive">
 
-            <table class="table align-middle" id="inventoryTable">
+            <table class="table inventory-table"
+                   id="inventoryTable">
 
                 <thead>
+
                     <tr>
+
                         <th>Product</th>
+
                         <th>Category</th>
+
                         <th>Price</th>
+
                         <th>Stock</th>
+
                         <th>Status</th>
-                        <th>Action</th>
+
+                        <th class="text-end">Action</th>
+
                     </tr>
+
                 </thead>
 
                 <tbody>
 
                     @foreach (var product in Model)
                     {
+
                         <tr>
 
+                            <!-- PRODUCT -->
                             <td>
-                                <strong>
-                                    @product.ProductName
-                                </strong>
+
+                                <div class="product-cell">
+
+                                    <div class="product-icon">
+                                        <i class="bi bi-box"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            @product.ProductName
+                                        </strong>
+
+                                        <small>
+                                            Product ID: #@product.ProductId
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
                             </td>
 
+
+                            <!-- CATEGORY -->
                             <td>
-                                @(product.Category?.CategoryName ?? "No Category")
+
+                                @if (product.Category != null)
+                                {
+                                    <span class="category-badge">
+                                        @product.Category.CategoryName
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        No Category
+                                    </span>
+                                }
+
                             </td>
 
+
+                            <!-- PRICE -->
                             <td>
-                                ₱@product.Price.ToString("N2")
+
+                                <span class="price-value">
+                                    ₱@product.Price.ToString("N2")
+                                </span>
+
                             </td>
 
-                            <td class="fw-bold">
-                                @product.Quantity
+
+                            <!-- STOCK -->
+                            <td>
+
+                                <div class="stock-value">
+
+                                    @if (product.Quantity == 0)
+                                    {
+                                        <span class="stock-number stock-danger">
+                                            0
+                                        </span>
+                                    }
+                                    else if (product.Quantity <= 10)
+                                    {
+                                        <span class="stock-number stock-warning">
+                                            @product.Quantity
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="stock-number stock-success">
+                                            @product.Quantity
+                                        </span>
+                                    }
+
+                                </div>
+
                             </td>
 
+
+                            <!-- STATUS -->
                             <td>
 
                                 @if (product.Quantity == 0)
                                 {
-                                    <span class="badge bg-danger">
+                                    <span class="inventory-status status-danger">
+                                        <span class="status-dot"></span>
                                         Out of Stock
                                     </span>
                                 }
                                 else if (product.Quantity <= 10)
                                 {
-                                    <span class="badge bg-warning text-dark">
+                                    <span class="inventory-status status-warning">
+                                        <span class="status-dot"></span>
                                         Low Stock
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-success">
+                                    <span class="inventory-status status-success">
+                                        <span class="status-dot"></span>
                                         In Stock
                                     </span>
                                 }
 
                             </td>
 
-                            <td>
-<button type="button"
-        class="btn btn-sm btn-outline-success"
-        data-bs-toggle="modal"
-        data-bs-target="#addStockModal"
-        data-product-id="@product.ProductId"
-        data-product-name="@product.ProductName"
-        data-current-stock="@product.Quantity">
-    <i class="bi bi-plus-lg"></i>
-    Add Stock
-</button>
+
+                            <!-- ACTION -->
+                            <td class="text-end">
+
+                                <button type="button"
+                                        class="btn add-stock-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addStockModal"
+                                        data-product-id="@product.ProductId"
+                                        data-product-name="@product.ProductName"
+                                        data-current-stock="@product.Quantity">
+
+                                    <i class="bi bi-plus-lg"></i>
+
+                                    Add Stock
+
+                                </button>
+
                             </td>
 
                         </tr>
+
                     }
 
                 </tbody>
@@ -172,29 +382,90 @@
 
         </div>
 
+
+        <!-- EMPTY STATE -->
+        @if (!Model.Any())
+        {
+
+            <div class="inventory-empty">
+
+                <div class="empty-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <h5>No products found</h5>
+
+                <p>
+                    Add products to your store to start managing inventory.
+                </p>
+
+                <a asp-controller="Products"
+                   asp-action="Index"
+                   class="btn inventory-primary-btn">
+
+                    <i class="bi bi-plus-lg"></i>
+                    Add Product
+
+                </a>
+
+            </div>
+
+        }
+
     </div>
 
 </div>
 
+
 <!-- ADD STOCK MODAL -->
-<div class="modal fade" id="addStockModal" tabindex="-1">
+<div class="modal fade"
+     id="addStockModal"
+     tabindex="-1"
+     aria-labelledby="addStockModalLabel"
+     aria-hidden="true">
 
     <div class="modal-dialog modal-dialog-centered">
 
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content inventory-modal">
 
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">
-                    Add Stock
-                </h5>
+
+                <div class="modal-title-wrapper">
+
+                    <div class="modal-icon">
+                        <i class="bi bi-plus-lg"></i>
+                    </div>
+
+                    <div>
+
+                        <h5 class="modal-title"
+                            id="addStockModalLabel">
+
+                            Add Stock
+
+                        </h5>
+
+                        <p>
+                            Increase the available quantity.
+                        </p>
+
+                    </div>
+
+                </div>
 
                 <button type="button"
                         class="btn-close"
-                        data-bs-dismiss="modal">
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
                 </button>
+
             </div>
 
-            <form asp-action="AddStock" method="post">
+
+            <form asp-action="AddStock"
+                  method="post">
+
+                @Html.AntiForgeryToken()
 
                 <div class="modal-body">
 
@@ -202,55 +473,96 @@
                            id="modalProductId"
                            name="id" />
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">
+
+                    <!-- PRODUCT -->
+                    <div class="modal-field">
+
+                        <label>
                             Product
                         </label>
 
-                        <input type="text"
-                               id="modalProductName"
-                               class="form-control"
-                               readonly />
+                        <div class="input-icon-wrapper">
+
+                            <i class="bi bi-box"></i>
+
+                            <input type="text"
+                                   id="modalProductName"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">
+
+                    <!-- CURRENT STOCK -->
+                    <div class="modal-field">
+
+                        <label>
                             Current Stock
                         </label>
 
-                        <input type="text"
-                               id="modalCurrentStock"
-                               class="form-control"
-                               readonly />
+                        <div class="input-icon-wrapper">
+
+                            <i class="bi bi-stack"></i>
+
+                            <input type="text"
+                                   id="modalCurrentStock"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
                     </div>
 
-                    <div>
-                        <label class="form-label fw-semibold">
+
+                    <!-- QUANTITY -->
+                    <div class="modal-field">
+
+                        <label>
                             Quantity to Add
                         </label>
 
-                        <input type="number"
-                               name="quantity"
-                               class="form-control"
-                               min="1"
-                               value="1"
-                               required />
+                        <div class="input-icon-wrapper">
+
+                            <i class="bi bi-plus-circle"></i>
+
+                            <input type="number"
+                                   id="stockQuantity"
+                                   name="quantity"
+                                   class="form-control"
+                                   min="1"
+                                   value="1"
+                                   required />
+
+                        </div>
+
+                        <small>
+                            Enter the number of items you want to add.
+                        </small>
+
                     </div>
 
                 </div>
 
+
                 <div class="modal-footer">
 
                     <button type="button"
-                            class="btn btn-outline-secondary"
+                            class="btn btn-light modal-cancel-btn"
                             data-bs-dismiss="modal">
+
                         Cancel
+
                     </button>
 
                     <button type="submit"
-                            class="btn btn-success">
+                            class="btn modal-submit-btn">
+
                         <i class="bi bi-plus-lg"></i>
+
                         Add Stock
+
                     </button>
 
                 </div>
@@ -263,12 +575,10 @@
 
 </div>
 
+
 @section Scripts {
 
-<script src= "~/js/inventory.js">
-
-
-</script>
+    <script src="~/js/inventory.js"
+            asp-append-version="true"></script>
 
 }
-
