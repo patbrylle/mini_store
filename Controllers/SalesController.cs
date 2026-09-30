@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
 using mini_store.Models;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace mini_store.Controllers
 {
+    [Authorize]
     public class SalesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -75,13 +78,14 @@ namespace mini_store.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            string? TransactionType,
-            int? CustomerId,
-            int[]? ProductId,
-            int[]? Quantity,
-            decimal AmountPaid,
-            string? ReturnTo)
+       public async Task<IActionResult> Create(
+    string? TransactionType,
+    int? CustomerId,
+    int[]? ProductId,
+    int[]? Quantity,
+    decimal AmountPaid,
+    DateTime? DueDate,
+    string? ReturnTo)
         {
             bool returnToUtang =
                 string.Equals(ReturnTo, "Utang", StringComparison.OrdinalIgnoreCase);
@@ -147,6 +151,19 @@ namespace mini_store.Controllers
                     "Please select a customer for utang."
                 );
             }
+            // -----------------------------------------------------
+// UTANG DUE DATE
+// -----------------------------------------------------
+
+if (TransactionType == "Utang" &&
+    DueDate.HasValue &&
+    DueDate.Value.Date < DateTime.Today)
+{
+    ModelState.AddModelError(
+        "",
+        "Due date cannot be in the past."
+    );
+}
 
             // -----------------------------------------------------
             // AMOUNT PAID CANNOT BE NEGATIVE
@@ -324,8 +341,14 @@ namespace mini_store.Controllers
 
                         _context.SaleItems.Add(saleItem);
 
-                        product.Quantity -= quantity;
-                    }
+int oldQuantity = product.Quantity;
+
+product.Quantity -= quantity;
+
+await CreateStockNotification(
+    product,
+    oldQuantity
+);                    }
                 }
 
                 // -------------------------------------------------
@@ -462,6 +485,10 @@ namespace mini_store.Controllers
 
                         existingUtang.Status =
                             sale.Status;
+                            if (DueDate.HasValue)
+{
+    existingUtang.DueDate = DueDate;
+}
                     }
 
                     // =============================================
@@ -542,32 +569,78 @@ namespace mini_store.Controllers
                         // CREATE UTANG RECORD
                         // -----------------------------------------
 
-                        var utang = new Utang
-                        {
-                            CustomerId = CustomerId.Value,
-                            SaleId = sale.SaleId,
-                            Amount = totalAmount,
-                            AmountPaid = AmountPaid,
-                            Balance = balance,
-                            DateCreated = transactionTime,
-                            Status = status
-                        };
+                      var utang = new Utang
+{
+    CustomerId = CustomerId.Value,
+    SaleId = sale.SaleId,
+    Amount = totalAmount,
+    AmountPaid = AmountPaid,
+    Balance = balance,
+    DateCreated = transactionTime,
+    DueDate = DueDate,
+    Status = status
+};
 
                         _context.Utangs.Add(utang);
                     }
+ // -------------------------------------------------
+// SAVE EVERYTHING
+// -------------------------------------------------
+
+await _context.SaveChangesAsync();
+
+// -------------------------------------------------
+// CREATE SALE NOTIFICATION
+// -------------------------------------------------
+
+var transactionName =
+    TransactionType == "Cash"
+        ? "Cash Sale"
+        : "Utang Sale";
+
+string customerName = "Customer";
+
+if (CustomerId.HasValue)
+{
+    var customer = await _context.Customers
+        .FirstOrDefaultAsync(c => c.CustomerId == CustomerId.Value);
+
+    if (customer != null)
+    {
+        customerName = customer.CustomerName;
+    }
+}
+
+var notificationTitle =
+    TransactionType == "Utang"
+        ? "New Utang Sale"
+        : "New Sale";
+
+var notificationMessage =
+    TransactionType == "Utang"
+        ? $"{customerName} recorded an utang of ₱{totalAmount:N2}."
+        : $"Cash sale recorded for ₱{totalAmount:N2}.";
+
+var notification = new Notification
+{
+    Title = notificationTitle,
+    Message = notificationMessage,
+    Type = "success",
+    CreatedAt = transactionTime,
+    IsRead = false,
+    Link = Url.Action("Index", "Sales") ?? "#"
+};
+
+_context.Notifications.Add(notification);
+
+await _context.SaveChangesAsync();
+
+// -------------------------------------------------
+// COMMIT DATABASE TRANSACTION
+// -------------------------------------------------
+
+await transaction.CommitAsync();
                 }
-
-                // -------------------------------------------------
-                // SAVE EVERYTHING
-                // -------------------------------------------------
-
-                await _context.SaveChangesAsync();
-
-                // -------------------------------------------------
-                // COMMIT DATABASE TRANSACTION
-                // -------------------------------------------------
-
-                await transaction.CommitAsync();
 
                 // -------------------------------------------------
                 // RETURN TO SALES PAGE
@@ -635,5 +708,83 @@ namespace mini_store.Controllers
                     .OrderBy(p => p.ProductName)
                     .ToListAsync();
         }
+        private async Task CreateStockNotification(
+    Product product,
+    int oldQuantity)
+{
+    string oldStatus;
+
+    if (oldQuantity <= 0)
+    {
+        oldStatus = "OutOfStock";
+    }
+    else if (oldQuantity <= 10)
+    {
+        oldStatus = "LowStock";
+    }
+    else
+    {
+        oldStatus = "InStock";
+    }
+
+    string newStatus;
+
+    if (product.Quantity <= 0)
+    {
+        newStatus = "OutOfStock";
+    }
+    else if (product.Quantity <= 10)
+    {
+        newStatus = "LowStock";
+    }
+    else
+    {
+        newStatus = "InStock";
+    }
+
+    // Only notify when the stock status changes.
+    if (oldStatus == newStatus)
+    {
+        return;
+    }
+
+    if (newStatus == "OutOfStock")
+    {
+        _context.Notifications.Add(new Notification
+        {
+            Title = "Out of Stock",
+            Message =
+                $"{product.ProductName} is out of stock.",
+            Type = "danger",
+            CreatedAt = DateTime.Now,
+            IsRead = false,
+            Link = Url.Action(
+                "Index",
+                "Products",
+                new { productId = product.ProductId }
+            ) ?? "#"
+        });
+    }
+    else if (newStatus == "LowStock")
+    {
+        _context.Notifications.Add(new Notification
+        {
+            Title = "Low Stock",
+            Message =
+                $"{product.ProductName} has only " +
+                $"{product.Quantity} items remaining.",
+            Type = "warning",
+            CreatedAt = DateTime.Now,
+            IsRead = false,
+            Link = Url.Action(
+                "Index",
+                "Products",
+                new { productId = product.ProductId }
+            ) ?? "#"
+        });
+    }
+
+    await _context.SaveChangesAsync();
+}
     }
 }

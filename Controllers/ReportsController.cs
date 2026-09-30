@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace mini_store.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ReportsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
 using mini_store.Models;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace mini_store.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class InventoryController : Controller
     {
         private readonly ApplicationDbContext _context;

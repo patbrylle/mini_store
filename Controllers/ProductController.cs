@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
 using mini_store.Models;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace mini_store.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,7 +23,8 @@ public async Task<IActionResult> Index(
     int? categoryId,
     string? stockStatus,
     decimal? minPrice,
-    decimal? maxPrice)
+    decimal? maxPrice,
+    int? productId)
 {
     var products = _context.Products
         .Include(p => p.Category)
@@ -74,6 +78,7 @@ public async Task<IActionResult> Index(
     ViewBag.SelectedStock = stockStatus;
     ViewBag.MinPrice = minPrice;
     ViewBag.MaxPrice = maxPrice;
+    ViewBag.OpenProductId = productId;
 
     return View(await products.ToListAsync());
 }
@@ -84,38 +89,200 @@ public async Task<IActionResult> Index(
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
+          if (ModelState.IsValid)
+{
+    _context.Products.Add(product);
 
-                return RedirectToAction(nameof(Index));
-            }
+    await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
-        }
+    // ==========================================
+    // CREATE STOCK NOTIFICATION
+    // ==========================================
 
-
-        // POST: Products/Edit
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product product)
+    if (product.Quantity <= 0)
+    {
+        _context.Notifications.Add(new Notification
         {
-            if (id != product.ProductId)
-            {
-                return NotFound();
-            }
+            Title = "Out of Stock",
+            Message =
+                $"{product.ProductName} is out of stock.",
+            Type = "danger",
+            CreatedAt = DateTime.Now,
+            IsRead = false,
+            Link = Url.Action(
+                "Index",
+                "Products",
+                new { productId = product.ProductId }
+            ) ?? "#"
+        });
+    }
+    else if (product.Quantity <= 10)
+    {
+        _context.Notifications.Add(new Notification
+        {
+            Title = "Low Stock",
+            Message =
+                $"{product.ProductName} has only " +
+                $"{product.Quantity} items remaining.",
+            Type = "warning",
+            CreatedAt = DateTime.Now,
+            IsRead = false,
+            Link = Url.Action(
+                "Index",
+                "Products",
+                new { productId = product.ProductId }
+            ) ?? "#"
+        });
+    }
 
-            if (ModelState.IsValid)
-            {
-                _context.Update(product);
-                await _context.SaveChangesAsync();
+    await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
-            }
+    return RedirectToAction(nameof(Index));
+}
 
             return RedirectToAction(nameof(Index));
         }
+
+    // ==========================================
+    // EDIT PRODUCTS
+    // ==========================================
+
+
+       [HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Edit(int id, Product product)
+{
+    if (id != product.ProductId)
+    {
+        return NotFound();
+    }
+
+    if (ModelState.IsValid)
+    {
+        var existingProduct = await _context.Products
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.ProductId == id);
+
+        if (existingProduct == null)
+        {
+            return NotFound();
+        }
+
+        // ==========================================
+        // DETERMINE OLD STOCK STATUS
+        // ==========================================
+
+        string oldStatus;
+
+        if (existingProduct.Quantity <= 0)
+        {
+            oldStatus = "OutOfStock";
+        }
+        else if (existingProduct.Quantity <= 10)
+        {
+            oldStatus = "LowStock";
+        }
+        else
+        {
+            oldStatus = "InStock";
+        }
+
+        // ==========================================
+        // DETERMINE NEW STOCK STATUS
+        // ==========================================
+
+        string newStatus;
+
+        if (product.Quantity <= 0)
+        {
+            newStatus = "OutOfStock";
+        }
+        else if (product.Quantity <= 10)
+        {
+            newStatus = "LowStock";
+        }
+        else
+        {
+            newStatus = "InStock";
+        }
+
+        // ==========================================
+        // UPDATE PRODUCT
+        // ==========================================
+
+        _context.Update(product);
+
+        await _context.SaveChangesAsync();
+
+        // ==========================================
+        // CREATE NOTIFICATION ONLY WHEN STATUS CHANGES
+        // ==========================================
+
+        if (oldStatus != newStatus)
+        {
+            if (newStatus == "OutOfStock")
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    Title = "Out of Stock",
+                    Message =
+                        $"{product.ProductName} is out of stock.",
+                    Type = "danger",
+                    CreatedAt = DateTime.Now,
+                    IsRead = false,
+                    Link = Url.Action(
+                        "Index",
+                        "Products",
+                        new { productId = product.ProductId }
+                    ) ?? "#"
+                });
+            }
+            else if (newStatus == "LowStock")
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    Title = "Low Stock",
+                    Message =
+                        $"{product.ProductName} has only " +
+                        $"{product.Quantity} items remaining.",
+                    Type = "warning",
+                    CreatedAt = DateTime.Now,
+                    IsRead = false,
+                    Link = Url.Action(
+                        "Index",
+                        "Products",
+                        new { productId = product.ProductId }
+                    ) ?? "#"
+                });
+            }
+            else if (newStatus == "InStock" &&
+                     oldStatus != "InStock")
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    Title = "Product Back in Stock",
+                    Message =
+                        $"{product.ProductName} is back in stock " +
+                        $"with {product.Quantity} items.",
+                    Type = "success",
+                    CreatedAt = DateTime.Now,
+                    IsRead = false,
+                    Link = Url.Action(
+                        "Index",
+                        "Products",
+                        new { productId = product.ProductId }
+                    ) ?? "#"
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    return RedirectToAction(nameof(Index));
+}
 
 
         // POST: Products/Delete

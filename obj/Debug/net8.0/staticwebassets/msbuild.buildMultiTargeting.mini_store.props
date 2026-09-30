@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/mini_store.props" />
-</Project>

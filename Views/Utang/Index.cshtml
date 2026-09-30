@@ -13,6 +13,10 @@
     var unpaidRecords = records.Count(u => u.Status == "Unpaid");
     var partialRecords = records.Count(u => u.Status == "Partial");
     var paidRecords = records.Count(u => u.Status == "Paid");
+    var overdueRecords = records.Count(u =>
+    u.DueDate.HasValue &&
+    u.DueDate.Value.Date < DateTime.Today &&
+    u.Balance > 0);
 }
 
 @section Styles {
@@ -179,6 +183,16 @@
             <strong>@paidRecords</strong>
             <span>Paid</span>
         </div>
+        <div class="utang-status-item">
+
+    <span class="status-dot status-dot-overdue"></span>
+
+    <div>
+        <strong>@overdueRecords</strong>
+        <span>Overdue</span>
+    </div>
+
+</div>
 
     </div>
 
@@ -236,6 +250,7 @@
                     <th>Customer</th>
 
                     <th>Date</th>
+                    <th>Due Date</th>
 
                     <th>Total Utang</th>
 
@@ -314,6 +329,42 @@
                                 </div>
 
                             </td>
+                            <!-- DUE DATE -->
+<td>
+
+    @if (utang.DueDate.HasValue)
+    {
+        <div class="utang-date-cell">
+
+            <strong>
+                @utang.DueDate.Value.ToString("MMM dd, yyyy")
+            </strong>
+
+            @if (utang.Status != "Paid" &&
+                 utang.DueDate.Value.Date < DateTime.Today)
+            {
+                <small class="text-danger fw-semibold">
+                    Overdue
+                </small>
+            }
+            else if (utang.Status != "Paid" &&
+                     utang.DueDate.Value.Date == DateTime.Today)
+            {
+                <small class="text-warning fw-semibold">
+                    Due Today
+                </small>
+            }
+
+        </div>
+    }
+    else
+    {
+        <span class="text-muted">
+            No due date
+        </span>
+    }
+
+</td>
 
 
                             <!-- TOTAL -->
@@ -346,18 +397,36 @@
                             </td>
 
 
-                            <!-- STATUS -->
-                            <td>
+                           <!-- STATUS -->
+<td>
 
-                                <span class="utang-status @statusClass">
+    @{
+        bool isOverdue =
+            utang.DueDate.HasValue &&
+            utang.DueDate.Value.Date < DateTime.Today &&
+            utang.Balance > 0;
+    }
 
-                                    <span></span>
+    @if (isOverdue)
+    {
+        <span class="utang-status status-overdue">
+            <span></span>
+            <i class="bi bi-exclamation-circle-fill me-1"></i>
+            Overdue
+        </span>
+    }
+    else
+    {
+        <span class="utang-status @statusClass">
 
-                                    @(utang.Status ?? "Unpaid")
+            <span></span>
 
-                                </span>
+            @(utang.Status ?? "Unpaid")
 
-                            </td>
+        </span>
+    }
+
+</td>
 
                             <!-- ACTION -->
                             <td class="text-end">
@@ -402,7 +471,7 @@
 
                     <tr>
 
-                        <td colspan="7"
+                        <td colspan="8"
                             class="text-center py-5">
 
                             <div class="text-muted">

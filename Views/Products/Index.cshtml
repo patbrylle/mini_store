@@ -1376,4 +1376,23 @@
     <script src="~/js/products.js"
             asp-append-version="true"></script>
 
+    @if (ViewBag.OpenProductId != null)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const productId = "@ViewBag.OpenProductId";
+
+                const editButton = document.querySelector(
+                    `.edit-product-btn[data-product-id="${productId}"]`
+                );
+
+                if (editButton) {
+                    editButton.click();
+                }
+
+            });
+        </script>
+    }
+
 }

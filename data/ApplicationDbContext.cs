@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
 using Microsoft.EntityFrameworkCore;
 using mini_store.Models;
 
 namespace mini_store.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -15,6 +17,7 @@ namespace mini_store.Data
         public DbSet<Sale> Sales { get; set; }
 public DbSet<SaleItem> SaleItems { get; set; }
 public DbSet<Utang> Utangs { get; set; }
+public DbSet<Notification> Notifications { get; set; }
 
     }
 }

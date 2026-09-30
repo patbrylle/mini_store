@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mini_store.Controllers
 {
+    [Authorize]
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;

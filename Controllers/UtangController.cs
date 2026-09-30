@@ -2,9 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace mini_store.Controllers
 {
+    [Authorize]
     public class UtangController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -39,9 +42,59 @@ namespace mini_store.Controllers
                         ? u.Sale.SaleDate
                         : u.DateCreated)
                 .ToListAsync();
+                await CreateOverdueNotifications(utangs);
 
             return View(utangs);
         }
+        private async Task CreateOverdueNotifications(
+    List<mini_store.Models.Utang> utangs)
+{
+    var today = DateTime.Today;
+
+    foreach (var utang in utangs)
+    {
+        if (!utang.DueDate.HasValue)
+            continue;
+
+        if (utang.Balance <= 0)
+            continue;
+
+        if (utang.DueDate.Value.Date >= today)
+            continue;
+
+        var customerName =
+            utang.Customer?.CustomerName ?? "Customer";
+
+        var link =
+            Url.Action("Index", "Utang") ?? "#";
+
+        var alreadyExists = await _context.Notifications
+            .AnyAsync(n =>
+                n.Title == "Overdue Utang" &&
+                n.Link == link &&
+                n.Message.Contains($"#{utang.UtangId}"));
+
+        if (alreadyExists)
+            continue;
+
+        _context.Notifications.Add(
+            new mini_store.Models.Notification
+            {
+                Title = "Overdue Utang",
+                Message =
+                    $"{customerName}'s utang #{utang.UtangId} " +
+                    $"is overdue. Remaining balance: " +
+                    $"₱{utang.Balance:N2}.",
+
+                Type = "danger",
+                CreatedAt = DateTime.Now,
+                IsRead = false,
+                Link = link
+            });
+    }
+
+    await _context.SaveChangesAsync();
+}
 
 
         // =========================================================
@@ -55,9 +108,10 @@ namespace mini_store.Controllers
             decimal paymentAmount)
         {
             // Find the utang record
-            var utang = await _context.Utangs
-                .Include(u => u.Sale)
-                .FirstOrDefaultAsync(u => u.UtangId == id);
+           var utang = await _context.Utangs
+    .Include(u => u.Customer)
+    .Include(u => u.Sale)
+    .FirstOrDefaultAsync(u => u.UtangId == id);
 
             if (utang == null)
             {
@@ -153,11 +207,34 @@ namespace mini_store.Controllers
             // SAVE
             // =====================================================
 
-            await _context.SaveChangesAsync();
+          await _context.SaveChangesAsync();
 
+var customerName =
+    utang.Customer?.CustomerName ?? "Customer";
 
-            TempData["UtangSuccess"] =
-                "Payment recorded successfully.";
+var paymentNotification = new mini_store.Models.Notification
+{
+    Title = "Utang Payment Received",
+    Message =
+        $"{customerName} paid ₱{paymentAmount:N2}. " +
+        $"Remaining balance: ₱{utang.Balance:N2}.",
+    Type = utang.Balance <= 0
+        ? "success"
+        : "info",
+    CreatedAt = DateTime.Now,
+    IsRead = false,
+    Link = Url.Action(
+        "Index",
+        "Utang"
+    ) ?? "#"
+};
+
+_context.Notifications.Add(paymentNotification);
+
+await _context.SaveChangesAsync();
+
+TempData["UtangSuccess"] =
+    "Payment recorded successfully.";
 
 
             return RedirectToAction(nameof(Index));

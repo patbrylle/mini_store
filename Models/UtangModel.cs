@@ -31,6 +31,8 @@ namespace mini_store.Models
 
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
+        public DateTime? DueDate { get; set; }
+
         [StringLength(20)]
         public string Status { get; set; } = "Unpaid";
     }
