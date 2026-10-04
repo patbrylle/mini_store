@@ -4,78 +4,224 @@
     ViewData["Title"] = "Add Staff";
 }
 
-<div class="page-header">
-    <div>
-        <h2>Add Staff</h2>
-        <p>Create a new staff account.</p>
-    </div>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/users.css" asp-append-version="true" />
+}
 
-<div class="card">
-    <div class="card-body">
+<div class="um-page um-form-page">
 
-        <form asp-action="CreateStaff" method="post">
+    <a asp-action="Index" class="um-back">
+        <i class="bi bi-arrow-left"></i>
+        Back to User Management
+    </a>
 
-            @Html.AntiForgeryToken()
+    <!-- HEADER -->
+    <div class="um-header">
 
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3"></div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">
-                    Email
-                </label>
-
-                <input asp-for="Email"
-                       class="form-control"
-                       placeholder="staff@example.com" />
-
-                <span asp-validation-for="Email"
-                      class="text-danger"></span>
+        <div class="um-title-area">
+            <div class="um-page-icon">
+                <i class="bi bi-person-plus"></i>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label">
-                    Password
-                </label>
-
-                <input asp-for="Password"
-                       class="form-control"
-                       placeholder="Enter password" />
-
-                <span asp-validation-for="Password"
-                      class="text-danger"></span>
+            <div>
+                <h1>Add Staff</h1>
+                <p>Create a new staff account.</p>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label">
-                    Confirm Password
-                </label>
-
-                <input asp-for="ConfirmPassword"
-                       class="form-control"
-                       placeholder="Confirm password" />
-
-                <span asp-validation-for="ConfirmPassword"
-                      class="text-danger"></span>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-person-plus-fill"></i>
-                    Create Staff
-                </button>
-
-                <a asp-action="Index" class="btn btn-secondary">
-                    Cancel
-                </a>
-            </div>
-
-        </form>
+        </div>
 
     </div>
+
+    <div class="row g-4">
+
+        <!-- FORM -->
+        <div class="col-lg-8">
+
+            <div class="um-card um-form-card">
+
+                <div class="um-form-head">
+                    <div class="um-form-head-icon">
+                        <i class="bi bi-person-vcard"></i>
+                    </div>
+
+                    <div>
+                        <h5>Account Information</h5>
+                        <p>Enter the email and a password for the new account.</p>
+                    </div>
+                </div>
+
+                <form asp-action="CreateStaff" method="post">
+
+                    <div class="um-form-body">
+
+                        <div asp-validation-summary="ModelOnly" class="um-alert"></div>
+
+                        <!-- EMAIL -->
+                        <div class="um-field">
+                            <label asp-for="Email" class="um-label">Email</label>
+
+                            <div class="um-input-wrap">
+                                <i class="bi bi-envelope"></i>
+                                <input asp-for="Email"
+                                       class="um-input"
+                                       placeholder="staff@example.com"
+                                       autocomplete="off" />
+                            </div>
+
+                            <span asp-validation-for="Email" class="um-field-error"></span>
+                        </div>
+
+                        <!-- PASSWORD -->
+                        <div class="um-field">
+                            <label asp-for="Password" class="um-label">Password</label>
+
+                            <div class="um-input-wrap has-toggle">
+                                <i class="bi bi-lock"></i>
+                                <input asp-for="Password"
+                                       type="password"
+                                       class="um-input"
+                                       placeholder="Enter password"
+                                       autocomplete="new-password" />
+
+                                <button type="button"
+                                        class="um-toggle"
+                                        data-toggle-password="Password"
+                                        aria-label="Show password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+
+                            <span asp-validation-for="Password" class="um-field-error"></span>
+                        </div>
+
+                        <!-- CONFIRM PASSWORD -->
+                        <div class="um-field mb-0">
+                            <label asp-for="ConfirmPassword" class="um-label">Confirm Password</label>
+
+                            <div class="um-input-wrap has-toggle">
+                                <i class="bi bi-shield-lock"></i>
+                                <input asp-for="ConfirmPassword"
+                                       type="password"
+                                       class="um-input"
+                                       placeholder="Confirm password"
+                                       autocomplete="new-password" />
+
+                                <button type="button"
+                                        class="um-toggle"
+                                        data-toggle-password="ConfirmPassword"
+                                        aria-label="Show password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+
+                            <span asp-validation-for="ConfirmPassword" class="um-field-error"></span>
+                            <small class="um-hint" id="matchHint" hidden></small>
+                        </div>
+
+                    </div>
+
+                    <div class="um-form-actions">
+                        <a asp-action="Index" class="um-btn um-btn-ghost">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn um-add-btn">
+                            <i class="bi bi-person-plus-fill"></i>
+                            Create Staff
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- SIDE TIPS -->
+        <div class="col-lg-4">
+
+            <div class="um-side-card">
+
+                <h6>Before you create</h6>
+
+                <ul class="um-tips">
+
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-person-badge"></i></span>
+                        <div>
+                            <strong>Staff role</strong>
+                            The account is created with the Staff role.
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-key"></i></span>
+                        <div>
+                            <strong>Use a strong password</strong>
+                            Mix letters, numbers and symbols, and share it with the staff member privately.
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-sliders"></i></span>
+                        <div>
+                            <strong>Manage it later</strong>
+                            You can edit, disable or delete this account from User Management.
+                        </div>
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function () {
+            // ---------- show / hide password ----------
+            document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var input = document.getElementById(btn.getAttribute('data-toggle-password'));
+                    var icon = btn.querySelector('i');
+                    if (!input || !icon) return;
+
+                    var reveal = input.type === 'password';
+                    input.type = reveal ? 'text' : 'password';
+                    icon.className = reveal ? 'bi bi-eye-slash' : 'bi bi-eye';
+                    btn.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+                });
+            });
+
+            // ---------- live "passwords match" hint ----------
+            var pw = document.getElementById('Password');
+            var confirmPw = document.getElementById('ConfirmPassword');
+            var hint = document.getElementById('matchHint');
+
+            function checkMatch() {
+                if (!pw || !confirmPw || !hint) return;
+
+                if (!confirmPw.value) {
+                    hint.hidden = true;
+                    return;
+                }
+
+                var ok = pw.value === confirmPw.value;
+                hint.hidden = false;
+                hint.className = 'um-hint ' + (ok ? 'is-ok' : 'is-bad');
+                hint.innerHTML = ok
+                    ? '<i class="bi bi-check-circle-fill"></i> Passwords match'
+                    : '<i class="bi bi-x-circle-fill"></i> Passwords do not match yet';
+            }
+
+            if (pw) pw.addEventListener('input', checkMatch);
+            if (confirmPw) confirmPw.addEventListener('input', checkMatch);
+        })();
+    </script>
 }

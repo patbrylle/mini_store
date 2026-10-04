@@ -1,10 +1,8 @@
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
 using mini_store.Models;
-using Microsoft.AspNetCore.Authorization;
-
 
 namespace mini_store.Controllers
 {
@@ -23,30 +21,29 @@ namespace mini_store.Controllers
         // =========================================================
 
         public async Task<IActionResult> Index()
-{
-    var sales = await GetSales();
+        {
+            var sales = await GetSales();
 
-    await LoadTransactionData();
+            await LoadTransactionData();
 
-    // Load utang records so the Sales page can open
-    // the reusable Utang Details modal.
-    var utangs = await _context.Utangs
-        .Include(u => u.Customer)
-        .Include(u => u.Sale)
-            .ThenInclude(s => s!.SaleItems)
-                .ThenInclude(si => si.Product)
-        .ToListAsync();
+            var utangs = await _context.Utangs
+                .Include(u => u.Customer)
+                .Include(u => u.Sale)
+                    .ThenInclude(s => s!.SaleItems)
+                        .ThenInclude(si => si.Product)
+                .ToListAsync();
 
-    ViewBag.UtangsBySaleId = utangs
-        .Where(u => u.SaleId > 0)
-        .GroupBy(u => u.SaleId)
-        .ToDictionary(
-            g => g.Key,
-            g => g.OrderByDescending(u => u.UtangId).First()
-        );
+            ViewBag.UtangsBySaleId = utangs
+                .Where(u => u.SaleId > 0)
+                .GroupBy(u => u.SaleId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(u => u.UtangId).First()
+                );
 
-    return View(sales);
-}
+            return View(sales);
+        }
+
         // =========================================================
         // GET: /Sales/Details/5
         // =========================================================
@@ -78,21 +75,25 @@ namespace mini_store.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-       public async Task<IActionResult> Create(
-    string? TransactionType,
-    int? CustomerId,
-    int[]? ProductId,
-    int[]? Quantity,
-    decimal AmountPaid,
-    DateTime? DueDate,
-    string? ReturnTo)
+        public async Task<IActionResult> Create(
+            string? TransactionType,
+            int? CustomerId,
+            int[]? ProductId,
+            int[]? Quantity,
+            decimal AmountPaid,
+            DateTime? DueDate,
+            string? ReturnTo)
         {
             bool returnToUtang =
-                string.Equals(ReturnTo, "Utang", StringComparison.OrdinalIgnoreCase);
+                string.Equals(
+                    ReturnTo,
+                    "Utang",
+                    StringComparison.OrdinalIgnoreCase
+                );
 
-            // -----------------------------------------------------
+            // =====================================================
             // BASIC VALIDATION
-            // -----------------------------------------------------
+            // =====================================================
 
             if (string.IsNullOrWhiteSpace(TransactionType))
             {
@@ -139,9 +140,9 @@ namespace mini_store.Controllers
                 );
             }
 
-            // -----------------------------------------------------
-            // UTANG REQUIRES CUSTOMER
-            // -----------------------------------------------------
+            // =====================================================
+            // UTANG VALIDATION
+            // =====================================================
 
             if (TransactionType == "Utang" &&
                 CustomerId == null)
@@ -151,23 +152,20 @@ namespace mini_store.Controllers
                     "Please select a customer for utang."
                 );
             }
-            // -----------------------------------------------------
-// UTANG DUE DATE
-// -----------------------------------------------------
 
-if (TransactionType == "Utang" &&
-    DueDate.HasValue &&
-    DueDate.Value.Date < DateTime.Today)
-{
-    ModelState.AddModelError(
-        "",
-        "Due date cannot be in the past."
-    );
-}
+            if (TransactionType == "Utang" &&
+                DueDate.HasValue &&
+                DueDate.Value.Date < DateTime.Today)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Due date cannot be in the past."
+                );
+            }
 
-            // -----------------------------------------------------
-            // AMOUNT PAID CANNOT BE NEGATIVE
-            // -----------------------------------------------------
+            // =====================================================
+            // AMOUNT VALIDATION
+            // =====================================================
 
             if (AmountPaid < 0)
             {
@@ -177,9 +175,9 @@ if (TransactionType == "Utang" &&
                 );
             }
 
-            // -----------------------------------------------------
-            // IF VALIDATION FAILED
-            // -----------------------------------------------------
+            // =====================================================
+            // RETURN IF VALIDATION FAILED
+            // =====================================================
 
             if (!ModelState.IsValid)
             {
@@ -190,10 +188,14 @@ if (TransactionType == "Utang" &&
                         ModelState.Values
                             .SelectMany(value => value.Errors)
                             .Select(error => error.ErrorMessage)
-                            .Where(message => !string.IsNullOrWhiteSpace(message))
+                            .Where(message =>
+                                !string.IsNullOrWhiteSpace(message))
                     );
 
-                    return RedirectToAction("Index", "Utang");
+                    return RedirectToAction(
+                        "Index",
+                        "Utang"
+                    );
                 }
 
                 await LoadTransactionData();
@@ -202,41 +204,49 @@ if (TransactionType == "Utang" &&
 
                 return View("Index", sales);
             }
-            if (ProductId == null || Quantity == null)
-{
-    if (returnToUtang)
-    {
-        TempData["TransactionError"] = "Please add at least one product.";
-        return RedirectToAction("Index", "Utang");
-    }
 
-    await LoadTransactionData();
+            // =====================================================
+            // EXTRA SAFETY CHECK
+            // =====================================================
 
-    var sales = await GetSales();
+            if (ProductId == null ||
+                Quantity == null)
+            {
+                if (returnToUtang)
+                {
+                    TempData["TransactionError"] =
+                        "Please add at least one product.";
 
-    return View("Index", sales);
-}
+                    return RedirectToAction(
+                        "Index",
+                        "Utang"
+                    );
+                }
 
-            // -----------------------------------------------------
+                await LoadTransactionData();
+
+                var sales = await GetSales();
+
+                return View("Index", sales);
+            }
+
+            // =====================================================
             // DATABASE TRANSACTION
-            // -----------------------------------------------------
+            // =====================================================
 
-            using var transaction =
+            await using var transaction =
                 await _context.Database.BeginTransactionAsync();
 
             try
             {
                 decimal totalAmount = 0;
 
-                // Capture ONE timestamp for this submitted transaction.
-                // All products added in this transaction will have
-                // the same AddedAt time.
+                DateTime transactionTime =
+                    DateTime.Now;
 
-                var transactionTime = DateTime.Now;
-
-                // -------------------------------------------------
-                // CALCULATE TOTAL FIRST
-                // -------------------------------------------------
+                // =================================================
+                // CALCULATE TOTAL
+                // =================================================
 
                 for (int i = 0; i < ProductId.Length; i++)
                 {
@@ -270,15 +280,13 @@ if (TransactionType == "Utang" &&
                         );
                     }
 
-                    decimal subtotal =
+                    totalAmount +=
                         product.Price * quantity;
-
-                    totalAmount += subtotal;
                 }
 
-                // -------------------------------------------------
+                // =================================================
                 // CASH SALE
-                // -------------------------------------------------
+                // =================================================
 
                 if (TransactionType == "Cash")
                 {
@@ -288,8 +296,6 @@ if (TransactionType == "Utang" &&
                             "Amount paid must cover the total amount."
                         );
                     }
-
-                    // Cash transactions always create a NEW Sale.
 
                     var sale = new Sale
                     {
@@ -303,10 +309,11 @@ if (TransactionType == "Utang" &&
 
                     _context.Sales.Add(sale);
 
+                    // Get SaleId
                     await _context.SaveChangesAsync();
 
                     // ---------------------------------------------
-                    // CREATE CASH SALE ITEMS
+                    // CREATE SALE ITEMS
                     // ---------------------------------------------
 
                     for (int i = 0; i < ProductId.Length; i++)
@@ -341,19 +348,21 @@ if (TransactionType == "Utang" &&
 
                         _context.SaleItems.Add(saleItem);
 
-int oldQuantity = product.Quantity;
+                        int oldQuantity =
+                            product.Quantity;
 
-product.Quantity -= quantity;
+                        product.Quantity -= quantity;
 
-await CreateStockNotification(
-    product,
-    oldQuantity
-);                    }
+                        CreateStockNotification(
+                            product,
+                            oldQuantity
+                        );
+                    }
                 }
 
-                // -------------------------------------------------
+                // =================================================
                 // UTANG SALE
-                // -------------------------------------------------
+                // =================================================
 
                 if (TransactionType == "Utang")
                 {
@@ -373,48 +382,60 @@ await CreateStockNotification(
                     }
 
                     // ---------------------------------------------
-                    // FIND EXISTING ACTIVE UTANG FOR THIS CUSTOMER
-                    // ON THE SAME DAY
+                    // FIND EXISTING ACTIVE UTANG
                     // ---------------------------------------------
 
-                    var today = transactionTime.Date;
-                    var tomorrow = today.AddDays(1);
+                    var today =
+                        transactionTime.Date;
 
-                    var existingUtang = await _context.Utangs
-                        .Include(u => u.Sale)
-                            .ThenInclude(s => s!.SaleItems)
-                        .Where(u =>
-                            u.CustomerId == CustomerId.Value &&
-                            u.Balance > 0 &&
-                            u.Sale != null &&
-                            u.Sale.SaleDate >= today &&
-                            u.Sale.SaleDate < tomorrow
-                        )
-                        .OrderByDescending(u => u.UtangId)
-                        .FirstOrDefaultAsync();
+                    var tomorrow =
+                        today.AddDays(1);
+
+                    var existingUtang =
+                        await _context.Utangs
+                            .Include(u => u.Sale)
+                                .ThenInclude(s => s!.SaleItems)
+                            .Where(u =>
+                                u.CustomerId == CustomerId.Value &&
+                                u.Balance > 0 &&
+                                u.Sale != null &&
+                                u.Sale.SaleDate >= today &&
+                                u.Sale.SaleDate < tomorrow
+                            )
+                            .OrderByDescending(
+                                u => u.UtangId
+                            )
+                            .FirstOrDefaultAsync();
 
                     // =============================================
-                    // EXISTING UTANG FOUND
+                    // EXISTING UTANG
                     // =============================================
 
                     if (existingUtang != null &&
                         existingUtang.Sale != null)
                     {
-                        var sale = existingUtang.Sale;
+                        var sale =
+                            existingUtang.Sale;
 
                         // -----------------------------------------
-                        // ADD NEW PRODUCTS TO EXISTING SALE
+                        // ADD PRODUCTS
                         // -----------------------------------------
 
-                        for (int i = 0; i < ProductId.Length; i++)
+                        for (int i = 0;
+                             i < ProductId.Length;
+                             i++)
                         {
-                            int productId = ProductId[i];
-                            int quantity = Quantity[i];
+                            int productId =
+                                ProductId[i];
 
-                            var product = await _context.Products
-                                .FirstOrDefaultAsync(
-                                    p => p.ProductId == productId
-                                );
+                            int quantity =
+                                Quantity[i];
+
+                            var product =
+                                await _context.Products
+                                    .FirstOrDefaultAsync(
+                                        p => p.ProductId == productId
+                                    );
 
                             if (product == null)
                             {
@@ -426,33 +447,49 @@ await CreateStockNotification(
                             decimal subtotal =
                                 product.Price * quantity;
 
-                            var saleItem = new SaleItem
-                            {
-                                SaleId = sale.SaleId,
-                                ProductId = product.ProductId,
-                                Quantity = quantity,
-                                UnitPrice = product.Price,
-                                Subtotal = subtotal,
-                                AddedAt = transactionTime
-                            };
+                            var saleItem =
+                                new SaleItem
+                                {
+                                    SaleId = sale.SaleId,
+                                    ProductId = product.ProductId,
+                                    Quantity = quantity,
+                                    UnitPrice = product.Price,
+                                    Subtotal = subtotal,
+                                    AddedAt = transactionTime
+                                };
 
-                            _context.SaleItems.Add(saleItem);
+                            _context.SaleItems.Add(
+                                saleItem
+                            );
 
-                            product.Quantity -= quantity;
+                            int oldQuantity =
+                                product.Quantity;
+
+                            product.Quantity -=
+                                quantity;
+
+                            CreateStockNotification(
+                                product,
+                                oldQuantity
+                            );
                         }
 
                         // -----------------------------------------
-                        // UPDATE EXISTING SALE
+                        // UPDATE SALE
                         // -----------------------------------------
 
-                        sale.TotalAmount += totalAmount;
+                        sale.TotalAmount +=
+                            totalAmount;
 
-                        sale.AmountPaid += AmountPaid;
+                        sale.AmountPaid +=
+                            AmountPaid;
 
-                        sale.PaymentMethod = "Utang";
+                        sale.PaymentMethod =
+                            "Utang";
 
                         decimal newBalance =
-                            sale.TotalAmount - sale.AmountPaid;
+                            sale.TotalAmount -
+                            sale.AmountPaid;
 
                         if (newBalance <= 0)
                         {
@@ -469,12 +506,14 @@ await CreateStockNotification(
                         }
 
                         // -----------------------------------------
-                        // UPDATE EXISTING UTANG
+                        // UPDATE UTANG
                         // -----------------------------------------
 
-                        existingUtang.Amount += totalAmount;
+                        existingUtang.Amount +=
+                            totalAmount;
 
-                        existingUtang.AmountPaid += AmountPaid;
+                        existingUtang.AmountPaid +=
+                            AmountPaid;
 
                         existingUtang.Balance =
                             Math.Max(
@@ -485,21 +524,23 @@ await CreateStockNotification(
 
                         existingUtang.Status =
                             sale.Status;
-                            if (DueDate.HasValue)
-{
-    existingUtang.DueDate = DueDate;
-}
+
+                        if (DueDate.HasValue)
+                        {
+                            existingUtang.DueDate =
+                                DueDate;
+                        }
                     }
 
                     // =============================================
-                    // NO EXISTING UTANG
                     // CREATE NEW UTANG
                     // =============================================
 
                     else
                     {
                         decimal balance =
-                            totalAmount - AmountPaid;
+                            totalAmount -
+                            AmountPaid;
 
                         string status =
                             AmountPaid >= totalAmount
@@ -509,7 +550,7 @@ await CreateStockNotification(
                                     : "Unpaid";
 
                         // -----------------------------------------
-                        // CREATE NEW SALE
+                        // CREATE SALE
                         // -----------------------------------------
 
                         var sale = new Sale
@@ -524,21 +565,28 @@ await CreateStockNotification(
 
                         _context.Sales.Add(sale);
 
+                        // Get SaleId
                         await _context.SaveChangesAsync();
 
                         // -----------------------------------------
                         // CREATE SALE ITEMS
                         // -----------------------------------------
 
-                        for (int i = 0; i < ProductId.Length; i++)
+                        for (int i = 0;
+                             i < ProductId.Length;
+                             i++)
                         {
-                            int productId = ProductId[i];
-                            int quantity = Quantity[i];
+                            int productId =
+                                ProductId[i];
 
-                            var product = await _context.Products
-                                .FirstOrDefaultAsync(
-                                    p => p.ProductId == productId
-                                );
+                            int quantity =
+                                Quantity[i];
+
+                            var product =
+                                await _context.Products
+                                    .FirstOrDefaultAsync(
+                                        p => p.ProductId == productId
+                                    );
 
                             if (product == null)
                             {
@@ -550,118 +598,167 @@ await CreateStockNotification(
                             decimal subtotal =
                                 product.Price * quantity;
 
-                            var saleItem = new SaleItem
-                            {
-                                SaleId = sale.SaleId,
-                                ProductId = product.ProductId,
-                                Quantity = quantity,
-                                UnitPrice = product.Price,
-                                Subtotal = subtotal,
-                                AddedAt = transactionTime
-                            };
+                            var saleItem =
+                                new SaleItem
+                                {
+                                    SaleId = sale.SaleId,
+                                    ProductId = product.ProductId,
+                                    Quantity = quantity,
+                                    UnitPrice = product.Price,
+                                    Subtotal = subtotal,
+                                    AddedAt = transactionTime
+                                };
 
-                            _context.SaleItems.Add(saleItem);
+                            _context.SaleItems.Add(
+                                saleItem
+                            );
 
-                            product.Quantity -= quantity;
+                            int oldQuantity =
+                                product.Quantity;
+
+                            product.Quantity -=
+                                quantity;
+
+                            CreateStockNotification(
+                                product,
+                                oldQuantity
+                            );
                         }
 
                         // -----------------------------------------
-                        // CREATE UTANG RECORD
+                        // CREATE UTANG
                         // -----------------------------------------
 
-                      var utang = new Utang
-{
-    CustomerId = CustomerId.Value,
-    SaleId = sale.SaleId,
-    Amount = totalAmount,
-    AmountPaid = AmountPaid,
-    Balance = balance,
-    DateCreated = transactionTime,
-    DueDate = DueDate,
-    Status = status
-};
+                        var utang = new Utang
+                        {
+                            CustomerId =
+                                CustomerId.Value,
 
-                        _context.Utangs.Add(utang);
+                            SaleId =
+                                sale.SaleId,
+
+                            Amount =
+                                totalAmount,
+
+                            AmountPaid =
+                                AmountPaid,
+
+                            Balance =
+                                balance,
+
+                            DateCreated =
+                                transactionTime,
+
+                            DueDate =
+                                DueDate,
+
+                            Status =
+                                status
+                        };
+
+                        _context.Utangs.Add(
+                            utang
+                        );
                     }
- // -------------------------------------------------
-// SAVE EVERYTHING
-// -------------------------------------------------
-
-await _context.SaveChangesAsync();
-
-// -------------------------------------------------
-// CREATE SALE NOTIFICATION
-// -------------------------------------------------
-
-var transactionName =
-    TransactionType == "Cash"
-        ? "Cash Sale"
-        : "Utang Sale";
-
-string customerName = "Customer";
-
-if (CustomerId.HasValue)
-{
-    var customer = await _context.Customers
-        .FirstOrDefaultAsync(c => c.CustomerId == CustomerId.Value);
-
-    if (customer != null)
-    {
-        customerName = customer.CustomerName;
-    }
-}
-
-var notificationTitle =
-    TransactionType == "Utang"
-        ? "New Utang Sale"
-        : "New Sale";
-
-var notificationMessage =
-    TransactionType == "Utang"
-        ? $"{customerName} recorded an utang of ₱{totalAmount:N2}."
-        : $"Cash sale recorded for ₱{totalAmount:N2}.";
-
-var notification = new Notification
-{
-    Title = notificationTitle,
-    Message = notificationMessage,
-    Type = "success",
-    CreatedAt = transactionTime,
-    IsRead = false,
-    Link = Url.Action("Index", "Sales") ?? "#"
-};
-
-_context.Notifications.Add(notification);
-
-await _context.SaveChangesAsync();
-
-// -------------------------------------------------
-// COMMIT DATABASE TRANSACTION
-// -------------------------------------------------
-
-await transaction.CommitAsync();
                 }
 
-                // -------------------------------------------------
-                // RETURN TO SALES PAGE
-                // -------------------------------------------------
+                // =================================================
+                // CREATE SALE NOTIFICATION
+                // =================================================
+
+                string customerName =
+                    "Customer";
+
+                if (CustomerId.HasValue)
+                {
+                    var customer =
+                        await _context.Customers
+                            .FirstOrDefaultAsync(
+                                c => c.CustomerId ==
+                                     CustomerId.Value
+                            );
+
+                    if (customer != null)
+                    {
+                        customerName =
+                            customer.CustomerName;
+                    }
+                }
+
+                var notification =
+                    new Notification
+                    {
+                        Title =
+                            TransactionType == "Utang"
+                                ? "New Utang Sale"
+                                : "New Sale",
+
+                        Message =
+                            TransactionType == "Utang"
+                                ? $"{customerName} recorded an utang of ₱{totalAmount:N2}."
+                                : $"Cash sale recorded for ₱{totalAmount:N2}.",
+
+                        Type = "success",
+
+                        CreatedAt =
+                            transactionTime,
+
+                        IsRead = false,
+
+                        Link =
+                            Url.Action(
+                                "Index",
+                                "Sales"
+                            ) ?? "#"
+                    };
+
+                _context.Notifications.Add(
+                    notification
+                );
+
+                // =================================================
+                // SAVE EVERYTHING
+                // =================================================
+
+                await _context.SaveChangesAsync();
+
+                // =================================================
+                // THIS IS THE IMPORTANT FIX
+                // COMMIT FOR BOTH CASH AND UTANG
+                // =================================================
+
+                await transaction.CommitAsync();
+
+                // =================================================
+                // RETURN
+                // =================================================
 
                 return returnToUtang
-                    ? RedirectToAction("Index", "Utang")
-                    : RedirectToAction(nameof(Index));
+                    ? RedirectToAction(
+                        "Index",
+                        "Utang"
+                    )
+                    : RedirectToAction(
+                        nameof(Index)
+                    );
             }
             catch (Exception ex)
             {
-                // -----------------------------------------------
-                // ROLLBACK IF SOMETHING GOES WRONG
-                // -----------------------------------------------
+                // =================================================
+                // ROLLBACK
+                // =================================================
 
                 await transaction.RollbackAsync();
 
                 if (returnToUtang)
                 {
-                    TempData["TransactionError"] = ex.Message;
-                    return RedirectToAction("Index", "Utang");
+                    TempData["TransactionError"] =
+                        ex.Message;
+
+                    return RedirectToAction(
+                        "Index",
+                        "Utang"
+                    );
                 }
 
                 ModelState.AddModelError(
@@ -671,9 +768,13 @@ await transaction.CommitAsync();
 
                 await LoadTransactionData();
 
-                var sales = await GetSales();
+                var sales =
+                    await GetSales();
 
-                return View("Index", sales);
+                return View(
+                    "Index",
+                    sales
+                );
             }
         }
 
@@ -692,7 +793,7 @@ await transaction.CommitAsync();
         }
 
         // =========================================================
-        // LOAD CUSTOMERS AND PRODUCTS FOR MODAL
+        // LOAD CUSTOMERS AND PRODUCTS
         // =========================================================
 
         private async Task LoadTransactionData()
@@ -708,83 +809,168 @@ await transaction.CommitAsync();
                     .OrderBy(p => p.ProductName)
                     .ToListAsync();
         }
-        private async Task CreateStockNotification(
-    Product product,
-    int oldQuantity)
-{
-    string oldStatus;
 
-    if (oldQuantity <= 0)
-    {
-        oldStatus = "OutOfStock";
-    }
-    else if (oldQuantity <= 10)
-    {
-        oldStatus = "LowStock";
-    }
-    else
-    {
-        oldStatus = "InStock";
-    }
+        // =========================================================
+        // STOCK NOTIFICATION
+        // =========================================================
 
-    string newStatus;
-
-    if (product.Quantity <= 0)
-    {
-        newStatus = "OutOfStock";
-    }
-    else if (product.Quantity <= 10)
-    {
-        newStatus = "LowStock";
-    }
-    else
-    {
-        newStatus = "InStock";
-    }
-
-    // Only notify when the stock status changes.
-    if (oldStatus == newStatus)
-    {
-        return;
-    }
-
-    if (newStatus == "OutOfStock")
-    {
-        _context.Notifications.Add(new Notification
+        private void CreateStockNotification(
+            Product product,
+            int oldQuantity)
         {
-            Title = "Out of Stock",
-            Message =
-                $"{product.ProductName} is out of stock.",
-            Type = "danger",
-            CreatedAt = DateTime.Now,
-            IsRead = false,
-            Link = Url.Action(
-                "Index",
-                "Products",
-                new { productId = product.ProductId }
-            ) ?? "#"
-        });
-    }
-    else if (newStatus == "LowStock")
-    {
-        _context.Notifications.Add(new Notification
-        {
-            Title = "Low Stock",
-            Message =
-                $"{product.ProductName} has only " +
-                $"{product.Quantity} items remaining.",
-            Type = "warning",
-            CreatedAt = DateTime.Now,
-            IsRead = false,
-            Link = Url.Action(
-                "Index",
-                "Products",
-                new { productId = product.ProductId }
-            ) ?? "#"
-        });
-    }
+            string oldStatus;
 
-    await _context.SaveChangesAsync();
-}
+            if (oldQuantity <= 0)
+            {
+                oldStatus = "OutOfStock";
+            }
+            else if (oldQuantity <= 10)
+            {
+                oldStatus = "LowStock";
+            }
+            else
+            {
+                oldStatus = "InStock";
+            }
+
+            string newStatus;
+
+            if (product.Quantity <= 0)
+            {
+                newStatus = "OutOfStock";
+            }
+            else if (product.Quantity <= 10)
+            {
+                newStatus = "LowStock";
+            }
+            else
+            {
+                newStatus = "InStock";
+            }
+
+            // No status change = no notification.
+            if (oldStatus == newStatus)
+            {
+                return;
+            }
+
+            if (newStatus == "OutOfStock")
+            {
+                _context.Notifications.Add(
+                    new Notification
+                    {
+                        Title = "Out of Stock",
+
+                        Message =
+                            $"{product.ProductName} is out of stock.",
+
+                        Type = "danger",
+
+                        CreatedAt =
+                            DateTime.Now,
+
+                        IsRead = false,
+
+                        Link =
+                            Url.Action(
+                                "Index",
+                                "Products",
+                                new
+                                {
+                                    productId =
+                                        product.ProductId
+                                }
+                            ) ?? "#"
+                    }
+                );
+            }
+            else if (newStatus == "LowStock")
+            {
+                _context.Notifications.Add(
+                    new Notification
+                    {
+                        Title = "Low Stock",
+
+                        Message =
+                            $"{product.ProductName} has only " +
+                            $"{product.Quantity} items remaining.",
+
+                        Type = "warning",
+
+                        CreatedAt =
+                            DateTime.Now,
+
+                        IsRead = false,
+
+                        Link =
+                            Url.Action(
+                                "Index",
+                                "Products",
+                                new
+                                {
+                                    productId =
+                                        product.ProductId
+                                }
+                            ) ?? "#"
+                    }
+                );
+            }
+        }
+
+        // =========================================================
+        // DELETE SALE
+        // =========================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var sale = await _context.Sales
+                .Include(s => s.SaleItems)
+                .FirstOrDefaultAsync(
+                    s => s.SaleId == id
+                );
+
+            // Only paid sales can be deleted.
+            if (sale == null ||
+                !string.Equals(
+                    sale.Status,
+                    "Paid",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction(
+                    nameof(Index)
+                );
+            }
+
+            // Restore stock.
+            foreach (var item in sale.SaleItems)
+            {
+                var product =
+                    await _context.Products.FindAsync(
+                        item.ProductId
+                    );
+
+                if (product != null)
+                {
+                    product.Quantity +=
+                        item.Quantity;
+                }
+            }
+
+            _context.SaleItems.RemoveRange(
+                sale.SaleItems
+            );
+
+            _context.Sales.Remove(
+                sale
+            );
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(
+                nameof(Index)
+            );
+        }
     }
 }

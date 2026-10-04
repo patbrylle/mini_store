@@ -1,269 +1,485 @@
-/* ==========================================================================
-   Reports — tokens matched to dashboard.css
-   ========================================================================== */
-
-:root {
-    --color-primary: #e4772e;
-    --color-primary-dark: #c95f1d;
-    --color-primary-soft: #fff0e6;
-
-    --color-gold: #d49a21;
-    --color-gold-soft: #fff7df;
-
-    --color-success: #3c9461;
-    --color-success-soft: #e8f6ed;
-
-    --color-danger: #c0392b;
-    --color-danger-soft: #fdeaea;
-
-    --color-text: #222;
-    --color-text-muted: #777;
-    --color-border: #eee;
-}
+/* =========================================================
+   Mini Store: Reports (modern theme, matches Sales/Products)
+   ========================================================= */
 
 .reports-page {
-    padding-bottom: 30px;
+    --gold-ink: #9a6a0a;
+    --gold-tint: color-mix(in srgb, var(--color-gold) 20%, white);
+
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 0 30px;
+    color: var(--color-text);
 }
 
-/* ==========================================================================
-   Header
-   ========================================================================== */
+@keyframes rpFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+}
+
+@keyframes rpGrow {
+    from { transform: scaleX(0); }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .reports-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
     margin-bottom: 28px;
+    animation: rpFadeUp .55s var(--ease-out) backwards;
+}
+
+.reports-title-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.reports-page-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-size: 24px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-gold));
+    box-shadow: 0 8px 18px rgba(228, 119, 46, .32);
 }
 
 .reports-title {
     margin: 0;
-    font-size: 28px;
+    font-size: 1.55rem;
     font-weight: 800;
+    letter-spacing: -.4px;
     color: var(--color-text);
 }
 
-/* ==========================================================================
-   Section labels
-   ========================================================================== */
+.reports-subtitle {
+    margin: 2px 0 0;
+    font-size: .9rem;
+    color: var(--color-text-muted);
+}
+
+.reports-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border: 1px solid color-mix(in srgb, var(--color-success) 25%, white);
+    border-radius: 999px;
+}
+
+.reports-pill span {
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.kpi-row {
+    margin-bottom: 32px;
+    animation: rpFadeUp .6s var(--ease-out) backwards;
+}
+
+.kpi-row:nth-of-type(2) { animation-delay: .10s; }
+.kpi-row:nth-of-type(3) { animation-delay: .18s; }
+.kpi-row:nth-of-type(4) { animation-delay: .26s; }
 
 .report-section-title {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--color-text);
+    gap: 10px;
     margin: 0 0 14px;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .9px;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
 }
 
 .report-section-title i {
-    color: var(--color-primary);
-    font-size: 17px;
-}
-
-/* ==========================================================================
-   KPI cards (mirrors dashboard.css kpi-card)
-   ========================================================================== */
-
-.kpi-row {
-    margin-bottom: 32px;
-}
-
-.kpi-card {
-    height: 100%;
-    padding: 20px;
-    border-radius: 16px;
-    background: #ffffff;
-    border: 1px solid var(--color-border);
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
-    gap: 14px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 14px;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+}
+
+.report-section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
+.kpi-card.is-primary { --kpi: var(--color-primary); }
+.kpi-card.is-gold    { --kpi: var(--color-gold); }
+.kpi-card.is-success { --kpi: var(--color-success); }
+.kpi-card.is-danger  { --kpi: var(--color-danger); }
+
+.kpi-card {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: transform .35s var(--ease-out), box-shadow .35s var(--ease), border-color .35s var(--ease);
+}
+
+.kpi-card::after {
+    content: "";
+    position: absolute;
+    top: -34px;
+    right: -34px;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--kpi) 12%, transparent);
+    pointer-events: none;
+    transition: transform .5s var(--ease-out);
 }
 
 .kpi-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--kpi);
 }
 
+.kpi-card:hover::after { transform: scale(1.35); }
+
 .kpi-icon {
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
-    border-radius: 13px;
+    position: relative;
+    z-index: 1;
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 19px;
+    border-radius: 15px;
+    font-size: 22px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--kpi), color-mix(in srgb, var(--kpi) 72%, white));
+    box-shadow: 0 8px 18px -6px color-mix(in srgb, var(--kpi) 75%, transparent);
+    transition: transform .4s var(--ease-spring);
 }
 
-.kpi-icon-primary { background: var(--color-primary-soft); color: var(--color-primary); }
-.kpi-icon-gold    { background: var(--color-gold-soft);    color: var(--color-gold); }
-.kpi-icon-success { background: var(--color-success-soft); color: var(--color-success); }
-.kpi-icon-danger  { background: var(--color-danger-soft);  color: var(--color-danger); }
+.kpi-card:hover .kpi-icon { transform: scale(1.08) rotate(-5deg); }
+
+.kpi-body {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
 
 .kpi-label {
+    margin: 0 0 3px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
     color: var(--color-text-muted);
-    font-size: 12.5px;
-    margin: 0 0 4px;
 }
 
 .kpi-value {
-    font-size: 21px;
-    font-weight: 800;
     margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -.4px;
     color: var(--color-text);
+    font-variant-numeric: tabular-nums;
 }
 
-/* ==========================================================================
-   Panels (charts + tables)
-   ========================================================================== */
+/* =========================================================
+   PANELS
+   ========================================================= */
 
 .panel {
-    background: #fff;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    padding: 20px;
     height: 100%;
+    padding: 22px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: rpFadeUp .6s var(--ease-out) .35s backwards;
+    transition: box-shadow .3s var(--ease);
 }
+
+.panel:hover { box-shadow: var(--shadow-md); }
 
 .panel-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
 }
 
 .panel-header h5 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
 }
 
 .panel-header h5 i {
-    color: var(--color-primary);
-    font-size: 17px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 15px;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
 }
 
+/* ---- charts ---- */
 .donut-chart-container {
-    height: 220px;
     position: relative;
+    height: 230px;
 }
 
 .bar-chart-container {
-    height: 260px;
     position: relative;
-    margin-bottom: 8px;
+    height: 270px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
 }
 
+/* ---- legend with values ---- */
 .donut-legend {
     display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin-top: 14px;
     flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
 }
 
 .donut-legend span {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12.5px;
-    color: var(--color-text-muted);
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: .78rem;
     font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
 }
 
 .donut-legend i {
     width: 9px;
     height: 9px;
-    border-radius: 50%;
+    flex-shrink: 0;
     display: inline-block;
+    border-radius: 50%;
 }
 
-/* ==========================================================================
-   Table (mirrors dashboard-table)
-   ========================================================================== */
+.donut-legend b {
+    font-weight: 800;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
 
 .report-table {
-    margin-bottom: 0;
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: var(--color-surface-soft);
+    margin: 0;
+    font-size: .87rem;
 }
 
-.report-table th {
-    color: var(--color-text-muted);
-    font-size: 12px;
-    font-weight: 600;
+.report-table thead th {
+    padding: 11px 16px;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
     white-space: nowrap;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
 }
 
-.report-table td {
-    font-size: 13px;
+.report-table thead th:first-child { border-top-left-radius: var(--radius-sm); }
+.report-table thead th:last-child  { border-top-right-radius: var(--radius-sm); text-align: right; }
+
+.report-table tbody td {
+    padding: 14px 16px;
     vertical-align: middle;
-    padding: 13px 8px;
+    color: var(--color-text);
     border-bottom: 1px solid var(--color-border);
+    transition: background-color var(--speed) var(--ease);
 }
 
-.report-table tbody tr:last-child td {
-    border-bottom: 0;
-}
+.report-table tbody tr:last-child td { border-bottom: 0; }
+.report-table tbody tr:hover td { background: var(--color-surface-soft); }
+.report-table tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 
+/* rank badge (top 3 get medal colors) */
 .rank-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
+    font-size: .78rem;
+    font-weight: 800;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
     border-radius: 50%;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
-    font-size: 12px;
-    font-weight: 700;
 }
 
-/* ==========================================================================
-   Empty state
-   ========================================================================== */
+.rank-badge.rank-1 {
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-gold), #f0c04a);
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(212, 154, 33, .4);
+}
+
+.rank-badge.rank-2 {
+    color: #fff;
+    background: linear-gradient(135deg, #8d98a5, #c3cad2);
+    border-color: transparent;
+}
+
+.rank-badge.rank-3 {
+    color: #fff;
+    background: linear-gradient(135deg, #b9703a, #dba070);
+    border-color: transparent;
+}
+
+.report-product {
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* quantity with inline bar */
+.qty-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 160px;
+}
+
+.qty-cell strong {
+    min-width: 34px;
+    font-variant-numeric: tabular-nums;
+}
+
+.qty-bar {
+    flex: 1;
+    height: 6px;
+    overflow: hidden;
+    background: var(--color-bg);
+    border-radius: 999px;
+}
+
+.qty-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-gold));
+    transform-origin: left;
+    animation: rpGrow .8s var(--ease-out) .6s backwards;
+}
+
+.revenue-value {
+    font-weight: 800;
+    color: var(--color-primary-dark);
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
 
 .empty-state {
-    min-height: 150px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #999;
+    gap: 6px;
+    min-height: 160px;
+    padding: 30px 16px;
     text-align: center;
+    color: var(--color-text-muted);
 }
 
 .empty-state i {
-    font-size: 30px;
-    margin-bottom: 8px;
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    font-size: 26px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
 }
 
 .empty-state p {
     margin: 0;
-    font-size: 13px;
+    font-size: .88rem;
 }
 
-/* ==========================================================================
-   Responsive
-   ========================================================================== */
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (max-width: 768px) {
-    .reports-header {
-        flex-direction: column;
-        gap: 12px;
-    }
+    .reports-title { font-size: 1.3rem; }
+    .reports-pill { width: 100%; justify-content: center; }
 
-    .reports-title {
-        font-size: 24px;
-    }
+    .donut-chart-container { height: 210px; }
+    .bar-chart-container { height: 230px; }
 
-    .donut-chart-container,
-    .bar-chart-container {
-        height: 220px;
-    }
+    .panel { padding: 18px; }
+    .qty-cell { min-width: 120px; }
+}
+
+@media print {
+    .kpi-row, .panel, .reports-header { animation: none; }
+    .kpi-card:hover, .panel:hover { transform: none; box-shadow: var(--shadow-sm); }
 }

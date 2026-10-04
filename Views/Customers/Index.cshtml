@@ -1,393 +1,542 @@
 @model IEnumerable<mini_store.Models.Customer>
 
 @{
-ViewData["Title"] = "Customers";
+    ViewData["Title"] = "Customers";
 
+    var customers = Model?.ToList()
+        ?? new List<mini_store.Models.Customer>();
 
-var customers = Model?.ToList()
-    ?? new List<mini_store.Models.Customer>();
-
-var totalCustomers = customers.Count;
-
+    int totalCustomers = customers.Count;
+    int withContact = customers.Count(c => !string.IsNullOrWhiteSpace(c.ContactNumber));
+    int completeProfiles = customers.Count(c =>
+        !string.IsNullOrWhiteSpace(c.Email) &&
+        !string.IsNullOrWhiteSpace(c.ContactNumber) &&
+        !string.IsNullOrWhiteSpace(c.Address));
 }
 
-@section Styles { <link rel="stylesheet"
-       href="~/css/customer.css"
-       asp-append-version="true" />
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/customer.css"
+          asp-append-version="true" />
 }
 
 <div class="customer-page">
 
-<!-- PAGE HEADER -->
-<div class="customer-header">
+    <!-- PAGE HEADER -->
+    <div class="customer-header">
 
-    <div class="customer-title-area">
+        <div class="customer-title-area">
 
-        <div class="customer-page-icon">
-            <i class="bi bi-people"></i>
+            <div class="customer-page-icon">
+                <i class="bi bi-people"></i>
+            </div>
+
+            <div>
+                <h1>Customers</h1>
+                <p>Manage your store customers and their information.</p>
+            </div>
+
         </div>
 
-        <div>
-            <h1>Customers</h1>
-
-            <p>
-                Manage your store customers and their information.
-            </p>
-        </div>
+        <button type="button"
+                class="btn customer-primary-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#addCustomerModal">
+            <i class="bi bi-plus-lg"></i>
+            Add Customer
+        </button>
 
     </div>
 
 
-   <button type="button"
-        class="btn customer-primary-btn"
-        data-bs-toggle="modal"
-        data-bs-target="#addCustomerModal">
+    <!-- ALERTS (outside any loop) -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert fade show customer-alert is-success" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-    <i class="bi bi-plus-lg"></i>
-    Add Customer
+    @if (TempData["DeleteError"] != null)
+    {
+        <div class="alert fade show customer-alert is-warning" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>@TempData["DeleteError"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-</button>
-</div>
 
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 customer-kpi-row">
 
-<!-- SUMMARY CARDS -->
-<div class="row g-3 customer-kpi-row">
-
-
-    <!-- TOTAL CUSTOMERS -->
-    <div class="col-xl-4 col-md-6">
-
-        <div class="customer-stat-card">
-
-            <div class="customer-stat-icon stat-primary">
-
-                <i class="bi bi-people"></i>
-
+        <div class="col-xl-4 col-md-6">
+            <div class="customer-stat-card is-primary" style="--i:0">
+                <div class="customer-stat-icon"><i class="bi bi-people"></i></div>
+                <div class="customer-stat-body">
+                    <span class="customer-stat-label">Total Customers</span>
+                    <h3>@totalCustomers</h3>
+                    <small>Registered customers</small>
+                </div>
             </div>
+        </div>
 
-            <div>
-
-                <span class="customer-stat-label">
-                    Total Customers
-                </span>
-
-                <h3>
-                    @totalCustomers
-                </h3>
-
-                <small>
-                    Registered customers
-                </small>
-
+        <div class="col-xl-4 col-md-6">
+            <div class="customer-stat-card is-gold" style="--i:1">
+                <div class="customer-stat-icon"><i class="bi bi-telephone"></i></div>
+                <div class="customer-stat-body">
+                    <span class="customer-stat-label">With Contact Number</span>
+                    <h3>@withContact</h3>
+                    <small>Reachable by phone</small>
+                </div>
             </div>
+        </div>
 
+        <div class="col-xl-4 col-md-6">
+            <div class="customer-stat-card is-success" style="--i:2">
+                <div class="customer-stat-icon"><i class="bi bi-person-check"></i></div>
+                <div class="customer-stat-body">
+                    <span class="customer-stat-label">Complete Profiles</span>
+                    <h3>@completeProfiles</h3>
+                    <small>Email, contact and address filled in</small>
+                </div>
+            </div>
         </div>
 
     </div>
 
 
     <!-- CUSTOMER DIRECTORY -->
-    <div class="col-xl-4 col-md-6">
+    <div class="customer-table-card">
 
-        <div class="customer-stat-card">
+        <div class="customer-table-header">
 
-            <div class="customer-stat-icon stat-gold">
+            <div class="customer-section-title">
 
-                <i class="bi bi-person-vcard"></i>
+                <div class="customer-section-icon">
+                    <i class="bi bi-person-vcard"></i>
+                </div>
 
-            </div>
-
-            <div>
-
-                <span class="customer-stat-label">
-                    Customer Directory
-                </span>
-
-                <h3>
-                    @totalCustomers
-                </h3>
-
-                <small>
-                    Customer profiles
-                </small>
+                <div>
+                    <h5>Customer Directory</h5>
+                    <p>View and manage registered customers.</p>
+                </div>
 
             </div>
 
-        </div>
+            <div class="customer-tools">
 
-    </div>
+                <span class="customer-count">@totalCustomers total</span>
 
-
-    <!-- CUSTOMER RECORDS -->
-    <div class="col-xl-4 col-md-6">
-
-        <div class="customer-stat-card">
-
-            <div class="customer-stat-icon stat-success">
-
-                <i class="bi bi-person-check"></i>
-
-            </div>
-
-            <div>
-
-                <span class="customer-stat-label">
-                    Customer Records
-                </span>
-
-                <h3>
-                    @totalCustomers
-                </h3>
-
-                <small>
-                    Available in system
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- CUSTOMER DIRECTORY -->
-<div class="customer-table-card">
-
-
-    <!-- TABLE HEADER -->
-    <div class="customer-table-header">
-
-        <div class="customer-section-title">
-
-            <div class="customer-section-icon">
-
-                <i class="bi bi-person-vcard"></i>
-
-            </div>
-
-            <div>
-
-                <h5>
-                    Customer Directory
-                </h5>
-
-                <p>
-                    View and manage registered customers.
-                </p>
+                <div class="customer-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text"
+                           id="customerSearch"
+                           placeholder="Search customer..."
+                           aria-label="Search customers"
+                           autocomplete="off" />
+                </div>
 
             </div>
 
         </div>
 
 
-        <!-- SEARCH -->
-        <div class="customer-search">
+        <div class="table-responsive">
 
-            <i class="bi bi-search"></i>
+            <table class="table customer-table" id="customerTable">
 
-            <input type="text"
-                   id="customerSearch"
-                   placeholder="Search customer..."
-                   autocomplete="off" />
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Address</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
 
-        </div>
+                <tbody>
 
-    </div>
-
-
-    <!-- TABLE -->
-    <div class="table-responsive">
-
-        <table class="table customer-table"
-               id="customerTable">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Customer
-                    </th>
-
-                    <th>
-                        Email
-                    </th>
-
-                    <th>
-                        Contact
-                    </th>
-
-                    <th>
-                        Address
-                    </th>
-
-                    <th class="text-end">
-                        Actions
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                @if (customers.Any())
-                {
-
-                    foreach (var customer in customers)
+                    @if (customers.Any())
                     {
+                        foreach (var customer in customers)
+                        {
+                            string name = customer.CustomerName ?? "";
+                            string initial = name.Length > 0 ? name.Substring(0, 1).ToUpper() : "?";
 
-                        <tr>
+                            <tr>
 
-                            <!-- CUSTOMER -->
-                            <td>
+                                <!-- CUSTOMER -->
+                                <td>
+                                    <div class="customer-cell">
+                                        <div class="customer-avatar">@initial</div>
+                                        <span class="customer-name">@customer.CustomerName</span>
+                                    </div>
+                                </td>
 
-                                <div class="customer-cell">
+                                <!-- EMAIL -->
+                                <td class="customer-email">
+                                    @if (!string.IsNullOrWhiteSpace(customer.Email))
+                                    {
+                                        <span class="customer-meta">
+                                            <i class="bi bi-envelope"></i>
+                                            @customer.Email
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="customer-none">Not provided</span>
+                                    }
+                                </td>
 
-                                    <div class="customer-avatar">
+                                <!-- CONTACT -->
+                                <td class="customer-contact">
+                                    @if (!string.IsNullOrWhiteSpace(customer.ContactNumber))
+                                    {
+                                        <span class="customer-meta">
+                                            <i class="bi bi-telephone"></i>
+                                            @customer.ContactNumber
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="customer-none">Not provided</span>
+                                    }
+                                </td>
 
-                                        <i class="bi bi-person"></i>
+                                <!-- ADDRESS -->
+                                <td class="customer-address">
+                                    @if (!string.IsNullOrWhiteSpace(customer.Address))
+                                    {
+                                        <span class="customer-address-text" title="@customer.Address">
+                                            @customer.Address
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="customer-none">Not provided</span>
+                                    }
+                                </td>
+
+                                <!-- ACTIONS -->
+                                <td>
+                                    <div class="customer-actions">
+
+                                        <button type="button"
+                                                class="btn customer-action-btn customer-edit-btn"
+                                                title="Edit customer"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editCustomerModal-@customer.CustomerId">
+                                            <i class="bi bi-pencil"></i>
+                                            <span>Edit</span>
+                                        </button>
+
+                                        <button type="button"
+                                                class="btn customer-action-btn customer-delete-btn"
+                                                title="Delete customer"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteCustomerModal-@customer.CustomerId">
+                                            <i class="bi bi-trash"></i>
+                                            <span>Delete</span>
+                                        </button>
 
                                     </div>
+                                </td>
 
-                                    <span class="customer-name">
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5">
 
-                                        @customer.CustomerName
+                                <div class="customer-empty">
 
-                                    </span>
+                                    <div class="customer-empty-icon">
+                                        <i class="bi bi-people"></i>
+                                    </div>
 
-                                </div>
+                                    <h5>No Customers</h5>
+                                    <p>There are currently no registered customers.</p>
 
-                            </td>
-
-
-                            <!-- EMAIL -->
-                            <td class="customer-email">
-
-                                @customer.Email
-
-                            </td>
-
-
-                            <!-- CONTACT -->
-                            <td class="customer-contact">
-
-                                @customer.ContactNumber
-
-                            </td>
-
-
-                            <!-- ADDRESS -->
-                            <td class="customer-address">
-
-                                @customer.Address
-
-                            </td>
-
-
-                            <!-- ACTIONS -->
-                            <td>
-
-                                <div class="customer-actions">
-
-
-                                    <!-- EDIT -->
-                                    <a asp-action="Edit"
-                                       asp-route-id="@customer.CustomerId"
-                                       class="btn customer-action-btn customer-edit-btn">
-
-                                        <i class="bi bi-pencil"></i>
-
-                                        Edit
-
-                                    </a>
-
-
-                                    <!-- DELETE -->
-                                    <a asp-action="Delete"
-                                       asp-route-id="@customer.CustomerId"
-                                       class="btn customer-action-btn customer-delete-btn">
-
-                                        <i class="bi bi-trash"></i>
-
-                                        Delete
-
-                                    </a>
+                                    <button type="button"
+                                            class="btn customer-primary-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#addCustomerModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                        Add Customer
+                                    </button>
 
                                 </div>
 
                             </td>
-
                         </tr>
-
                     }
 
-                }
-                else
-                {
+                </tbody>
 
-                    <!-- EMPTY STATE -->
+            </table>
 
-                    <tr>
+        </div>
 
-                        <td colspan="5">
-
-                            <div class="customer-empty">
-
-                                <div class="customer-empty-icon">
-
-                                    <i class="bi bi-people"></i>
-
-                                </div>
-
-                                <h5>
-                                    No Customers
-                                </h5>
-
-                                <p>
-                                    There are currently no registered customers.
-                                </p>
-
-                                <a asp-action="Create"
-                                   class="btn customer-primary-btn">
-
-                                    <i class="bi bi-plus-lg"></i>
-
-                                    Add Customer
-
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                }
-
-            </tbody>
-
-        </table>
+        <!-- shown when the search matches nothing -->
+        <div class="customer-empty" id="customerNoResults" hidden>
+            <div class="customer-empty-icon">
+                <i class="bi bi-search"></i>
+            </div>
+            <h5>No matching customers</h5>
+            <p>Try a different name, email or number.</p>
+        </div>
 
     </div>
 
 </div>
 
 
-</div>
+<!-- ADD CUSTOMER MODAL -->
 <partial name="CustomerCreateModal" />
 
 
+<!-- ============================================================
+     EDIT + DELETE MODALS
+     ============================================================ -->
 
+@foreach (var customer in customers)
+{
+    <!-- EDIT CUSTOMER MODAL -->
+    <div class="modal fade"
+         id="editCustomerModal-@customer.CustomerId"
+         tabindex="-1"
+         aria-labelledby="editCustomerModalLabel-@customer.CustomerId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content customer-modal">
+
+                <form asp-controller="Customers"
+                      asp-action="Edit"
+                      method="post">
+
+                    <!-- Controller expects Edit(int id, Customer customer),
+                         so BOTH id and CustomerId are posted -->
+                    <input type="hidden" name="id" value="@customer.CustomerId" />
+                    <input type="hidden" name="CustomerId" value="@customer.CustomerId" />
+
+                    <div class="modal-header customer-modal-header">
+
+                        <div class="customer-modal-title">
+
+                            <div class="customer-modal-icon">
+                                <i class="bi bi-pencil"></i>
+                            </div>
+
+                            <div>
+                                <h5 id="editCustomerModalLabel-@customer.CustomerId">Edit Customer</h5>
+                                <p>Update customer information.</p>
+                            </div>
+
+                        </div>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+
+                    </div>
+
+                    <div class="modal-body customer-modal-body">
+
+                        <!-- NAME -->
+                        <div class="customer-form-group">
+                            <label for="editName-@customer.CustomerId">Customer Name</label>
+
+                            <div class="customer-input">
+                                <i class="bi bi-person"></i>
+                                <input type="text"
+                                       id="editName-@customer.CustomerId"
+                                       name="CustomerName"
+                                       class="form-control"
+                                       value="@customer.CustomerName"
+                                       required />
+                            </div>
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="customer-form-group">
+                            <label for="editEmail-@customer.CustomerId">Email</label>
+
+                            <div class="customer-input">
+                                <i class="bi bi-envelope"></i>
+                                <input type="email"
+                                       id="editEmail-@customer.CustomerId"
+                                       name="Email"
+                                       class="form-control"
+                                       value="@customer.Email" />
+                            </div>
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="customer-form-group">
+                            <label for="editContact-@customer.CustomerId">Contact Number</label>
+
+                            <div class="customer-input">
+                                <i class="bi bi-telephone"></i>
+                                <input type="text"
+                                       id="editContact-@customer.CustomerId"
+                                       name="ContactNumber"
+                                       class="form-control"
+                                       value="@customer.ContactNumber" />
+                            </div>
+                        </div>
+
+                        <!-- ADDRESS -->
+                        <div class="customer-form-group">
+                            <label for="editAddress-@customer.CustomerId">Address</label>
+
+                            <div class="customer-input customer-textarea">
+                                <i class="bi bi-geo-alt"></i>
+                                <textarea id="editAddress-@customer.CustomerId"
+                                          name="Address"
+                                          class="form-control"
+                                          rows="3">@customer.Address</textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer customer-modal-footer">
+
+                        <button type="button"
+                                class="btn customer-cancel-btn"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn customer-save-btn">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Save Changes
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DELETE CUSTOMER MODAL -->
+    <div class="modal fade"
+         id="deleteCustomerModal-@customer.CustomerId"
+         tabindex="-1"
+         aria-labelledby="deleteCustomerModalLabel-@customer.CustomerId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content customer-modal">
+
+                <div class="modal-header customer-modal-header">
+
+                    <div class="customer-modal-title">
+
+                        <div class="customer-modal-icon is-danger">
+                            <i class="bi bi-trash"></i>
+                        </div>
+
+                        <div>
+                            <h5 id="deleteCustomerModalLabel-@customer.CustomerId">Delete Customer</h5>
+                            <p>This action cannot be undone.</p>
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+
+                </div>
+
+                <div class="modal-body customer-modal-body">
+
+                    <p class="customer-delete-text">
+                        Are you sure you want to delete
+                        <strong>@customer.CustomerName</strong>?
+                    </p>
+
+                </div>
+
+                <div class="modal-footer customer-modal-footer">
+
+                    <button type="button"
+                            class="btn customer-cancel-btn"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <form asp-controller="Customers"
+                          asp-action="Delete"
+                          method="post">
+
+                        <input type="hidden" name="id" value="@customer.CustomerId" />
+
+                        <button type="submit" class="btn customer-delete-confirm">
+                            <i class="bi bi-trash me-1"></i>
+                            Delete Customer
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
 
 
 @section Scripts {
 
-<script src="~/js/customer.js"
-        asp-append-version="true"></script>
+    <script src="~/js/customer.js"
+            asp-append-version="true"></script>
 
+    <script>
+        // Shows "No matching customers" when customer.js's search hides every row.
+        // It only reads row visibility, so it never fights with that script.
+        (function () {
+            var table = document.getElementById('customerTable');
+            var search = document.getElementById('customerSearch');
+            var none = document.getElementById('customerNoResults');
+            if (!table || !search || !none) return;
+
+            var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'))
+                .filter(function (r) { return !r.querySelector('td[colspan]'); });
+
+            if (!rows.length) return;
+
+            function refresh() {
+                var visible = rows.filter(function (r) {
+                    return window.getComputedStyle(r).display !== 'none';
+                }).length;
+
+                none.hidden = visible !== 0;
+            }
+
+            ['input', 'keyup', 'search'].forEach(function (evt) {
+                search.addEventListener(evt, function () { setTimeout(refresh, 0); });
+            });
+        })();
+    </script>
 
 }

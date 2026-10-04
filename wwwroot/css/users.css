@@ -1,0 +1,1184 @@
+/* =========================================================
+   Mini Store — User Management
+   (uses the tokens defined in site.css)
+   ========================================================= */
+
+.um-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@keyframes umFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+}
+
+@keyframes umRow {
+    from { opacity: 0; transform: translateX(-8px); }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.um-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+    animation: umFadeUp .55s var(--ease-out) backwards;
+}
+
+.um-title-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.um-page-icon {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 23px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    box-shadow: 0 8px 18px -6px rgba(228, 119, 46, .6);
+}
+
+.um-title-area h1 {
+    margin: 0 0 3px;
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: -.4px;
+    color: var(--color-text);
+}
+
+.um-title-area p {
+    margin: 0;
+    font-size: .92rem;
+    color: var(--color-text-muted);
+}
+
+.um-add-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    overflow: hidden;
+    font-size: .88rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border: 0;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px rgba(228, 119, 46, .3);
+    cursor: pointer;
+    transition: transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+
+/* shine sweep on hover */
+.um-add-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, .35), transparent);
+    transform: skewX(-20deg);
+    transition: left .7s var(--ease);
+}
+
+.um-add-btn:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(228, 119, 46, .4);
+}
+
+.um-add-btn:hover::after {
+    left: 135%;
+}
+
+/* =========================================================
+   SUMMARY CARDS
+   ========================================================= */
+
+.um-kpi.is-primary { --kpi: var(--color-primary); }
+.um-kpi.is-gold    { --kpi: var(--color-gold); }
+.um-kpi.is-success { --kpi: var(--color-success); }
+.um-kpi.is-danger  { --kpi: var(--color-danger); }
+
+.um-kpi {
+    --kpi-soft: color-mix(in srgb, var(--kpi, var(--color-primary)) 12%, transparent);
+
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: umFadeUp .6s var(--ease-out) calc(var(--i, 0) * .08s + .1s) backwards;
+    transition: transform .35s var(--ease-out), box-shadow .35s var(--ease), border-color .35s var(--ease);
+}
+
+.um-kpi::after {
+    content: "";
+    position: absolute;
+    top: -34px;
+    right: -34px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--kpi-soft);
+    pointer-events: none;
+    transition: transform .5s var(--ease-out);
+}
+
+.um-kpi:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--kpi);
+}
+
+.um-kpi:hover::after {
+    transform: scale(1.35);
+}
+
+.um-kpi-icon {
+    position: relative;
+    z-index: 1;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 24px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--kpi), color-mix(in srgb, var(--kpi) 72%, white));
+    box-shadow: 0 8px 18px -6px color-mix(in srgb, var(--kpi) 75%, transparent);
+    transition: transform .4s var(--ease-spring);
+}
+
+.um-kpi:hover .um-kpi-icon {
+    transform: scale(1.08) rotate(-5deg);
+}
+
+.um-kpi > div:last-child {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.um-kpi span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.um-kpi h3 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.4px;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   TABLE CARD
+   ========================================================= */
+
+.um-card {
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: umFadeUp .6s var(--ease-out) .35s backwards;
+}
+
+.um-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 20px 22px 14px;
+}
+
+.um-card-header h5 {
+    margin: 0 0 2px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.um-card-header p {
+    margin: 0;
+    font-size: .82rem;
+    color: var(--color-text-muted);
+}
+
+/* ---- search ---- */
+.um-search {
+    position: relative;
+    width: 280px;
+    max-width: 100%;
+}
+
+.um-search i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.um-search input {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    font-size: .86rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    outline: none;
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease), background-color var(--speed) var(--ease);
+}
+
+.um-search input:focus {
+    background: var(--color-surface);
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+/* ---- filter chips ---- */
+.um-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 22px 16px;
+}
+
+.um-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 14px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease), border-color var(--speed) var(--ease);
+}
+
+.um-chip span {
+    min-width: 22px;
+    padding: 1px 7px;
+    font-size: .72rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-radius: 999px;
+}
+
+.um-chip:hover {
+    color: var(--color-primary-dark);
+    border-color: var(--color-primary-light);
+}
+
+.um-chip.active {
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border-color: transparent;
+}
+
+.um-chip.active span {
+    color: #fff;
+    background: rgba(255, 255, 255, .25);
+}
+
+/* ---- table ---- */
+.um-table {
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: var(--color-surface-soft);
+
+    margin: 0;
+    font-size: .88rem;
+}
+
+.um-table thead th {
+    padding: 11px 22px;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.um-table tbody td {
+    padding: 14px 22px;
+    vertical-align: middle;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.um-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.um-table tbody tr[data-role] {
+    animation: umRow .45s var(--ease-out) backwards;
+    transition: background-color var(--speed) var(--ease);
+}
+
+.um-table tbody tr[data-role]:nth-child(1) { animation-delay: .45s; }
+.um-table tbody tr[data-role]:nth-child(2) { animation-delay: .50s; }
+.um-table tbody tr[data-role]:nth-child(3) { animation-delay: .55s; }
+.um-table tbody tr[data-role]:nth-child(4) { animation-delay: .60s; }
+.um-table tbody tr[data-role]:nth-child(n+5) { animation-delay: .65s; }
+
+.um-table tbody tr[data-role]:hover {
+    background: var(--color-surface-soft);
+}
+
+.um-table tbody tr.is-disabled .um-user-text strong {
+    color: var(--color-text-muted);
+}
+
+/* ---- user cell ---- */
+.um-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.um-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+}
+
+.um-avatar.is-admin {
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border-color: transparent;
+    box-shadow: 0 6px 14px -5px rgba(228, 119, 46, .6);
+}
+
+.um-table tr.is-disabled .um-avatar {
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+}
+
+.um-user-text {
+    min-width: 0;
+}
+
+.um-user-text strong {
+    display: block;
+    max-width: 280px;
+    overflow: hidden;
+    font-size: .9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-text);
+}
+
+.um-user-text small {
+    font-size: .76rem;
+    color: var(--color-text-muted);
+}
+
+/* ---- role + status badges ---- */
+.um-role,
+.um-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: .76rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border-radius: 999px;
+}
+
+.um-role.admin {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+.um-role.staff {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+}
+
+.um-status.active {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+}
+
+.um-status.disabled {
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+}
+
+.um-status > span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* ---- actions ---- */
+.um-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.um-actions form {
+    margin: 0;
+}
+
+.um-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 13px;
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: transform var(--speed) var(--ease), background-color var(--speed) var(--ease),
+                color var(--speed) var(--ease), border-color var(--speed) var(--ease),
+                box-shadow var(--speed) var(--ease);
+}
+
+.um-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* edit */
+.um-btn-edit {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+.um-btn-edit:hover {
+    color: #fff;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 12px -4px rgba(228, 119, 46, .5);
+}
+
+/* disable */
+.um-btn-disable {
+    color: #9a6a0a;
+    background: color-mix(in srgb, var(--color-gold) 16%, white);
+    border-color: color-mix(in srgb, var(--color-gold) 35%, transparent);
+}
+
+.um-btn-disable:hover {
+    color: #fff;
+    background: var(--color-gold);
+    border-color: var(--color-gold);
+    box-shadow: 0 6px 12px -4px color-mix(in srgb, var(--color-gold) 60%, transparent);
+}
+
+/* enable */
+.um-btn-enable {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+
+.um-btn-enable:hover {
+    color: #fff;
+    background: var(--color-success);
+    border-color: var(--color-success);
+    box-shadow: 0 6px 12px -4px color-mix(in srgb, var(--color-success) 55%, transparent);
+}
+
+/* delete (icon only) */
+.um-btn-delete {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
+}
+
+.um-btn-delete:hover {
+    color: #fff;
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    box-shadow: 0 6px 12px -4px color-mix(in srgb, var(--color-danger) 55%, transparent);
+}
+
+/* modal + form buttons */
+.um-btn-ghost {
+    padding: 9px 18px;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.um-btn-ghost:hover {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: var(--color-primary-light);
+}
+
+.um-btn-danger-solid {
+    padding: 9px 18px;
+    color: #fff;
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--color-danger) 55%, transparent);
+}
+
+.um-btn-danger-solid:hover {
+    color: #fff;
+    background: color-mix(in srgb, var(--color-danger) 88%, black);
+}
+
+.um-protected {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border: 1px dashed var(--color-border);
+    border-radius: 999px;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.um-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 48px 16px;
+    text-align: center;
+}
+
+.um-empty[hidden] {
+    display: none;
+}
+
+.um-empty i {
+    width: 62px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    font-size: 27px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
+}
+
+.um-empty strong {
+    font-size: .98rem;
+    color: var(--color-text);
+}
+
+.um-empty span {
+    font-size: .86rem;
+    color: var(--color-text-muted);
+}
+
+/* =========================================================
+   DELETE MODAL
+   ========================================================= */
+
+.um-modal .modal-content {
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.um-modal-body {
+    padding: 28px 24px 8px;
+    text-align: center;
+}
+
+.um-modal-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    font-size: 27px;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+.um-modal-body h5 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.um-modal-body p {
+    margin: 0 0 8px;
+    font-size: .88rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
+.um-modal-body p strong {
+    display: block;
+    word-break: break-all;
+    color: var(--color-text);
+}
+
+.um-modal-body small {
+    font-size: .78rem;
+    color: var(--color-text-muted);
+}
+
+.um-modal-footer {
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 24px 24px;
+    border: 0;
+}
+
+/* =========================================================
+   ADD / EDIT STAFF FORM
+   ========================================================= */
+
+.um-form-page {
+    max-width: 1060px;
+}
+
+/* ---- back link ---- */
+.um-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    animation: umFadeUp .5s var(--ease-out) backwards;
+    transition: color var(--speed) var(--ease);
+}
+
+.um-back i {
+    transition: transform .3s var(--ease-out);
+}
+
+.um-back:hover {
+    color: var(--color-primary-dark);
+}
+
+.um-back:hover .bi-arrow-left {
+    transform: translateX(-4px);
+}
+
+/* ---- form card ---- */
+.um-form-card {
+    animation-delay: .15s;
+}
+
+.um-form-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.um-form-head-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    font-size: 20px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
+}
+
+.um-form-head h5 {
+    margin: 0 0 2px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.um-form-head p {
+    margin: 0;
+    font-size: .82rem;
+    color: var(--color-text-muted);
+}
+
+.um-form-body {
+    padding: 24px;
+}
+
+.um-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 24px;
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+}
+
+/* ---- fields ---- */
+.um-field {
+    margin-bottom: 20px;
+}
+
+.um-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.um-input-wrap {
+    position: relative;
+}
+
+.um-input-wrap > i:first-child {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    transition: color var(--speed) var(--ease);
+}
+
+.um-input-wrap:focus-within > i:first-child {
+    color: var(--color-primary);
+}
+
+.um-input {
+    width: 100%;
+    padding: 11px 14px 11px 42px;
+    font-size: .9rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease),
+                background-color var(--speed) var(--ease);
+}
+
+.um-input::placeholder {
+    color: var(--color-text-muted);
+    opacity: .7;
+}
+
+.um-input:focus {
+    background: var(--color-surface);
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.um-input-wrap.has-toggle .um-input {
+    padding-right: 48px;
+}
+
+/* jQuery validation adds this class to invalid inputs */
+.um-input.input-validation-error {
+    background: color-mix(in srgb, var(--color-danger) 5%, var(--color-surface));
+    border-color: var(--color-danger);
+}
+
+.um-input.input-validation-error:focus {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.um-toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 34px;
+    height: 34px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease);
+}
+
+.um-toggle:hover {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+}
+
+.um-field-error {
+    display: block;
+    margin-top: 6px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--color-danger);
+}
+
+.um-field-error:empty {
+    display: none;
+}
+
+.um-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+.um-hint[hidden] {
+    display: none;
+}
+
+.um-hint.is-ok  { color: var(--color-success); }
+.um-hint.is-bad { color: var(--color-danger); }
+
+/* ---- validation summary (ModelOnly errors) ---- */
+.um-alert.validation-summary-valid {
+    display: none;
+}
+
+.um-alert.validation-summary-errors {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    font-size: .86rem;
+    font-weight: 600;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent);
+    border-left: 4px solid var(--color-danger);
+    border-radius: var(--radius-md);
+}
+
+.um-alert ul {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+/* ---- side tips ---- */
+.um-side-card {
+    padding: 22px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: umFadeUp .6s var(--ease-out) .3s backwards;
+}
+
+.um-side-card h6 {
+    margin: 0 0 16px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.um-tips {
+    display: grid;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.um-tips li {
+    display: flex;
+    gap: 12px;
+    font-size: .83rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
+.um-tips strong {
+    display: block;
+    margin-bottom: 1px;
+    font-size: .86rem;
+    color: var(--color-text);
+}
+
+.um-tip-icon {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 16px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
+}
+
+/* =========================================================
+   EDIT USER — role picker + notice
+   ========================================================= */
+
+.um-role-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.um-role-option {
+    position: relative;
+    display: block;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* the real radio stays in the DOM (keyboard + form post) but is invisible */
+.um-role-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.um-role-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--speed) var(--ease), background-color var(--speed) var(--ease),
+                box-shadow var(--speed) var(--ease), transform var(--speed) var(--ease);
+}
+
+.um-role-card strong {
+    display: block;
+    font-size: .9rem;
+    color: var(--color-text);
+}
+
+.um-role-card small {
+    font-size: .76rem;
+    color: var(--color-text-muted);
+}
+
+.um-role-card-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 18px;
+}
+
+.um-role-card-icon.staff {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+}
+
+.um-role-card-icon.admin {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+.um-role-check {
+    margin-left: auto;
+    font-size: 19px;
+    color: var(--color-primary);
+    opacity: 0;
+    transform: scale(.6);
+    transition: opacity var(--speed) var(--ease), transform .35s var(--ease-spring);
+}
+
+.um-role-option:hover .um-role-card {
+    border-color: var(--color-primary-light);
+    transform: translateY(-1px);
+}
+
+.um-role-option input:checked + .um-role-card {
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.um-role-option input:checked + .um-role-card .um-role-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.um-role-option input:focus-visible + .um-role-card {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* ---- notice box ---- */
+.um-note {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    font-size: .82rem;
+    line-height: 1.5;
+    color: #7a5608;
+    background: color-mix(in srgb, var(--color-gold) 14%, white);
+    border: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
+    border-radius: var(--radius-md);
+    animation: umFadeUp .35s var(--ease-out) backwards;
+}
+
+.um-note[hidden] {
+    display: none;
+}
+
+.um-note > i {
+    margin-top: 2px;
+    color: var(--color-gold);
+}
+
+/* =========================================================
+   RESPONSIVE  (keep every @media rule down here, at the end)
+   ========================================================= */
+
+@media (max-width: 767px) {
+    .um-search { width: 100%; }
+    .um-card-header { padding: 18px 16px 12px; }
+    .um-filters { padding: 0 16px 14px; }
+
+    .um-table thead th,
+    .um-table tbody td {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+@media (max-width: 576px) {
+    .um-title-area h1 { font-size: 1.4rem; }
+
+    .um-kpi { padding: 16px; }
+    .um-kpi-icon { width: 48px; height: 48px; font-size: 21px; }
+    .um-kpi h3 { font-size: 1.35rem; }
+
+    /* icon-only action buttons on phones */
+    .um-btn-edit,
+    .um-btn-disable,
+    .um-btn-enable {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+    }
+
+    .um-btn-edit span,
+    .um-btn-disable span,
+    .um-btn-enable span {
+        display: none;
+    }
+
+    /* forms */
+    .um-form-head,
+    .um-form-body,
+    .um-form-actions {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .um-form-actions .um-btn,
+    .um-form-actions .um-add-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+
+    .um-role-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* must stay LAST so it overrides every animation above */
+@media (prefers-reduced-motion: reduce) {
+    .um-header,
+    .um-kpi,
+    .um-card,
+    .um-table tbody tr[data-role],
+    .um-back,
+    .um-side-card,
+    .um-note {
+        animation: none;
+    }
+}

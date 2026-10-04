@@ -4,85 +4,205 @@
     ViewData["Title"] = "Edit User";
 }
 
-<div class="page-header">
-    <div>
-        <h2>Edit User</h2>
-        <p>Update the user's email address and role.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/users.css" asp-append-version="true" />
+}
+
+<div class="um-page um-form-page">
+
+    <a asp-action="Index" class="um-back">
+        <i class="bi bi-arrow-left"></i>
+        Back to User Management
+    </a>
+
+    <!-- HEADER -->
+    <div class="um-header">
+
+        <div class="um-title-area">
+            <div class="um-page-icon">
+                <i class="bi bi-pencil-square"></i>
+            </div>
+
+            <div>
+                <h1>Edit User</h1>
+                <p>Update the user's email address and role.</p>
+            </div>
+        </div>
+
     </div>
 
-    <div>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i>
-            Back
-        </a>
+    <div class="row g-4">
+
+        <!-- FORM -->
+        <div class="col-lg-8">
+
+            <div class="um-card um-form-card">
+
+                <div class="um-form-head">
+                    <div class="um-form-head-icon">
+                        <i class="bi bi-person-gear"></i>
+                    </div>
+
+                    <div>
+                        <h5>Account Details</h5>
+                        <p>Changes apply as soon as you save.</p>
+                    </div>
+                </div>
+
+                <form asp-action="Edit" method="post">
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="um-form-body">
+
+                        <div asp-validation-summary="ModelOnly" class="um-alert"></div>
+
+                        <!-- EMAIL -->
+                        <div class="um-field">
+                            <label asp-for="Email" class="um-label">Email Address</label>
+
+                            <div class="um-input-wrap">
+                                <i class="bi bi-envelope"></i>
+                                <input asp-for="Email"
+                                       type="email"
+                                       class="um-input"
+                                       placeholder="Enter email address"
+                                       autocomplete="off" />
+                            </div>
+
+                            <span asp-validation-for="Email" class="um-field-error"></span>
+                        </div>
+
+                        <!-- ROLE -->
+                        <div class="um-field mb-0">
+
+                            <span class="um-label" id="roleLabel">Role</span>
+
+                            <div class="um-role-grid" role="radiogroup" aria-labelledby="roleLabel">
+
+                                <label class="um-role-option">
+                                    <input type="radio" asp-for="Role" id="Role_Staff" value="Staff" />
+
+                                    <div class="um-role-card">
+                                        <div class="um-role-card-icon staff">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Staff</strong>
+                                            <small>Day-to-day store access</small>
+                                        </div>
+                                        <i class="bi bi-check-circle-fill um-role-check"></i>
+                                    </div>
+                                </label>
+
+                                <label class="um-role-option">
+                                    <input type="radio" asp-for="Role" id="Role_Admin" value="Admin" />
+
+                                    <div class="um-role-card">
+                                        <div class="um-role-card-icon admin">
+                                            <i class="bi bi-shield-fill"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Admin</strong>
+                                            <small>Full administrative access</small>
+                                        </div>
+                                        <i class="bi bi-check-circle-fill um-role-check"></i>
+                                    </div>
+                                </label>
+
+                            </div>
+
+                            <span asp-validation-for="Role" class="um-field-error"></span>
+
+                            <div class="um-note" id="adminNote" hidden>
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div>
+                                    Admin accounts are protected. After saving, this account can't be
+                                    edited, disabled or deleted from the user list.
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="um-form-actions">
+                        <a asp-action="Index" class="um-btn um-btn-ghost">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn um-add-btn">
+                            <i class="bi bi-check-circle"></i>
+                            Save Changes
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- SIDE TIPS -->
+        <div class="col-lg-4">
+
+            <div class="um-side-card">
+
+                <h6>Good to know</h6>
+
+                <ul class="um-tips">
+
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-envelope-check"></i></span>
+                        <div>
+                            <strong>Check the email</strong>
+                            Make sure the new address is correct, since it identifies this account.
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-shield-lock"></i></span>
+                        <div>
+                            <strong>Admins are protected</strong>
+                            Once a user is an Admin, they can't be edited, disabled or deleted from the list.
+                        </div>
+                    </li>
+
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-key"></i></span>
+                        <div>
+                            <strong>Password unchanged</strong>
+                            Passwords are not changed on this page.
+                        </div>
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
     </div>
-</div>
 
-<div class="card">
-    <div class="card-body">
-
-        <form asp-action="Edit" method="post">
-
-            @Html.AntiForgeryToken()
-
-            <input type="hidden" asp-for="Id" />
-
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
-            </div>
-
-            <!-- EMAIL -->
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">
-                    Email Address
-                </label>
-
-                <input asp-for="Email"
-                       type="email"
-                       class="form-control"
-                       placeholder="Enter email address" />
-
-                <span asp-validation-for="Email"
-                      class="text-danger">
-                </span>
-            </div>
-
-            <!-- ROLE -->
-            <div class="mb-3">
-                <label asp-for="Role" class="form-label">
-                    Role
-                </label>
-
-                <select asp-for="Role" class="form-select">
-                    <option value="Staff">Staff</option>
-                    <option value="Admin">Admin</option>
-                </select>
-
-                <span asp-validation-for="Role"
-                      class="text-danger">
-                </span>
-            </div>
-
-            <!-- BUTTONS -->
-            <div class="d-flex gap-2">
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i>
-                    Save Changes
-                </button>
-
-                <a asp-action="Index"
-                   class="btn btn-secondary">
-                    Cancel
-                </a>
-
-            </div>
-
-        </form>
-
-    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function () {
+            // Show the "Admin accounts are protected" warning only while Admin is selected
+            var radios = document.querySelectorAll('input[name="Role"]');
+            var admin = document.getElementById('Role_Admin');
+            var note = document.getElementById('adminNote');
+
+            function sync() {
+                if (note && admin) note.hidden = !admin.checked;
+            }
+
+            radios.forEach(function (r) { r.addEventListener('change', sync); });
+            sync();
+        })();
+    </script>
 }

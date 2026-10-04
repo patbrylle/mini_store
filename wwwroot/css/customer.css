@@ -1,1094 +1,890 @@
-/* ==========================================================================
-   Customers — theme matched to dashboard.css / reports.css
-========================================================================== */
-
-:root {
-
-    --color-primary: #e4772e;
-    --color-primary-dark: #c95f1d;
-    --color-primary-soft: #fff0e6;
-
-    --color-gold: #d49a21;
-    --color-gold-soft: #fff7df;
-
-    --color-success: #3c9461;
-    --color-success-soft: #e8f6ed;
-
-    --color-danger: #c0392b;
-    --color-danger-soft: #fdeaea;
-
-    --color-text: #222;
-    --color-text-muted: #777;
-    --color-border: #eee;
-
-}
-
-
-/* ==========================================================================
-   Page
-========================================================================== */
+/* =========================================================
+   Mini Store — Customers
+   (uses the tokens defined in site.css)
+   ========================================================= */
 
 .customer-page {
-
+    max-width: 1400px;
+    margin: 0 auto;
     padding-bottom: 30px;
-
 }
 
+@keyframes cuFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+}
 
-/* ==========================================================================
-   Header
-========================================================================== */
+@keyframes cuRow {
+    from { opacity: 0; transform: translateX(-8px); }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .customer-header {
-
     display: flex;
-
+    align-items: center;
     justify-content: space-between;
-
-    align-items: flex-start;
-
-    margin-bottom: 28px;
-
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+    animation: cuFadeUp .55s var(--ease-out) backwards;
 }
 
 .customer-title-area {
-
     display: flex;
-
     align-items: center;
-
     gap: 14px;
-
 }
 
 .customer-page-icon {
-
-    width: 48px;
-    height: 48px;
-
-    min-width: 48px;
-
-    border-radius: 13px;
-
-    background: var(--color-primary-soft);
-
-    color: var(--color-primary);
-
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    font-size: 21px;
-
+    border-radius: 16px;
+    font-size: 23px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    box-shadow: 0 8px 18px -6px rgba(228, 119, 46, .6);
 }
 
 .customer-title-area h1 {
-
-    margin: 0;
-
-    font-size: 28px;
-
+    margin: 0 0 3px;
+    font-size: 1.65rem;
     font-weight: 800;
-
+    letter-spacing: -.4px;
     color: var(--color-text);
-
 }
 
 .customer-title-area p {
-
-    margin: 4px 0 0;
-
+    margin: 0;
+    font-size: .92rem;
     color: var(--color-text-muted);
-
-    font-size: 13px;
-
 }
 
-
-/* ==========================================================================
-   Primary Button
-========================================================================== */
-
 .customer-primary-btn {
-
+    position: relative;
     display: inline-flex;
-
     align-items: center;
-
-    gap: 5px;
-
-    background: var(--color-primary);
-
-    color: #fff;
-
-    border: 1px solid var(--color-primary);
-
-    border-radius: 9px;
-
-    padding: 10px 16px;
-
-    font-size: 13px;
-
+    gap: 8px;
+    padding: 10px 18px;
+    overflow: hidden;
+    font-size: .88rem;
     font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border: 0;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px rgba(228, 119, 46, .3);
+    cursor: pointer;
+    transition: transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
 
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease;
-
+/* shine sweep on hover */
+.customer-primary-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, .35), transparent);
+    transform: skewX(-20deg);
+    transition: left .7s var(--ease);
 }
 
 .customer-primary-btn:hover {
-
-    background: var(--color-primary-dark);
-
-    border-color: var(--color-primary-dark);
-
     color: #fff;
-
-    transform: translateY(-1px);
-
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(228, 119, 46, .4);
 }
 
+.customer-primary-btn:hover::after {
+    left: 135%;
+}
 
-/* ==========================================================================
-   Summary / KPI Cards
-========================================================================== */
+/* =========================================================
+   ALERTS
+   ========================================================= */
+
+.customer-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    font-size: .88rem;
+    font-weight: 600;
+    border: 1px solid;
+    border-left-width: 4px;
+    border-radius: var(--radius-md);
+    animation: cuFadeUp .45s var(--ease-out) backwards;
+}
+
+.customer-alert > i {
+    font-size: 18px;
+}
+
+.customer-alert > span {
+    flex: 1;
+}
+
+.customer-alert .btn-close {
+    padding: .5rem;
+    font-size: .65rem;
+}
+
+.customer-alert.is-success {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border-color: color-mix(in srgb, var(--color-success) 25%, transparent);
+    border-left-color: var(--color-success);
+}
+
+.customer-alert.is-warning {
+    color: #7a5608;
+    background: color-mix(in srgb, var(--color-gold) 14%, white);
+    border-color: color-mix(in srgb, var(--color-gold) 35%, transparent);
+    border-left-color: var(--color-gold);
+}
+
+/* =========================================================
+   SUMMARY CARDS
+   ========================================================= */
 
 .customer-kpi-row {
-
-    margin-bottom: 32px;
-
+    margin-bottom: 24px;
 }
 
+.customer-stat-card.is-primary { --kpi: var(--color-primary); }
+.customer-stat-card.is-gold    { --kpi: var(--color-gold); }
+.customer-stat-card.is-success { --kpi: var(--color-success); }
+
 .customer-stat-card {
+    --kpi-soft: color-mix(in srgb, var(--kpi, var(--color-primary)) 12%, transparent);
 
+    position: relative;
     height: 100%;
-
-    padding: 20px;
-
-    border-radius: 16px;
-
-    background: #fff;
-
-    border: 1px solid var(--color-border);
-
     display: flex;
-
     align-items: center;
+    gap: 16px;
+    padding: 20px;
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: cuFadeUp .6s var(--ease-out) calc(var(--i, 0) * .08s + .1s) backwards;
+    transition: transform .35s var(--ease-out), box-shadow .35s var(--ease), border-color .35s var(--ease);
+}
 
-    gap: 14px;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-
+.customer-stat-card::after {
+    content: "";
+    position: absolute;
+    top: -34px;
+    right: -34px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--kpi-soft);
+    pointer-events: none;
+    transition: transform .5s var(--ease-out);
 }
 
 .customer-stat-card:hover {
-
-    transform: translateY(-3px);
-
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--kpi);
 }
 
-
-/* ==========================================================================
-   Stat Icons
-========================================================================== */
+.customer-stat-card:hover::after {
+    transform: scale(1.35);
+}
 
 .customer-stat-icon {
-
-    width: 46px;
-    height: 46px;
-
-    min-width: 46px;
-
-    border-radius: 13px;
-
+    position: relative;
+    z-index: 1;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    font-size: 19px;
-
+    border-radius: 16px;
+    font-size: 24px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--kpi), color-mix(in srgb, var(--kpi) 72%, white));
+    box-shadow: 0 8px 18px -6px color-mix(in srgb, var(--kpi) 75%, transparent);
+    transition: transform .4s var(--ease-spring);
 }
 
-.stat-primary {
-
-    background: var(--color-primary-soft);
-
-    color: var(--color-primary);
-
+.customer-stat-card:hover .customer-stat-icon {
+    transform: scale(1.08) rotate(-5deg);
 }
 
-.stat-gold {
-
-    background: var(--color-gold-soft);
-
-    color: var(--color-gold);
-
+.customer-stat-body {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
 }
-
-.stat-success {
-
-    background: var(--color-success-soft);
-
-    color: var(--color-success);
-
-}
-
-
-/* ==========================================================================
-   Stat Text
-========================================================================== */
 
 .customer-stat-label {
-
     display: block;
-
+    margin-bottom: 4px;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
     color: var(--color-text-muted);
-
-    font-size: 12.5px;
-
-    margin: 0 0 4px;
-
 }
 
 .customer-stat-card h3 {
-
     margin: 0;
-
-    font-size: 21px;
-
+    font-size: 1.55rem;
     font-weight: 800;
-
+    line-height: 1.15;
+    letter-spacing: -.4px;
     color: var(--color-text);
-
+    font-variant-numeric: tabular-nums;
 }
 
 .customer-stat-card small {
-
     display: block;
-
-    margin-top: 2px;
-
+    margin-top: 3px;
+    font-size: .78rem;
     color: var(--color-text-muted);
-
-    font-size: 12px;
-
 }
 
-
-/* ==========================================================================
-   Customer Directory Panel
-========================================================================== */
+/* =========================================================
+   DIRECTORY CARD
+   ========================================================= */
 
 .customer-table-card {
-
-    background: #fff;
-
-    border: 1px solid var(--color-border);
-
-    border-radius: 16px;
-
     overflow: hidden;
-
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: cuFadeUp .6s var(--ease-out) .35s backwards;
 }
 
-
-/* ==========================================================================
-   Directory Header
-========================================================================== */
-
 .customer-table-header {
-
-    padding: 20px;
-
     display: flex;
-
-    justify-content: space-between;
-
     align-items: center;
-
-    gap: 20px;
-
-    border-bottom: 1px solid var(--color-border);
-
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 20px 22px;
 }
 
 .customer-section-title {
-
     display: flex;
-
     align-items: center;
-
     gap: 12px;
-
 }
 
 .customer-section-icon {
-
-    width: 40px;
-    height: 40px;
-
-    border-radius: 11px;
-
-    background: var(--color-primary-soft);
-
-    color: var(--color-primary);
-
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    font-size: 17px;
-
+    border-radius: 13px;
+    font-size: 18px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
 }
 
 .customer-section-title h5 {
-
-    margin: 0;
-
-    font-size: 16px;
-
+    margin: 0 0 2px;
+    font-size: 1rem;
     font-weight: 700;
-
     color: var(--color-text);
-
 }
 
 .customer-section-title p {
-
-    margin: 3px 0 0;
-
+    margin: 0;
+    font-size: .82rem;
     color: var(--color-text-muted);
-
-    font-size: 12.5px;
-
 }
 
+.customer-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-/* ==========================================================================
-   Search
-========================================================================== */
+.customer-count {
+    padding: 6px 12px;
+    font-size: .76rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-radius: 999px;
+}
 
+/* ---- search ---- */
 .customer-search {
-
     position: relative;
-
-    width: 260px;
-
+    width: 270px;
+    max-width: 100%;
 }
 
 .customer-search i {
-
     position: absolute;
-
-    left: 13px;
-
     top: 50%;
-
+    left: 14px;
     transform: translateY(-50%);
-
-    color: #aaa;
-
     font-size: 14px;
-
+    color: var(--color-text-muted);
     pointer-events: none;
-
 }
 
 .customer-search input {
-
     width: 100%;
-
-    padding: 9px 12px 9px 37px;
-
-    border: 1px solid #ddd;
-
-    border-radius: 9px;
-
-    background: #fff;
-
+    padding: 9px 14px 9px 38px;
+    font-size: .86rem;
     color: var(--color-text);
-
-    font-size: 13px;
-
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
     outline: none;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease), background-color var(--speed) var(--ease);
 }
 
 .customer-search input::placeholder {
-
-    color: #aaa;
-
+    color: var(--color-text-muted);
+    opacity: .7;
 }
 
 .customer-search input:focus {
-
-    border-color: var(--color-primary);
-
-    box-shadow:
-        0 0 0 3px var(--color-primary-soft);
-
+    background: var(--color-surface);
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
-
-/* ==========================================================================
-   Customer Table
-========================================================================== */
+/* =========================================================
+   TABLE
+   ========================================================= */
 
 .customer-table {
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: var(--color-surface-soft);
 
     margin: 0;
-
+    font-size: .88rem;
 }
 
 .customer-table thead th {
-
-    background: #fafafa;
-
-    color: var(--color-text-muted);
-
-    font-size: 11.5px;
-
+    padding: 11px 22px;
+    font-size: .68rem;
     font-weight: 700;
-
+    letter-spacing: .8px;
     text-transform: uppercase;
-
-    letter-spacing: 0.03em;
-
     white-space: nowrap;
-
-    padding: 13px 18px;
-
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
-
 }
 
 .customer-table tbody td {
-
-    padding: 14px 18px;
-
+    padding: 14px 22px;
     vertical-align: middle;
-
-    border-bottom: 1px solid var(--color-border);
-
-    font-size: 13px;
-
     color: var(--color-text);
-
+    border-bottom: 1px solid var(--color-border);
 }
 
 .customer-table tbody tr:last-child td {
-
     border-bottom: 0;
-
 }
 
 .customer-table tbody tr {
-
-    transition: background 0.15s ease;
-
+    animation: cuRow .45s var(--ease-out) backwards;
+    transition: background-color var(--speed) var(--ease);
 }
+
+.customer-table tbody tr:nth-child(1) { animation-delay: .45s; }
+.customer-table tbody tr:nth-child(2) { animation-delay: .50s; }
+.customer-table tbody tr:nth-child(3) { animation-delay: .55s; }
+.customer-table tbody tr:nth-child(4) { animation-delay: .60s; }
+.customer-table tbody tr:nth-child(n+5) { animation-delay: .65s; }
 
 .customer-table tbody tr:hover {
-
-    background: #fffaf6;
-
+    background: var(--color-surface-soft);
 }
 
-
-/* ==========================================================================
-   Customer Name
-========================================================================== */
-
+/* ---- customer cell ---- */
 .customer-cell {
-
     display: flex;
-
     align-items: center;
-
-    gap: 11px;
-
+    gap: 12px;
 }
 
 .customer-avatar {
-
-    width: 38px;
-    height: 38px;
-
-    min-width: 38px;
-
-    border-radius: 50%;
-
-    background: var(--color-primary-soft);
-
-    color: var(--color-primary);
-
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
+    border-radius: 50%;
     font-size: 15px;
-
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
 }
 
 .customer-name {
-
     font-weight: 700;
-
     color: var(--color-text);
-
 }
 
-.customer-email {
-
+/* ---- details ---- */
+.customer-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     color: var(--color-text-muted);
-
 }
 
-.customer-contact {
+.customer-meta i {
+    font-size: 14px;
+    color: var(--color-primary);
+}
 
+.customer-contact .customer-meta {
     color: var(--color-text);
-
     font-weight: 500;
+}
 
+.customer-none {
+    font-size: .82rem;
+    font-style: italic;
+    color: var(--color-text-muted);
+    opacity: .7;
 }
 
 .customer-address {
-
-    color: var(--color-text-muted);
-
-    max-width: 220px;
-
+    max-width: 260px;
 }
 
+.customer-address-text {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-text-muted);
+}
 
-/* ==========================================================================
-   Action Buttons
-========================================================================== */
+/* =========================================================
+   ROW ACTIONS
+   ========================================================= */
 
 .customer-actions {
-
     display: flex;
-
-    justify-content: flex-end;
-
     align-items: center;
-
-    gap: 6px;
-
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 .customer-action-btn {
-
     display: inline-flex;
-
     align-items: center;
-
-    border-radius: 7px;
-
-    padding: 6px 10px;
-
-    background: #fff;
-
-    border: 1px solid var(--color-border);
-
-    font-size: 12px;
-
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 13px;
+    font-size: .8rem;
     font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: transform var(--speed) var(--ease), background-color var(--speed) var(--ease),
+                color var(--speed) var(--ease), border-color var(--speed) var(--ease),
+                box-shadow var(--speed) var(--ease);
+}
 
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-
+.customer-action-btn:hover {
+    transform: translateY(-1px);
 }
 
 .customer-edit-btn {
-
-    color: var(--color-gold);
-
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
 
 .customer-edit-btn:hover {
-
-    background: var(--color-gold-soft);
-
-    border-color: #efdca9;
-
-    color: #b27d0e;
-
+    color: #fff;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 12px -4px rgba(228, 119, 46, .5);
 }
 
 .customer-delete-btn {
-
     color: var(--color-danger);
-
+    background: var(--color-danger-bg);
+    border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
 }
 
 .customer-delete-btn:hover {
-
-    background: var(--color-danger-soft);
-
-    border-color: #f2c5c0;
-
-    color: #a93226;
-
+    color: #fff;
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    box-shadow: 0 6px 12px -4px color-mix(in srgb, var(--color-danger) 55%, transparent);
 }
 
-
-/* ==========================================================================
-   Empty State
-========================================================================== */
+/* =========================================================
+   EMPTY STATES
+   ========================================================= */
 
 .customer-empty {
-
-    min-height: 210px;
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
-
-    color: #999;
-
+    gap: 6px;
+    min-height: 220px;
+    padding: 40px 16px;
     text-align: center;
+}
 
+.customer-empty[hidden] {
+    display: none;
 }
 
 .customer-empty-icon {
-
-    width: 58px;
-    height: 58px;
-
-    margin-bottom: 12px;
-
-    border-radius: 14px;
-
-    background: var(--color-primary-soft);
-
-    color: var(--color-primary);
-
+    width: 62px;
+    height: 62px;
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    font-size: 23px;
-
+    margin-bottom: 6px;
+    border-radius: 50%;
+    font-size: 27px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
 }
 
 .customer-empty h5 {
-
-    margin: 0 0 5px;
-
-    color: var(--color-text);
-
-    font-size: 15px;
-
+    margin: 0;
+    font-size: 1rem;
     font-weight: 700;
-
+    color: var(--color-text);
 }
 
 .customer-empty p {
-
-    margin: 0 0 17px;
-
+    margin: 0 0 12px;
+    font-size: .86rem;
     color: var(--color-text-muted);
-
-    font-size: 12.5px;
-
 }
 
-
-/* ==========================================================================
-   Add Customer Modal
-========================================================================== */
+/* =========================================================
+   MODALS (Add / Edit / Delete)
+   ========================================================= */
 
 .customer-modal {
-
-    border: none;
-
-    border-radius: 14px;
-
     overflow: hidden;
-
-    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
-
+    border: 0;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
 }
 
-
-/* ==========================================================================
-   Modal Header
-========================================================================== */
-
 .customer-modal-header {
-
-    padding: 20px 22px;
-
+    padding: 20px 24px;
+    background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
-
-    background: #fff;
-
 }
 
 .customer-modal-title {
-
     display: flex;
-
     align-items: center;
-
-    gap: 12px;
-
+    gap: 14px;
 }
 
 .customer-modal-icon {
-
-    width: 42px;
-    height: 42px;
-
-    min-width: 42px;
-
-    border-radius: 11px;
-
-    background: var(--color-primary-soft);
-
-    color: var(--color-primary);
-
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
     display: flex;
-
     align-items: center;
-
     justify-content: center;
+    border-radius: 14px;
+    font-size: 19px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
+}
 
-    font-size: 18px;
-
+.customer-modal-icon.is-danger {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
 }
 
 .customer-modal-title h5 {
-
-    margin: 0;
-
-    color: var(--color-text);
-
-    font-size: 17px;
-
+    margin: 0 0 2px;
+    font-size: 1.05rem;
     font-weight: 700;
-
+    color: var(--color-text);
 }
 
 .customer-modal-title p {
-
-    margin: 3px 0 0;
-
+    margin: 0;
+    font-size: .8rem;
     color: var(--color-text-muted);
-
-    font-size: 12px;
-
 }
-
-
-/* ==========================================================================
-   Modal Body
-========================================================================== */
 
 .customer-modal-body {
-
-    padding: 22px;
-
+    padding: 24px;
 }
 
+.customer-delete-text {
+    margin: 0;
+    font-size: .92rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+}
+
+.customer-delete-text strong {
+    color: var(--color-text);
+}
+
+/* ---- form fields ---- */
 .customer-form-group {
-
-    margin-bottom: 17px;
-
+    margin-bottom: 18px;
 }
 
 .customer-form-group:last-child {
-
     margin-bottom: 0;
-
 }
 
 .customer-form-group label {
-
     display: block;
-
     margin-bottom: 7px;
-
+    font-size: .82rem;
+    font-weight: 700;
     color: var(--color-text);
-
-    font-size: 13px;
-
-    font-weight: 600;
-
 }
 
+.customer-form-group .text-danger,
+.customer-form-group .field-validation-error {
+    display: block;
+    margin-top: 6px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--color-danger) !important;
+}
 
-/* ==========================================================================
-   Modal Inputs
-========================================================================== */
+.customer-form-group .text-danger:empty {
+    display: none;
+}
 
 .customer-input {
-
     position: relative;
-
 }
 
 .customer-input > i {
-
     position: absolute;
-
-    left: 13px;
-
     top: 50%;
-
-    transform: translateY(-50%);
-
-    color: var(--color-text-muted);
-
-    font-size: 14px;
-
+    left: 14px;
     z-index: 2;
+    transform: translateY(-50%);
+    font-size: 15px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    transition: color var(--speed) var(--ease);
+}
 
+.customer-input:focus-within > i {
+    color: var(--color-primary);
 }
 
 .customer-input .form-control {
-
-    min-height: 42px;
-
-    padding-left: 38px;
-
-    border: 1px solid #ddd;
-
-    border-radius: 9px;
-
-    background: #fff;
-
+    min-height: 44px;
+    padding: 10px 14px 10px 42px;
+    font-size: .9rem;
     color: var(--color-text);
-
-    font-size: 13px;
-
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     box-shadow: none;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease),
+                background-color var(--speed) var(--ease);
 }
 
 .customer-input .form-control::placeholder {
-
-    color: #aaa;
-
+    color: var(--color-text-muted);
+    opacity: .7;
 }
 
 .customer-input .form-control:focus {
-
-    border-color: var(--color-primary);
-
-    box-shadow:
-        0 0 0 3px var(--color-primary-soft);
-
+    background: var(--color-surface);
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
-
-/* ==========================================================================
-   Textarea
-========================================================================== */
+.customer-input .form-control.input-validation-error,
+.customer-input .form-control.is-invalid {
+    background: color-mix(in srgb, var(--color-danger) 5%, var(--color-surface));
+    border-color: var(--color-danger);
+}
 
 .customer-textarea > i {
-
-    top: 17px;
-
+    top: 20px;
     transform: none;
-
 }
 
 .customer-textarea textarea {
-
-    min-height: 90px;
-
+    min-height: 92px;
     resize: vertical;
-
 }
 
-
-/* ==========================================================================
-   Modal Footer
-========================================================================== */
-
+/* ---- footer + buttons ---- */
 .customer-modal-footer {
-
-    padding: 15px 22px;
-
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    background: var(--color-bg);
     border-top: 1px solid var(--color-border);
-
-    background: #fafafa;
-
 }
 
+.customer-modal-footer > * {
+    margin: 0;
+}
 
-/* ==========================================================================
-   Cancel Button
-========================================================================== */
+.customer-modal-footer form {
+    display: inline-block;
+}
 
 .customer-cancel-btn {
-
-    padding: 9px 16px;
-
-    background: #fff;
-
-    color: var(--color-text-muted);
-
-    border: 1px solid var(--color-border);
-
-    border-radius: 8px;
-
-    font-size: 13px;
-
+    padding: 9px 18px;
+    font-size: .85rem;
     font-weight: 600;
-
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease),
+                border-color var(--speed) var(--ease);
 }
 
 .customer-cancel-btn:hover {
-
-    background: #f5f5f5;
-
-    color: var(--color-text);
-
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: var(--color-primary-light);
 }
 
-
-/* ==========================================================================
-   Save Button
-========================================================================== */
-
 .customer-save-btn {
-
-    padding: 9px 17px;
-
-    background: var(--color-primary);
-
+    padding: 9px 18px;
+    font-size: .85rem;
+    font-weight: 700;
     color: #fff;
-
-    border: 1px solid var(--color-primary);
-
-    border-radius: 8px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
-
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border: 0;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px rgba(228, 119, 46, .3);
+    transition: transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
 }
 
 .customer-save-btn:hover {
-
-    background: var(--color-primary-dark);
-
-    border-color: var(--color-primary-dark);
-
     color: #fff;
-
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(228, 119, 46, .4);
 }
 
+.customer-delete-confirm {
+    padding: 9px 18px;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--color-danger);
+    border: 0;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--color-danger) 55%, transparent);
+    transition: transform var(--speed) var(--ease), background-color var(--speed) var(--ease);
+}
 
-/* ==========================================================================
-   Responsive
-========================================================================== */
+.customer-delete-confirm:hover {
+    color: #fff;
+    background: color-mix(in srgb, var(--color-danger) 88%, black);
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   RESPONSIVE  (keep every @media rule down here, at the end)
+   ========================================================= */
 
 @media (max-width: 768px) {
+    .customer-title-area h1 { font-size: 1.4rem; }
 
     .customer-header {
-
         flex-direction: column;
-
-        gap: 14px;
-
-    }
-
-    .customer-title-area h1 {
-
-        font-size: 24px;
-
+        align-items: stretch;
     }
 
     .customer-primary-btn {
-
         width: 100%;
-
         justify-content: center;
-
     }
 
     .customer-table-header {
-
         flex-direction: column;
-
         align-items: stretch;
+        padding: 18px 16px;
+    }
 
+    .customer-tools {
+        flex-direction: row-reverse;
+        justify-content: space-between;
     }
 
     .customer-search {
-
-        width: 100%;
-
+        flex: 1;
+        width: auto;
     }
 
     .customer-table {
-
         min-width: 760px;
-
     }
-
 }
 
-
-/* ==========================================================================
-   Modal Responsive
-========================================================================== */
-
 @media (max-width: 576px) {
+    .customer-stat-card { padding: 16px; }
+    .customer-stat-icon { width: 48px; height: 48px; font-size: 21px; }
+    .customer-stat-card h3 { font-size: 1.35rem; }
 
-    .customer-modal-header {
-
-        padding: 17px 18px;
-
+    /* icon-only action buttons on phones */
+    .customer-action-btn {
+        width: 34px;
+        height: 34px;
+        padding: 0;
     }
 
-    .customer-modal-body {
-
-        padding: 18px;
-
+    .customer-action-btn span {
+        display: none;
     }
 
+    .customer-modal-header,
+    .customer-modal-body,
     .customer-modal-footer {
-
-        padding: 13px 18px;
-
+        padding-left: 18px;
+        padding-right: 18px;
     }
+}
 
+/* must stay LAST so it overrides every animation above */
+@media (prefers-reduced-motion: reduce) {
+    .customer-header,
+    .customer-alert,
+    .customer-stat-card,
+    .customer-table-card,
+    .customer-table tbody tr {
+        animation: none;
+    }
 }

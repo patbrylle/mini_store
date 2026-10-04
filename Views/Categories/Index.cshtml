@@ -3,17 +3,13 @@
 @{
     ViewData["Title"] = "Categories";
 
-    var categories = Model?.ToList()
-        ?? new List<mini_store.Models.Category>();
+    var categories = Model?.ToList() ?? new List<mini_store.Models.Category>();
 
     var totalCategories = categories.Count;
 
-    /*
-     * This will be replaced by the real product count
-     * when your Category model has a Products navigation property.
-     */
     var totalProducts = categories.Sum(c =>
-        c.Products?.Count ?? 0);
+        c.Products?.Count ?? 0
+    );
 }
 
 @section Styles {
@@ -24,9 +20,9 @@
 
 <div class="category-page">
 
-    <!-- =========================================================
+    <!-- ============================================================
          PAGE HEADER
-    ========================================================== -->
+         ============================================================ -->
 
     <div class="category-header">
 
@@ -46,7 +42,6 @@
 
         </div>
 
-
         <button type="button"
                 class="category-primary-btn"
                 data-bs-toggle="modal"
@@ -61,9 +56,9 @@
     </div>
 
 
-    <!-- =========================================================
-         SUMMARY / KPI CARDS
-    ========================================================== -->
+    <!-- ============================================================
+         KPI CARDS
+         ============================================================ -->
 
     <div class="row g-3 category-kpi-row">
 
@@ -73,10 +68,8 @@
 
             <div class="category-stat-card">
 
-                <div class="category-stat-icon stat-primary">
-
+                <div class="category-stat-icon">
                     <i class="bi bi-folder2-open"></i>
-
                 </div>
 
                 <div>
@@ -100,16 +93,14 @@
         </div>
 
 
-        <!-- PRODUCTS CATEGORIZED -->
+        <!-- TOTAL PRODUCTS -->
 
         <div class="col-md-6">
 
             <div class="category-stat-card">
 
-                <div class="category-stat-icon stat-gold">
-
+                <div class="category-stat-icon">
                     <i class="bi bi-box-seam"></i>
-
                 </div>
 
                 <div>
@@ -135,23 +126,18 @@
     </div>
 
 
-    <!-- =========================================================
+    <!-- ============================================================
          CATEGORY DIRECTORY
-    ========================================================== -->
+         ============================================================ -->
 
     <div class="category-table-card">
-
-
-        <!-- DIRECTORY HEADER -->
 
         <div class="category-table-header">
 
             <div class="category-section-title">
 
                 <div class="category-section-icon">
-
                     <i class="bi bi-list-ul"></i>
-
                 </div>
 
                 <div>
@@ -185,9 +171,9 @@
         </div>
 
 
-        <!-- =====================================================
-             TABLE
-        ====================================================== -->
+        <!-- ========================================================
+             CATEGORY TABLE
+             ======================================================== -->
 
         <div class="table-responsive">
 
@@ -241,11 +227,9 @@
 
                                         </div>
 
-                                        <div>
+                                        <div class="category-name">
 
-                                            <div class="category-name">
-                                                @category.CategoryName
-                                            </div>
+                                            @category.CategoryName
 
                                         </div>
 
@@ -254,7 +238,7 @@
                                 </td>
 
 
-                                <!-- PRODUCTS -->
+                                <!-- PRODUCT COUNT -->
 
                                 <td>
 
@@ -293,44 +277,47 @@
 
                                     <div class="category-actions">
 
+
                                         <!-- VIEW PRODUCTS -->
 
-                                        <a asp-controller="Categories"
-                                           asp-action="Products"
-                                           asp-route-id="@category.CategoryId"
-                                           class="category-action-btn category-view-btn">
+                                        <button type="button"
+                                                class="category-action-btn category-view-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#viewProductsModal-@category.CategoryId">
 
                                             <i class="bi bi-eye"></i>
 
                                             View Products
 
-                                        </a>
+                                        </button>
 
 
                                         <!-- EDIT -->
 
-                                        <a asp-action="Edit"
-                                           asp-route-id="@category.CategoryId"
-                                           class="category-action-btn category-edit-btn">
+                                        <button type="button"
+                                                class="category-action-btn category-edit-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editCategoryModal-@category.CategoryId">
 
                                             <i class="bi bi-pencil"></i>
 
                                             Edit
 
-                                        </a>
+                                        </button>
 
 
                                         <!-- DELETE -->
 
-                                        <a asp-action="Delete"
-                                           asp-route-id="@category.CategoryId"
-                                           class="category-action-btn category-delete-btn">
+                                        <button type="button"
+                                                class="category-action-btn category-delete-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteCategoryModal-@category.CategoryId">
 
                                             <i class="bi bi-trash"></i>
 
                                             Delete
 
-                                        </a>
+                                        </button>
 
                                     </div>
 
@@ -358,7 +345,8 @@
                                     </h5>
 
                                     <p>
-                                        Add your first category to organize your products.
+                                        Add your first category to organize
+                                        your products.
                                     </p>
 
                                     <button type="button"
@@ -390,9 +378,9 @@
 </div>
 
 
-<!-- =============================================================
+<!-- ================================================================
      ADD CATEGORY MODAL
-============================================================== -->
+     ================================================================ -->
 
 <div class="modal fade"
      id="addCategoryModal"
@@ -507,9 +495,481 @@
 </div>
 
 
+<!-- ================================================================
+     EDIT / DELETE / VIEW PRODUCT MODALS
+     ================================================================ -->
+
+@foreach (var category in categories)
+{
+
+    <!-- ============================================================
+         EDIT CATEGORY MODAL
+         ============================================================ -->
+
+    <div class="modal fade"
+         id="editCategoryModal-@category.CategoryId"
+         tabindex="-1"
+         aria-labelledby="editCategoryModalLabel-@category.CategoryId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content category-modal">
+
+                <form asp-controller="Categories"
+                      asp-action="Edit"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <input type="hidden"
+                           name="id"
+                           value="@category.CategoryId" />
+
+                    <input type="hidden"
+                           name="CategoryId"
+                           value="@category.CategoryId" />
+
+
+                    <!-- HEADER -->
+
+                    <div class="modal-header category-modal-header">
+
+                        <div class="category-modal-title">
+
+                            <div class="category-modal-icon">
+
+                                <i class="bi bi-pencil"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h5 id="editCategoryModalLabel-@category.CategoryId">
+                                    Edit Category
+                                </h5>
+
+                                <p>
+                                    Update the category information.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                        </button>
+
+                    </div>
+
+
+                    <!-- BODY -->
+
+                    <div class="modal-body category-modal-body">
+
+                        <div class="category-form-group">
+
+                            <label for="editCategoryName-@category.CategoryId">
+                                Category Name
+                            </label>
+
+                            <div class="category-input">
+
+                                <i class="bi bi-tag"></i>
+
+                                <input type="text"
+                                       id="editCategoryName-@category.CategoryId"
+                                       name="CategoryName"
+                                       class="form-control"
+                                       value="@category.CategoryName"
+                                       required />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FOOTER -->
+
+                    <div class="modal-footer category-modal-footer">
+
+                        <button type="button"
+                                class="btn category-cancel-btn"
+                                data-bs-dismiss="modal">
+
+                            Cancel
+
+                        </button>
+
+                        <button type="submit"
+                                class="btn category-save-btn">
+
+                            <i class="bi bi-check-lg me-1"></i>
+
+                            Save Changes
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================================
+         DELETE CATEGORY MODAL
+         ============================================================ -->
+
+    <div class="modal fade"
+         id="deleteCategoryModal-@category.CategoryId"
+         tabindex="-1"
+         aria-labelledby="deleteCategoryModalLabel-@category.CategoryId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content category-modal">
+
+
+                <!-- HEADER -->
+
+                <div class="modal-header category-modal-header">
+
+                    <div class="category-modal-title">
+
+                        <div class="category-modal-icon is-danger">
+
+                            <i class="bi bi-trash"></i>
+
+                        </div>
+
+                        <div>
+
+                            <h5 id="deleteCategoryModalLabel-@category.CategoryId">
+                                Delete Category
+                            </h5>
+
+                            <p>
+                                This action cannot be undone.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+
+                </div>
+
+
+                <!-- BODY -->
+
+                <div class="modal-body category-modal-body">
+
+                    <p>
+
+                        Are you sure you want to delete
+
+                        <strong>
+                            @category.CategoryName
+                        </strong>?
+
+                    </p>
+
+
+                    @if (category.Products != null &&
+                         category.Products.Any())
+                    {
+
+                        <div class="alert alert-warning">
+
+                            <i class="bi bi-exclamation-triangle"></i>
+
+                            <span>
+
+                                This category contains
+
+                                <strong>
+                                    @category.Products.Count
+                                </strong>
+
+                                product(s).
+
+                            </span>
+
+                        </div>
+
+                    }
+
+                </div>
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer category-modal-footer">
+
+                    <button type="button"
+                            class="btn category-cancel-btn"
+                            data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+
+                    <form asp-controller="Categories"
+                          asp-action="Delete"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@category.CategoryId" />
+
+                        <button type="submit"
+                                class="btn btn-danger">
+
+                            <i class="bi bi-trash me-1"></i>
+
+                            Delete Category
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================================
+         VIEW PRODUCTS MODAL
+         ============================================================ -->
+
+    <div class="modal fade"
+         id="viewProductsModal-@category.CategoryId"
+         tabindex="-1"
+         aria-labelledby="viewProductsModalLabel-@category.CategoryId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+
+            <div class="modal-content category-modal">
+
+
+                <!-- HEADER -->
+
+                <div class="modal-header category-modal-header">
+
+                    <div class="category-modal-title">
+
+                        <div class="category-modal-icon">
+
+                            <i class="bi bi-box-seam"></i>
+
+                        </div>
+
+                        <div>
+
+                            <h5 id="viewProductsModalLabel-@category.CategoryId">
+
+                                @category.CategoryName Products
+
+                            </h5>
+
+                            <p>
+
+                                Products assigned to this category.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+
+                </div>
+
+
+                <!-- BODY -->
+
+                <div class="modal-body category-modal-body">
+
+                    @if (category.Products != null &&
+                         category.Products.Any())
+                    {
+
+                        <div class="table-responsive">
+
+                            <table class="table category-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Product
+                                        </th>
+
+                                        <th>
+                                            Price
+                                        </th>
+
+                                        <th>
+                                            Stock
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    @foreach (var product in category.Products)
+                                    {
+
+                                        <tr>
+
+                                            <!-- PRODUCT -->
+
+                                            <td>
+
+                                                <div class="category-cell">
+
+                                                    <div class="category-avatar">
+
+                                                        <i class="bi bi-box"></i>
+
+                                                    </div>
+
+                                                    <div class="category-name">
+
+                                                        @product.ProductName
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+
+                                            <!-- PRICE -->
+
+                                            <td>
+
+                                                ₱@product.Price.ToString("N2")
+
+                                            </td>
+
+
+                                            <!-- STOCK -->
+
+                                            <td>
+
+                                                @product.Quantity
+
+                                            </td>
+
+                                        </tr>
+
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    }
+                    else
+                    {
+
+                        <div class="category-empty">
+
+                            <div class="category-empty-icon">
+
+                                <i class="bi bi-box-seam"></i>
+
+                            </div>
+
+                            <h5>
+                                No products in this category
+                            </h5>
+
+                            <p>
+
+                                There are currently no products assigned
+                                to
+
+                                <strong>
+                                    @category.CategoryName
+                                </strong>.
+
+                            </p>
+
+                        </div>
+
+                    }
+
+                </div>
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer category-modal-footer">
+
+                    <button type="button"
+                            class="btn category-cancel-btn"
+                            data-bs-dismiss="modal">
+
+                        Close
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+}
+
+
 @section Scripts {
 
     <script src="~/js/categories.js"
-            asp-append-version="true"></script>
+            asp-append-version="true">
+    </script>
 
 }

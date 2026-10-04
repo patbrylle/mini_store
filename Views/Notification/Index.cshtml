@@ -2,76 +2,151 @@
 
 @{
     ViewData["Title"] = "Notifications";
+
+    var notifications = Model ?? new List<mini_store.ViewModels.Notification.NotificationViewModel>();
+    int unreadCount = notifications.Count(n => !n.IsRead);
+
+    // Use DateTime.UtcNow here if CreatedAt is saved with DateTime.UtcNow
+    var now = DateTime.Now;
+    var today = now.Date;
+
+    string GroupOf(DateTime d) =>
+        d.Date == today ? "Today" :
+        d.Date == today.AddDays(-1) ? "Yesterday" : "Earlier";
+
+    string TimeAgo(DateTime d)
+    {
+        var span = now - d;
+        if (span.TotalMinutes < 1) return "Just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} min ago";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} hr ago";
+
+        int days = (int)span.TotalDays;
+        if (days < 7) return days == 1 ? "1 day ago" : $"{days} days ago";
+
+        return d.ToString("MMM dd, yyyy");
+    }
+
+    // Picks an accent color from the icon name. Falls back to the brand orange.
+    string ToneOf(string icon)
+    {
+        var i = (icon ?? "").ToLower();
+        if (i.Contains("exclamation") || i.Contains("x-circle") || i.Contains("trash")) return "danger";
+        if (i.Contains("check")) return "success";
+        if (i.Contains("wallet") || i.Contains("cash") || i.Contains("box")) return "gold";
+        return "primary";
+    }
+
+    var groups = notifications
+        .OrderByDescending(n => n.CreatedAt)
+        .GroupBy(n => GroupOf(n.CreatedAt))
+        .ToList();
+
+    int itemIndex = 0;
 }
 
-<div class="page-header">
-    <div>
-        <h2>Notifications</h2>
-        <p>View important updates and alerts from your store.</p>
-    </div>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/notifications.css" asp-append-version="true" />
+}
 
-<div class="card">
-    <div class="card-body">
+<div class="notif-page">
 
-        @if (!Model.Any())
+    <!-- HEADER -->
+    <div class="notif-header">
+
+        <div class="notif-title-area">
+            <div class="notif-page-icon">
+                <i class="bi bi-bell"></i>
+            </div>
+
+            <div>
+                <h1>Notifications</h1>
+                <p>View important updates and alerts from your store.</p>
+            </div>
+        </div>
+
+        @if (unreadCount > 0)
         {
-            <div class="text-center py-5">
+            <span class="notif-pill">
+                <span class="notif-pill-dot"></span>
+                @unreadCount unread
+            </span>
+        }
+        else if (notifications.Any())
+        {
+            <span class="notif-pill is-clear">
+                <i class="bi bi-check2-all"></i>
+                All caught up
+            </span>
+        }
 
-                <i class="bi bi-bell-slash"
-                   style="font-size: 3rem;">
-                </i>
+    </div>
 
-                <h5 class="mt-3">
-                    No notifications
-                </h5>
 
-                <p class="text-muted">
-                    Everything looks good for now.
-                </p>
+    <!-- LIST -->
+    <div class="notif-card">
 
+        @if (!notifications.Any())
+        {
+            <div class="notif-empty">
+                <i class="bi bi-bell-slash"></i>
+                <h5>No notifications</h5>
+                <p>Everything looks good for now.</p>
             </div>
         }
         else
         {
-            @foreach (var notification in Model)
+            foreach (var group in groups)
             {
-               <a asp-controller="Notification"
-   asp-action="Open"
-   asp-route-id="@notification.NotificationId"
-   class="text-decoration-none text-dark">
+                <section class="notif-group">
 
-<div class="notification-item d-flex align-items-center gap-3 p-3 @(notification.IsRead ? "" : "notification-unread")">
-                        <div class="notification-icon">
-                            <i class="bi @notification.Icon"></i>
-                        </div>
-
-                        <div class="notification-content flex-grow-1">
-
-                          <h6 class="mb-1 @(notification.IsRead ? "" : "fw-bold")">
-    @notification.Title
-</h6>
-
-                            <p class="mb-1">
-                                @notification.Message
-                            </p>
-
-                            <small class="text-muted">
-                                @notification.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
-                            </small>
-
-                        </div>
-
-<div class="notification-arrow">
-    <i class="bi bi-chevron-right"></i>
-</div>
+                    <div class="notif-group-label">
+                        <span>@group.Key</span>
+                        <small>@group.Count()</small>
                     </div>
 
-                </a>
+                    @foreach (var notification in group)
+                    {
+                        <a asp-controller="Notification"
+                           asp-action="Open"
+                           asp-route-id="@notification.NotificationId"
+                           class="notif-item tone-@ToneOf(notification.Icon) @(notification.IsRead ? "" : "is-unread")"
+                           style="--i:@(Math.Min(itemIndex++, 10))">
 
-                <hr class="my-0" />
+                            <div class="notif-icon">
+                                <i class="bi @notification.Icon"></i>
+                            </div>
+
+                            <div class="notif-content">
+
+                                <div class="notif-top">
+                                    <h6 class="notif-title">@notification.Title</h6>
+
+                                    <span class="notif-time"
+                                          title="@notification.CreatedAt.ToString("MMM dd, yyyy h:mm tt")">
+                                        @TimeAgo(notification.CreatedAt)
+                                    </span>
+                                </div>
+
+                                <p class="notif-message">@notification.Message</p>
+
+                            </div>
+
+                            <div class="notif-side">
+                                @if (!notification.IsRead)
+                                {
+                                    <span class="notif-dot" aria-label="Unread"></span>
+                                }
+                                <i class="bi bi-chevron-right notif-arrow"></i>
+                            </div>
+
+                        </a>
+                    }
+
+                </section>
             }
         }
 
     </div>
+
 </div>

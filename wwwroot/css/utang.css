@@ -1,1250 +1,1696 @@
 /* =========================================================
-UTANG PAGE
-========================================================= */
+   Mini Store — Utang Records
+   (page styles use the tokens defined in site.css)
+   ========================================================= */
 
-.utang-page {
-padding-bottom: 30px;
+.ut-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-bottom: 30px;
+}
+
+@keyframes utFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+}
+
+@keyframes utRow {
+    from { opacity: 0; transform: translateX(-8px); }
+}
+
+@keyframes utPulse {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-danger) 45%, transparent); }
+    70%  { box-shadow: 0 0 0 8px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
 }
 
 /* =========================================================
-HEADER
-========================================================= */
+   HEADER
+   ========================================================= */
 
-.utang-header {
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 20px;
-margin-bottom: 24px;
+.ut-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+    animation: utFadeUp .55s var(--ease-out) backwards;
 }
 
-.utang-title-area {
-display: flex;
-align-items: center;
-gap: 14px;
+.ut-title-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
-.utang-page-icon {
-width: 48px;
-height: 48px;
-border-radius: 12px;
-background: #fff3ea;
-color: #e4772e;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 22px;
+.ut-page-icon {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 23px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    box-shadow: 0 8px 18px -6px rgba(228, 119, 46, .6);
 }
 
-.utang-header h1 {
-margin: 0;
-color: #1f2937;
-font-size: 26px;
-font-weight: 700;
+.ut-title-area h1 {
+    margin: 0 0 3px;
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: -.4px;
+    color: var(--color-text);
 }
 
-.utang-header p {
-margin: 4px 0 0;
-color: #6b7280;
-font-size: 14px;
+.ut-title-area p {
+    margin: 0;
+    font-size: .92rem;
+    color: var(--color-text-muted);
+}
+
+.ut-primary-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    overflow: hidden;
+    font-size: .88rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border: 0;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 14px rgba(228, 119, 46, .3);
+    cursor: pointer;
+    transition: transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+}
+
+/* shine sweep on hover */
+.ut-primary-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, .35), transparent);
+    transform: skewX(-20deg);
+    transition: left .7s var(--ease);
+}
+
+.ut-primary-btn:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(228, 119, 46, .4);
+}
+
+.ut-primary-btn:hover::after {
+    left: 135%;
 }
 
 /* =========================================================
-BUTTONS
-========================================================= */
+   ALERTS
+   ========================================================= */
 
+.ut-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    font-size: .88rem;
+    font-weight: 600;
+    border: 1px solid;
+    border-left-width: 4px;
+    border-radius: var(--radius-md);
+    animation: utFadeUp .45s var(--ease-out) backwards;
+}
+
+.ut-alert > i {
+    font-size: 18px;
+}
+
+.ut-alert > span {
+    flex: 1;
+}
+
+.ut-alert .btn-close {
+    padding: .5rem;
+    font-size: .65rem;
+}
+
+.ut-alert.is-success {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border-color: color-mix(in srgb, var(--color-success) 25%, transparent);
+    border-left-color: var(--color-success);
+}
+
+.ut-alert.is-danger {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
+    border-left-color: var(--color-danger);
+}
+
+/* =========================================================
+   SUMMARY CARDS
+   ========================================================= */
+
+.ut-kpi.is-primary { --kpi: var(--color-primary); }
+.ut-kpi.is-gold    { --kpi: var(--color-gold); }
+.ut-kpi.is-success { --kpi: var(--color-success); }
+.ut-kpi.is-danger  { --kpi: var(--color-danger); }
+
+.ut-kpi {
+    --kpi-soft: color-mix(in srgb, var(--kpi, var(--color-primary)) 12%, transparent);
+
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: utFadeUp .6s var(--ease-out) calc(var(--i, 0) * .08s + .1s) backwards;
+    transition: transform .35s var(--ease-out), box-shadow .35s var(--ease), border-color .35s var(--ease);
+}
+
+.ut-kpi::after {
+    content: "";
+    position: absolute;
+    top: -34px;
+    right: -34px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--kpi-soft);
+    pointer-events: none;
+    transition: transform .5s var(--ease-out);
+}
+
+.ut-kpi:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--kpi);
+}
+
+.ut-kpi:hover::after {
+    transform: scale(1.35);
+}
+
+.ut-kpi-icon {
+    position: relative;
+    z-index: 1;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 24px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--kpi), color-mix(in srgb, var(--kpi) 72%, white));
+    box-shadow: 0 8px 18px -6px color-mix(in srgb, var(--kpi) 75%, transparent);
+    transition: transform .4s var(--ease-spring);
+}
+
+.ut-kpi:hover .ut-kpi-icon {
+    transform: scale(1.08) rotate(-5deg);
+}
+
+.ut-kpi-body {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.ut-kpi-body > span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.ut-kpi h3 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.4px;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.ut-kpi small {
+    display: block;
+    margin-top: 3px;
+    font-size: .78rem;
+    color: var(--color-text-muted);
+}
+
+/* =========================================================
+   TABLE CARD
+   ========================================================= */
+
+.ut-card {
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    animation: utFadeUp .6s var(--ease-out) .35s backwards;
+}
+
+.ut-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 20px 22px 14px;
+}
+
+.ut-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ut-section-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    font-size: 18px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
+}
+
+.ut-section-title h5 {
+    margin: 0 0 2px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.ut-section-title p {
+    margin: 0;
+    font-size: .82rem;
+    color: var(--color-text-muted);
+}
+
+.ut-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ut-count {
+    padding: 6px 12px;
+    font-size: .76rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-radius: 999px;
+}
+
+/* ---- search ---- */
+.ut-search {
+    position: relative;
+    width: 270px;
+    max-width: 100%;
+}
+
+.ut-search i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.ut-search input {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    font-size: .86rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    outline: none;
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease), background-color var(--speed) var(--ease);
+}
+
+.ut-search input::placeholder {
+    color: var(--color-text-muted);
+    opacity: .7;
+}
+
+.ut-search input:focus {
+    background: var(--color-surface);
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+/* ---- filter chips ---- */
+.ut-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 22px 16px;
+}
+
+.ut-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 14px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease), border-color var(--speed) var(--ease);
+}
+
+.ut-chip span {
+    min-width: 22px;
+    padding: 1px 7px;
+    font-size: .72rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-radius: 999px;
+}
+
+.ut-chip:hover {
+    color: var(--color-primary-dark);
+    border-color: var(--color-primary-light);
+}
+
+.ut-chip.active {
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border-color: transparent;
+}
+
+.ut-chip.active span {
+    color: #fff;
+    background: rgba(255, 255, 255, .25);
+}
+
+/* overdue chip is red */
+.ut-chip.is-overdue {
+    color: var(--color-danger);
+    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+.ut-chip.is-overdue span {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+.ut-chip.is-overdue:hover {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+.ut-chip.is-overdue.active {
+    color: #fff;
+    background: var(--color-danger);
+    border-color: transparent;
+}
+
+.ut-chip.is-overdue.active span {
+    color: #fff;
+    background: rgba(255, 255, 255, .25);
+}
+
+/* ---- table ---- */
+.ut-table {
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: var(--color-surface-soft);
+
+    margin: 0;
+    font-size: .88rem;
+}
+
+.ut-table thead th {
+    padding: 11px 20px;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.ut-table tbody td {
+    padding: 14px 20px;
+    vertical-align: middle;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.ut-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.ut-table tbody tr[data-status] {
+    animation: utRow .45s var(--ease-out) backwards;
+    transition: background-color var(--speed) var(--ease);
+}
+
+.ut-table tbody tr[data-status]:nth-child(1) { animation-delay: .45s; }
+.ut-table tbody tr[data-status]:nth-child(2) { animation-delay: .50s; }
+.ut-table tbody tr[data-status]:nth-child(3) { animation-delay: .55s; }
+.ut-table tbody tr[data-status]:nth-child(4) { animation-delay: .60s; }
+.ut-table tbody tr[data-status]:nth-child(n+5) { animation-delay: .65s; }
+
+.ut-table tbody tr[data-status]:hover {
+    background: var(--color-surface-soft);
+}
+
+/* ---- customer ---- */
+.ut-customer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ut-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+}
+
+.ut-customer-name {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* ---- dates ---- */
+.ut-date {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ut-date strong {
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.ut-date small {
+    font-size: .74rem;
+    color: var(--color-text-muted);
+}
+
+.ut-flag {
+    font-weight: 700;
+}
+
+.ut-date small.ut-flag.is-overdue {
+    color: var(--color-danger);
+}
+
+.ut-date small.ut-flag.is-today {
+    color: #9a6a0a;
+}
+
+.ut-none {
+    font-size: .82rem;
+    font-style: italic;
+    color: var(--color-text-muted);
+    opacity: .75;
+}
+
+/* ---- money ---- */
+.ut-amount,
+.ut-paid,
+.ut-balance {
+    font-weight: 700;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.ut-amount {
+    color: var(--color-text);
+}
+
+.ut-paid {
+    color: var(--color-success);
+}
+
+.ut-balance {
+    color: var(--color-danger);
+}
+
+.ut-balance.is-settled {
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.ut-progress {
+    width: 88px;
+    height: 5px;
+    margin-top: 6px;
+    overflow: hidden;
+    background: var(--color-border);
+    border-radius: 999px;
+}
+
+.ut-progress span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, white));
+    border-radius: 999px;
+}
+
+/* ---- status badge ---- */
+.ut-status-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+.ut-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: .76rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border-radius: 999px;
+}
+
+.ut-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ut-status.paid {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+}
+
+.ut-status.partial {
+    color: #9a6a0a;
+    background: color-mix(in srgb, var(--color-gold) 20%, white);
+}
+
+.ut-status.unpaid {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+.ut-status.overdue {
+    color: #fff;
+    background: var(--color-danger);
+    animation: utPulse 2.4s ease-out infinite;
+}
+
+.ut-status-sub {
+    padding-left: 4px;
+    font-size: .72rem;
+    color: var(--color-text-muted);
+}
+
+/* ---- row actions ---- */
+.ut-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.ut-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 13px;
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: transform var(--speed) var(--ease), background-color var(--speed) var(--ease),
+                color var(--speed) var(--ease), border-color var(--speed) var(--ease),
+                box-shadow var(--speed) var(--ease);
+}
+
+.ut-btn:hover {
+    transform: translateY(-1px);
+}
+
+.ut-btn-view {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+.ut-btn-view:hover {
+    color: #fff;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 12px -4px rgba(228, 119, 46, .5);
+}
+
+.ut-btn-delete {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
+}
+
+.ut-btn-delete:hover {
+    color: #fff;
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    box-shadow: 0 6px 12px -4px color-mix(in srgb, var(--color-danger) 55%, transparent);
+}
+
+.ut-btn-ghost {
+    padding: 9px 18px;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.ut-btn-ghost:hover {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: var(--color-primary-light);
+}
+
+.ut-btn-danger-solid {
+    padding: 9px 18px;
+    color: #fff;
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--color-danger) 55%, transparent);
+}
+
+.ut-btn-danger-solid:hover {
+    color: #fff;
+    background: color-mix(in srgb, var(--color-danger) 88%, black);
+}
+
+/* ---- empty states ---- */
+.ut-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 220px;
+    padding: 40px 16px;
+    text-align: center;
+}
+
+.ut-empty[hidden] {
+    display: none;
+}
+
+.ut-empty-icon {
+    width: 62px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    font-size: 27px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
+}
+
+.ut-empty h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.ut-empty p {
+    margin: 0 0 12px;
+    font-size: .86rem;
+    color: var(--color-text-muted);
+}
+
+/* ---- delete modal ---- */
+.ut-modal .modal-content {
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.ut-modal-body {
+    padding: 28px 24px 8px;
+    text-align: center;
+}
+
+.ut-modal-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    font-size: 27px;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+.ut-modal-body h5 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.ut-modal-body p {
+    margin: 0 0 8px;
+    font-size: .9rem;
+    color: var(--color-text-muted);
+}
+
+.ut-modal-body p strong {
+    color: var(--color-text);
+}
+
+.ut-modal-body small {
+    display: block;
+    font-size: .78rem;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
+.ut-modal-footer {
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 24px 24px;
+    border: 0;
+}
+
+.ut-modal-footer > * {
+    margin: 0;
+}
+
+/* =========================================================
+   SHARED — used by UtangDetailsModal / _UtangTransactionModal,
+   which the Sales page also uses. Kept as it was.
+   ========================================================= */
+
+/* ---- legacy buttons ---- */
 .utang-primary-btn {
-background: #e4772e;
-border: 1px solid #e4772e;
-color: #fff;
-border-radius: 9px;
-padding: 10px 16px;
-font-size: 13px;
-font-weight: 600;
+    background: #e4772e;
+    border: 1px solid #e4772e;
+    color: #fff;
+    border-radius: 9px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .utang-primary-btn:hover {
-background: #cf651f;
-border-color: #cf651f;
-color: #fff;
+    background: #cf651f;
+    border-color: #cf651f;
+    color: #fff;
 }
 
 .utang-back-btn {
-background: #fff;
-border: 1px solid #dfe3e7;
-color: #59636e;
-border-radius: 9px;
-padding: 10px 15px;
-font-size: 13px;
-font-weight: 600;
+    background: #fff;
+    border: 1px solid #dfe3e7;
+    color: #59636e;
+    border-radius: 9px;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .utang-back-btn:hover {
-background: #f7f8fa;
-color: #374151;
+    background: #f7f8fa;
+    color: #374151;
 }
 
-/* =========================================================
-SUMMARY CARDS
-========================================================= */
-
-.utang-stat-card {
-height: 100%;
-display: flex;
-align-items: center;
-gap: 15px;
-padding: 20px;
-background: #fff;
-border: 1px solid #edf0f2;
-border-radius: 14px;
-box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
-transition: 0.2s ease;
-}
-
-.utang-stat-card:hover {
-transform: translateY(-2px);
-box-shadow: 0 7px 20px rgba(15, 23, 42, 0.08);
-}
-
-.utang-stat-icon {
-width: 48px;
-height: 48px;
-flex-shrink: 0;
-border-radius: 12px;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 20px;
-}
-
-.stat-orange {
-background: #fff3ea;
-color: #e4772e;
-}
-
-.stat-green {
-background: #edf8f1;
-color: #3c9461;
-}
-
-.stat-red {
-background: #fff0f0;
-color: #c0392b;
-}
-
-.utang-stat-label {
-display: block;
-color: #6b7280;
-font-size: 13px;
-margin-bottom: 3px;
-}
-
-.utang-stat-card h3 {
-margin: 0;
-color: #1f2937;
-font-size: 23px;
-font-weight: 700;
-}
-
-.utang-stat-card small {
-display: block;
-margin-top: 3px;
-color: #9ca3af;
-font-size: 11px;
-}
-
-/* =========================================================
-STATUS SUMMARY
-========================================================= */
-
-.utang-status-summary {
-display: flex;
-align-items: center;
-gap: 28px;
-margin-bottom: 20px;
-padding: 13px 18px;
-background: #fff;
-border: 1px solid #edf0f2;
-border-radius: 12px;
-}
-
-.utang-status-item {
-display: flex;
-align-items: center;
-gap: 9px;
-}
-
-.utang-status-item strong {
-margin-right: 4px;
-color: #374151;
-font-size: 13px;
-}
-
-.utang-status-item span:not(.status-dot) {
-color: #8a94a6;
-font-size: 12px;
-}
-
-.status-dot {
-width: 8px;
-height: 8px;
-border-radius: 50%;
-}
-
-.status-dot-red {
-background: #c0392b;
-}
-
-.status-dot-yellow {
-background: #d49a21;
-}
-
-.status-dot-green {
-background: #3c9461;
-}
-
-/* =========================================================
-TABLE CARD
-========================================================= */
-
-.utang-table-card {
-background: #fff;
-border: 1px solid #edf0f2;
-border-radius: 14px;
-box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
-overflow: hidden;
-}
-
-.utang-table-header {
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 20px;
-padding: 20px 22px;
-border-bottom: 1px solid #edf0f2;
-}
-
-.utang-section-title {
-display: flex;
-align-items: center;
-gap: 12px;
-}
-
-.section-icon {
-width: 40px;
-height: 40px;
-border-radius: 10px;
-background: #f5f7f9;
-color: #59636e;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-
-.utang-section-title h5 {
-margin: 0;
-color: #1f2937;
-font-size: 16px;
-font-weight: 700;
-}
-
-.utang-section-title p {
-margin: 3px 0 0;
-color: #8a94a6;
-font-size: 12px;
-}
-
-/* =========================================================
-SEARCH
-========================================================= */
-
-.utang-search {
-position: relative;
-width: 260px;
-}
-
-.utang-search i {
-position: absolute;
-left: 13px;
-top: 50%;
-transform: translateY(-50%);
-color: #9ca3af;
-}
-
-.utang-search input {
-width: 100%;
-height: 40px;
-padding: 0 13px 0 38px;
-border: 1px solid #dfe3e7;
-border-radius: 9px;
-outline: none;
-font-size: 13px;
-}
-
-.utang-search input:focus {
-border-color: #e4772e;
-box-shadow: 0 0 0 3px rgba(228, 119, 46, 0.10);
-}
-
-/* =========================================================
-UTANG TABLE
-========================================================= */
-
-.utang-table {
-margin: 0;
-}
-
-.utang-table thead th {
-padding: 13px 18px;
-background: #fafbfc;
-border-bottom: 1px solid #e9edf1;
-color: #6b7280;
-font-size: 11px;
-font-weight: 700;
-text-transform: uppercase;
-letter-spacing: 0.03em;
-white-space: nowrap;
-}
-
-.utang-table tbody td {
-padding: 15px 18px;
-border-bottom: 1px solid #f0f2f4;
-color: #374151;
-font-size: 13px;
-vertical-align: middle;
-}
-
-.utang-table tbody tr:last-child td {
-border-bottom: 0;
-}
-
-.utang-table tbody tr:hover {
-background: #fcfcfd;
-}
-
-/* =========================================================
-CUSTOMER CELL
-========================================================= */
-
+/* ---- customer cell ---- */
 .customer-cell {
-display: flex;
-align-items: center;
-gap: 11px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
 }
 
 .customer-avatar {
-width: 38px;
-height: 38px;
-flex-shrink: 0;
-border-radius: 10px;
-background: #f3f5f7;
-color: #697586;
-display: flex;
-align-items: center;
-justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #f3f5f7;
+    color: #697586;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .customer-cell strong {
-display: block;
-color: #1f2937;
-font-size: 13px;
+    display: block;
+    color: #1f2937;
+    font-size: 13px;
 }
 
 .customer-cell small {
-display: block;
-margin-top: 2px;
-color: #9ca3af;
-font-size: 11px;
+    display: block;
+    margin-top: 2px;
+    color: #9ca3af;
+    font-size: 11px;
 }
 
-/* =========================================================
-DATE CELL
-========================================================= */
-
+/* ---- date cell ---- */
 .utang-date-cell {
-display: flex;
-flex-direction: column;
-gap: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .utang-date-cell strong {
-color: #374151;
-font-size: 13px;
+    color: #374151;
+    font-size: 13px;
 }
 
 .utang-date-cell small {
-color: #9ca3af;
-font-size: 11px;
+    color: #9ca3af;
+    font-size: 11px;
 }
 
-/* =========================================================
-AMOUNTS
-========================================================= */
-
+/* ---- amounts ---- */
 .amount-text {
-font-weight: 600;
-color: #374151;
+    font-weight: 600;
+    color: #374151;
 }
 
 .paid-amount {
-color: #3c9461;
-font-weight: 600;
+    color: #3c9461;
+    font-weight: 600;
 }
 
 .balance-amount {
-color: #c0392b;
-font-weight: 700;
+    color: #c0392b;
+    font-weight: 700;
 }
 
-/* =========================================================
-STATUS
-========================================================= */
-
+/* ---- status ---- */
 .utang-status {
-display: inline-flex;
-align-items: center;
-gap: 7px;
-font-size: 12px;
-font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .utang-status span {
-width: 7px;
-height: 7px;
-border-radius: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
 }
 
 .status-paid {
-color: #3c9461;
+    color: #3c9461;
 }
 
 .status-paid span {
-background: #3c9461;
+    background: #3c9461;
 }
 
 .status-partial {
-color: #b27b08;
+    color: #b27b08;
 }
 
 .status-partial span {
-background: #d49a21;
+    background: #d49a21;
 }
 
 .status-unpaid {
-color: #c0392b;
+    color: #c0392b;
 }
 
 .status-unpaid span {
-background: #c0392b;
+    background: #c0392b;
 }
 
-/* =========================================================
-VIEW BUTTON
-========================================================= */
+.status-overdue {
+    color: #c0392b;
+}
 
+.status-overdue span {
+    background: #c0392b;
+}
+
+/* ---- view button (also used on the Sales page) ---- */
 .view-utang-btn {
     border: 1px solid #e3e3e3;
-
     background: #fff;
-
     color: var(--color-primary);
-
     border-radius: 7px;
-
     padding: 6px 10px;
-
     font-size: 11.5px;
     font-weight: 600;
-
     transition: 0.2s ease;
 }
 
 .view-utang-btn:hover {
     background: var(--color-primary-soft);
-
     border-color: #f1c5a4;
-
     color: var(--color-primary-dark);
 }
-/* =========================================================
-DELETE BUTTON
-========================================================= */
 
-.utang-delete-btn {
-    border: 1px solid #e3e3e3;
-    background: #fff;
-    color: #c0392b;
-    border-radius: 7px;
-    padding: 6px 10px;
-    font-size: 11.5px;
-    font-weight: 600;
-    transition: 0.2s ease;
-    margin-left: 5px;
-}
-
-.utang-delete-btn:hover {
-    background: #fdeaea;
-    border-color: #e8b4b0;
-    color: #a93226;
-}
-
-/* =========================================================
-UTANG DETAILS MODAL
-========================================================= */
-
+/* ---- utang details modal ---- */
 .utang-details-modal {
-border: 0;
-border-radius: 16px;
-overflow: hidden;
-box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+    border: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
 }
 
 .utang-details-header {
-padding: 18px 20px;
-border-bottom: 1px solid #edf0f2;
-background: #fff;
+    padding: 18px 20px;
+    border-bottom: 1px solid #edf0f2;
+    background: #fff;
 }
 
 .utang-details-title {
-display: flex;
-align-items: center;
-gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .utang-details-icon {
-width: 42px;
-height: 42px;
-border-radius: 11px;
-background: #fff3ea;
-color: #e4772e;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 19px;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: #fff3ea;
+    color: #e4772e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
 }
 
 .utang-details-title h5 {
-margin: 0;
-color: #1f2937;
-font-size: 17px;
-font-weight: 700;
+    margin: 0;
+    color: #1f2937;
+    font-size: 17px;
+    font-weight: 700;
 }
 
 .utang-details-title p {
-margin: 3px 0 0;
-color: #8a94a6;
-font-size: 12px;
+    margin: 3px 0 0;
+    color: #8a94a6;
+    font-size: 12px;
 }
 
 .utang-details-body {
-padding: 20px;
-background: #fff;
+    padding: 20px;
+    background: #fff;
 }
 
-/* =========================================================
-DETAIL INFORMATION
-========================================================= */
-
+/* ---- detail information ---- */
 .utang-detail-info-grid {
-display: grid;
-grid-template-columns: repeat(2, 1fr);
-gap: 12px;
-margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .utang-detail-info {
-padding: 13px 14px;
-background: #f8f9fa;
-border: 1px solid #edf0f2;
-border-radius: 10px;
+    padding: 13px 14px;
+    background: #f8f9fa;
+    border: 1px solid #edf0f2;
+    border-radius: 10px;
 }
 
 .utang-detail-info > span:first-child {
-display: block;
-margin-bottom: 4px;
-color: #8a94a6;
-font-size: 11px;
-font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+    color: #8a94a6;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .utang-detail-info strong {
-display: block;
-color: #374151;
-font-size: 13px;
+    display: block;
+    color: #374151;
+    font-size: 13px;
 }
 
 .utang-detail-info small {
-display: block;
-margin-top: 3px;
-color: #9ca3af;
-font-size: 11px;
+    display: block;
+    margin-top: 3px;
+    color: #9ca3af;
+    font-size: 11px;
 }
 
-/* =========================================================
-PRODUCTS SECTION
-========================================================= */
-
+/* ---- products section ---- */
 .utang-products-section {
-margin-top: 5px;
+    margin-top: 5px;
 }
 
 .utang-details-section-header {
-display: flex;
-align-items: center;
-justify-content: space-between;
-margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
 }
 
 .utang-details-section-header h6 {
-margin: 0;
-color: #1f2937;
-font-size: 14px;
-font-weight: 700;
+    margin: 0;
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .utang-details-section-header p {
-margin: 3px 0 0;
-color: #8a94a6;
-font-size: 11px;
+    margin: 3px 0 0;
+    color: #8a94a6;
+    font-size: 11px;
 }
 
-/* =========================================================
-DATE DROPDOWNS
-========================================================= */
-
+/* ---- date dropdowns ---- */
 .utang-date-list {
-display: flex;
-flex-direction: column;
-gap: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
 }
 
 .utang-date-group {
-border: 1px solid #e9edf1;
-border-radius: 11px;
-overflow: hidden;
-background: #fff;
+    border: 1px solid #e9edf1;
+    border-radius: 11px;
+    overflow: hidden;
+    background: #fff;
 }
 
-/* DATE BUTTON */
-
 .utang-date-toggle {
-width: 100%;
-border: 0;
-background: #fff;
-padding: 13px 14px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 12px;
-cursor: pointer;
-text-align: left;
-transition: background 0.2s ease;
+    width: 100%;
+    border: 0;
+    background: #fff;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease;
 }
 
 .utang-date-toggle:hover {
-background: #fff8f3;
+    background: #fff8f3;
 }
 
 .utang-date-toggle:focus {
-outline: none;
-box-shadow: none;
+    outline: none;
+    box-shadow: none;
 }
 
-/* DATE LEFT */
-
 .utang-date-left {
-display: flex;
-align-items: center;
-gap: 11px;
-min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
 }
 
 .utang-calendar-icon {
-width: 36px;
-height: 36px;
-flex-shrink: 0;
-border-radius: 9px;
-background: #fff3ea;
-color: #e4772e;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 15px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background: #fff3ea;
+    color: #e4772e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
 }
 
 .utang-date {
-color: #374151;
-font-size: 13px;
-font-weight: 700;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .utang-date-count {
-margin-top: 2px;
-color: #9ca3af;
-font-size: 11px;
+    margin-top: 2px;
+    color: #9ca3af;
+    font-size: 11px;
 }
 
-/* DATE RIGHT */
-
 .utang-date-right {
-display: flex;
-align-items: center;
-gap: 11px;
-flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    flex-shrink: 0;
 }
 
 .utang-date-total {
-color: #374151;
-font-size: 13px;
-font-weight: 700;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .utang-date-chevron {
-color: #9ca3af;
-font-size: 13px;
-transition: transform 0.2s ease;
+    color: #9ca3af;
+    font-size: 13px;
+    transition: transform 0.2s ease;
 }
-
-/* ROTATE ARROW WHEN OPEN */
 
 .utang-date-toggle[aria-expanded="true"] .utang-date-chevron {
-transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
-/* =========================================================
-PRODUCT LEDGER
-========================================================= */
-
+/* ---- product ledger ---- */
 .utang-product-ledger {
-border-top: 1px solid #edf0f2;
-background: #fafbfc;
+    border-top: 1px solid #edf0f2;
+    background: #fafbfc;
 }
 
 .utang-ledger-header,
 .utang-ledger-row {
-display: grid;
-grid-template-columns: 1.2fr 1.5fr 0.5fr 0.8fr;
-gap: 12px;
-align-items: center;
-padding: 10px 14px;
+    display: grid;
+    grid-template-columns: 1.2fr 1.5fr 0.5fr 0.8fr;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
 }
-
-/* LEDGER HEADER */
 
 .utang-ledger-header {
-background: #f5f7f9;
-color: #8a94a6;
-font-size: 10px;
-font-weight: 700;
-text-transform: uppercase;
-letter-spacing: 0.04em;
+    background: #f5f7f9;
+    color: #8a94a6;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-/* LEDGER ROW */
-
 .utang-ledger-row {
-background: #fff;
-border-top: 1px solid #edf0f2;
-color: #374151;
-font-size: 12px;
+    background: #fff;
+    border-top: 1px solid #edf0f2;
+    color: #374151;
+    font-size: 12px;
 }
 
 .utang-ledger-row:first-child {
-border-top: 0;
+    border-top: 0;
 }
 
-/* TIME */
-
 .utang-item-time {
-display: flex;
-flex-direction: column;
-gap: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .utang-item-time strong {
-color: #374151;
-font-size: 12px;
-font-weight: 700;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 .utang-item-time small {
-color: #9ca3af;
-font-size: 10px;
+    color: #9ca3af;
+    font-size: 10px;
 }
 
-/* PRODUCT */
-
 .utang-item-product {
-min-width: 0;
+    min-width: 0;
 }
 
 .utang-product-name {
-display: flex;
-align-items: center;
-gap: 8px;
-min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
 .utang-product-name strong {
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-color: #374151;
-font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #374151;
+    font-size: 12px;
 }
 
 .utang-product-icon {
-width: 28px;
-height: 28px;
-flex-shrink: 0;
-border-radius: 7px;
-background: #f5f7f9;
-color: #697586;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 12px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 7px;
+    background: #f5f7f9;
+    color: #697586;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
 }
-
-/* SUBTOTAL */
 
 .utang-item-subtotal {
-text-align: right;
-color: #374151;
-font-weight: 700;
+    text-align: right;
+    color: #374151;
+    font-weight: 700;
 }
 
-/* =========================================================
-EMPTY PRODUCTS
-========================================================= */
-
+/* ---- empty products ---- */
 .utang-empty-products {
-padding: 28px 20px;
-border: 1px dashed #dfe3e7;
-border-radius: 11px;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-gap: 7px;
-color: #9ca3af;
-font-size: 12px;
+    padding: 28px 20px;
+    border: 1px dashed #dfe3e7;
+    border-radius: 11px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    color: #9ca3af;
+    font-size: 12px;
 }
 
 .utang-empty-products i {
-font-size: 23px;
+    font-size: 23px;
 }
 
-/* =========================================================
-PAYMENT SUMMARY
-========================================================= */
-
+/* ---- payment summary ---- */
 .utang-payment-summary {
-margin-top: 18px;
-padding: 14px 16px;
-background: #f8f9fa;
-border: 1px solid #edf0f2;
-border-radius: 11px;
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: #f8f9fa;
+    border: 1px solid #edf0f2;
+    border-radius: 11px;
 }
 
 .utang-payment-row {
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 15px;
-padding: 7px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 7px 0;
 }
 
 .utang-payment-row span {
-color: #6b7280;
-font-size: 12px;
+    color: #6b7280;
+    font-size: 12px;
 }
 
 .utang-payment-row strong {
-color: #374151;
-font-size: 13px;
+    color: #374151;
+    font-size: 13px;
 }
 
 .utang-payment-row .paid-value {
-color: #3c9461;
+    color: #3c9461;
 }
 
 .utang-balance-row {
-margin-top: 5px;
-padding-top: 11px;
-border-top: 1px solid #e3e6e9;
+    margin-top: 5px;
+    padding-top: 11px;
+    border-top: 1px solid #e3e6e9;
 }
 
 .utang-balance-row strong {
-color: #c0392b;
-font-size: 15px;
+    color: #c0392b;
+    font-size: 15px;
 }
 
-/* =========================================================
-DETAILS FOOTER
-========================================================= */
-
+/* ---- details footer ---- */
 .utang-details-footer {
-padding: 14px 20px;
-border-top: 1px solid #edf0f2;
-background: #fff;
+    padding: 14px 20px;
+    border-top: 1px solid #edf0f2;
+    background: #fff;
 }
 
 .transaction-cancel-btn {
-border: 1px solid #dfe3e7;
-background: #fff;
-color: #59636e;
-border-radius: 8px;
-padding: 8px 14px;
-font-size: 12px;
-font-weight: 600;
+    border: 1px solid #dfe3e7;
+    background: #fff;
+    color: #59636e;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .transaction-cancel-btn:hover {
-background: #f7f8fa;
-color: #374151;
+    background: #f7f8fa;
+    color: #374151;
 }
 
 .utang-pay-btn {
-background: #e4772e;
-border: 1px solid #e4772e;
-color: #fff;
-border-radius: 8px;
-padding: 8px 14px;
-font-size: 12px;
-font-weight: 600;
+    background: #e4772e;
+    border: 1px solid #e4772e;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .utang-pay-btn:hover {
-background: #cf651f;
-border-color: #cf651f;
-color: #fff;
+    background: #cf651f;
+    border-color: #cf651f;
+    color: #fff;
 }
 
-/* =========================================================
-PAYMENT MODAL
-========================================================= */
-
+/* ---- payment modal ---- */
 .utang-payment-modal {
-border: 0;
-border-radius: 16px;
-overflow: hidden;
-box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+    border: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
 }
 
 .utang-payment-modal .modal-header {
-padding: 18px 20px;
-border-bottom: 1px solid #edf0f2;
+    padding: 18px 20px;
+    border-bottom: 1px solid #edf0f2;
 }
 
 .utang-pay-title {
-display: flex;
-align-items: center;
-gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .utang-pay-icon {
-width: 42px;
-height: 42px;
-border-radius: 11px;
-background: #edf8f1;
-color: #3c9461;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 19px;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: #edf8f1;
+    color: #3c9461;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
 }
 
 .utang-pay-title h5 {
-margin: 0;
-color: #1f2937;
-font-size: 17px;
-font-weight: 700;
+    margin: 0;
+    color: #1f2937;
+    font-size: 17px;
+    font-weight: 700;
 }
 
 .utang-pay-title p {
-margin: 3px 0 0;
-color: #8a94a6;
-font-size: 12px;
+    margin: 3px 0 0;
+    color: #8a94a6;
+    font-size: 12px;
 }
 
-/* PAYMENT BODY */
-
 .utang-payment-modal .modal-body {
-padding: 20px;
+    padding: 20px;
 }
 
 .utang-pay-customer {
-display: flex;
-flex-direction: column;
-gap: 4px;
-padding: 13px 14px;
-margin-bottom: 10px;
-background: #f8f9fa;
-border: 1px solid #edf0f2;
-border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border: 1px solid #edf0f2;
+    border-radius: 10px;
 }
 
 .utang-pay-customer span,
 .utang-pay-balance span {
-color: #8a94a6;
-font-size: 11px;
+    color: #8a94a6;
+    font-size: 11px;
 }
 
 .utang-pay-customer strong {
-color: #374151;
-font-size: 13px;
+    color: #374151;
+    font-size: 13px;
 }
 
-/* BALANCE */
-
 .utang-pay-balance {
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 15px;
-padding: 13px 14px;
-margin-bottom: 18px;
-background: #fff8f3;
-border: 1px solid #f6dfce;
-border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 13px 14px;
+    margin-bottom: 18px;
+    background: #fff8f3;
+    border: 1px solid #f6dfce;
+    border-radius: 10px;
 }
 
 .utang-pay-balance strong {
-color: #c0392b;
-font-size: 16px;
+    color: #c0392b;
+    font-size: 16px;
 }
 
-/* PAYMENT INPUT */
-
 .utang-pay-input label {
-display: block;
-margin-bottom: 7px;
-color: #374151;
-font-size: 12px;
-font-weight: 600;
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .money-input {
-display: flex;
-align-items: center;
-border: 1px solid #dfe3e7;
-border-radius: 9px;
-overflow: hidden;
-background: #fff;
+    display: flex;
+    align-items: center;
+    border: 1px solid #dfe3e7;
+    border-radius: 9px;
+    overflow: hidden;
+    background: #fff;
 }
 
 .money-input > span {
-padding-left: 13px;
-color: #6b7280;
-font-size: 14px;
-font-weight: 600;
+    padding-left: 13px;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .money-input input {
-border: 0;
-box-shadow: none !important;
-height: 42px;
-font-size: 14px;
+    border: 0;
+    box-shadow: none !important;
+    height: 42px;
+    font-size: 14px;
 }
 
 .money-input:focus-within {
-border-color: #e4772e;
-box-shadow: 0 0 0 3px rgba(228, 119, 46, 0.10);
+    border-color: #e4772e;
+    box-shadow: 0 0 0 3px rgba(228, 119, 46, 0.10);
 }
 
 .utang-pay-input small {
-display: block;
-margin-top: 6px;
-color: #9ca3af;
-font-size: 10px;
-}
-
-/* PAYMENT NOTE */
-
-.utang-pay-note {
-display: flex;
-align-items: flex-start;
-gap: 8px;
-margin-top: 16px;
-padding: 11px 12px;
-background: #f5f7f9;
-border-radius: 9px;
-color: #697586;
-font-size: 11px;
-line-height: 1.5;
-}
-
-.utang-pay-note i {
-margin-top: 1px;
-color: #e4772e;
-}
-
-/* PAYMENT FOOTER */
-
-.utang-payment-modal .modal-footer {
-padding: 14px 20px;
-border-top: 1px solid #edf0f2;
-}
-
-.utang-confirm-pay-btn {
-background: #3c9461;
-border: 1px solid #3c9461;
-color: #fff;
-border-radius: 8px;
-padding: 8px 14px;
-font-size: 12px;
-font-weight: 600;
-}
-
-.utang-confirm-pay-btn:hover {
-background: #327d51;
-border-color: #327d51;
-color: #fff;
-}
-
-/* =========================================================
-EMPTY STATE
-========================================================= */
-
-.utang-empty {
-padding: 60px 20px;
-text-align: center;
-}
-
-.utang-empty-icon {
-width: 60px;
-height: 60px;
-margin: 0 auto 15px;
-border-radius: 50%;
-background: #f5f7f9;
-color: #9ca3af;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 25px;
-}
-
-.utang-empty h5 {
-color: #374151;
-font-weight: 700;
-}
-
-.utang-empty p {
-color: #8a94a6;
-font-size: 13px;
-margin-bottom: 18px;
-}
-
-/* =========================================================
-RESPONSIVE
-========================================================= */
-
-@media (max-width: 768px) {
-
-
-.utang-header {
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.utang-primary-btn,
-.utang-back-btn {
-    width: 100%;
-    text-align: center;
-}
-
-.utang-table-header {
-    flex-direction: column;
-    align-items: stretch;
-}
-
-.utang-search {
-    width: 100%;
-}
-
-.utang-status-summary {
-    flex-wrap: wrap;
-    gap: 18px;
-}
-
-.utang-table {
-    min-width: 850px;
-}
-
-.utang-detail-info-grid {
-    grid-template-columns: 1fr;
-}
-
-
-}
-
-/* =========================================================
-SMALL MOBILE
-========================================================= */
-
-@media (max-width: 576px) {
-
-
-.utang-header h1 {
-    font-size: 22px;
-}
-
-.utang-page-icon {
-    width: 42px;
-    height: 42px;
-}
-
-.utang-stat-card {
-    padding: 16px;
-}
-
-.utang-details-body {
-    padding: 15px;
-}
-
-.utang-date-toggle {
-    padding: 12px;
-}
-
-.utang-date-total {
-    font-size: 12px;
-}
-
-.utang-date-count {
+    display: block;
+    margin-top: 6px;
+    color: #9ca3af;
     font-size: 10px;
 }
 
-/*
-   On small screens the ledger becomes
-   a two-column layout.
-*/
-
-.utang-ledger-header {
-    display: none;
+.utang-pay-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 11px 12px;
+    background: #f5f7f9;
+    border-radius: 9px;
+    color: #697586;
+    font-size: 11px;
+    line-height: 1.5;
 }
 
-.utang-ledger-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 12px;
+.utang-pay-note i {
+    margin-top: 1px;
+    color: #e4772e;
 }
 
-.utang-item-time {
-    grid-column: 1;
+.utang-payment-modal .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid #edf0f2;
 }
 
-.utang-item-product {
-    grid-column: 2;
+.utang-confirm-pay-btn {
+    background: #3c9461;
+    border: 1px solid #3c9461;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.utang-ledger-row > div:nth-child(3) {
-    grid-column: 1;
+.utang-confirm-pay-btn:hover {
+    background: #327d51;
+    border-color: #327d51;
+    color: #fff;
 }
 
-.utang-ledger-row > div:nth-child(4) {
-    grid-column: 2;
-    text-align: right;
+/* =========================================================
+   RESPONSIVE  (every @media rule lives down here, at the end)
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    /* page */
+    .ut-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ut-primary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .ut-card-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 18px 16px 12px;
+    }
+
+    .ut-tools {
+        flex-direction: row-reverse;
+        justify-content: space-between;
+    }
+
+    .ut-search {
+        flex: 1;
+        width: auto;
+    }
+
+    .ut-filters {
+        padding: 0 16px 14px;
+    }
+
+    .ut-table {
+        min-width: 920px;
+    }
+
+    /* shared modal */
+    .utang-detail-info-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
+@media (max-width: 576px) {
+
+    /* page */
+    .ut-title-area h1 { font-size: 1.4rem; }
+
+    .ut-kpi { padding: 16px; }
+    .ut-kpi-icon { width: 48px; height: 48px; font-size: 21px; }
+    .ut-kpi h3 { font-size: 1.3rem; }
+
+    .ut-btn-view {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+    }
+
+    .ut-btn-view span {
+        display: none;
+    }
+
+    /* shared modal */
+    .utang-details-body {
+        padding: 15px;
+    }
+
+    .utang-date-toggle {
+        padding: 12px;
+    }
+
+    .utang-date-total {
+        font-size: 12px;
+    }
+
+    .utang-date-count {
+        font-size: 10px;
+    }
+
+    /* the ledger becomes a two-column layout on small screens */
+    .utang-ledger-header {
+        display: none;
+    }
+
+    .utang-ledger-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .utang-item-time {
+        grid-column: 1;
+    }
+
+    .utang-item-product {
+        grid-column: 2;
+    }
+
+    .utang-ledger-row > div:nth-child(3) {
+        grid-column: 1;
+    }
+
+    .utang-ledger-row > div:nth-child(4) {
+        grid-column: 2;
+        text-align: right;
+    }
+}
+
+/* must stay LAST so it overrides every animation above */
+@media (prefers-reduced-motion: reduce) {
+    .ut-header,
+    .ut-alert,
+    .ut-kpi,
+    .ut-card,
+    .ut-table tbody tr[data-status],
+    .ut-status.overdue {
+        animation: none;
+    }
 }

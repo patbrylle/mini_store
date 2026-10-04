@@ -15,28 +15,17 @@
 
                 @Html.AntiForgeryToken()
 
-                <input type="hidden"
-                       name="ReturnTo"
-                       value="Utang" />
+                <input type="hidden" name="ReturnTo" value="Utang" />
 
                 <div class="modal-header transaction-header">
-
                     <div class="transaction-title">
-
                         <div class="transaction-icon">
                             <i class="bi bi-wallet2"></i>
                         </div>
-
                         <div>
-                            <h5 id="newSaleModalLabel">
-                                Record Utang
-                            </h5>
-
-                            <p>
-                                Create a customer credit transaction.
-                            </p>
+                            <h5 id="newSaleModalLabel">Record Utang</h5>
+                            <p>Create a customer credit transaction.</p>
                         </div>
-
                     </div>
 
                     <button type="button"
@@ -44,121 +33,74 @@
                             data-bs-dismiss="modal"
                             aria-label="Close">
                     </button>
-
                 </div>
-
 
                 <div class="modal-body transaction-body">
 
-
                     <!-- TRANSACTION TYPE -->
                     <div class="transaction-section">
-
-                        <label class="transaction-label">
-                            Transaction Type
-                        </label>
+                        <label class="transaction-label">Transaction Type</label>
 
                         <div class="transaction-type-grid">
 
                             <label class="transaction-type-option">
-
-                                <input type="radio"
-                                       name="TransactionType"
-                                       value="Cash" />
-
+                                <input type="radio" name="TransactionType" value="Cash" />
                                 <div class="transaction-type-card">
-
                                     <div class="transaction-type-icon cash">
                                         <i class="bi bi-cash"></i>
                                     </div>
-
                                     <div>
                                         <strong>Cash Sale</strong>
-                                        <small>
-                                            Customer pays immediately
-                                        </small>
+                                        <small>Customer pays immediately</small>
                                     </div>
-
                                     <i class="bi bi-check-circle-fill selected-icon"></i>
-
                                 </div>
-
                             </label>
 
-
                             <label class="transaction-type-option">
-
-                                <input type="radio"
-                                       name="TransactionType"
-                                       value="Utang"
-                                       checked />
-
+                                <input type="radio" name="TransactionType" value="Utang" checked />
                                 <div class="transaction-type-card">
-
                                     <div class="transaction-type-icon utang">
                                         <i class="bi bi-wallet2"></i>
                                     </div>
-
                                     <div>
                                         <strong>Utang</strong>
-                                        <small>
-                                            Record customer balance
-                                        </small>
+                                        <small>Record customer balance</small>
                                     </div>
-
                                     <i class="bi bi-check-circle-fill selected-icon"></i>
-
                                 </div>
-
                             </label>
 
                         </div>
-
                     </div>
-
 
                     <!-- CUSTOMER -->
                     <div class="transaction-section">
-
-                        <label for="customerSelect"
-                               class="transaction-label">
-                            Customer
-                        </label>
+                        <label for="customerSelect" class="transaction-label">Customer</label>
 
                         <select id="customerSelect"
                                 name="CustomerId"
                                 class="form-select transaction-select">
 
-                            <option value="">
-                                Walk-in Customer
-                            </option>
+                            <option value="">Walk-in Customer</option>
 
                             @if (ViewBag.Customers != null)
                             {
                                 foreach (var customer in ViewBag.Customers)
                                 {
-                                    <option value="@customer.CustomerId">
-                                        @customer.CustomerName
-                                    </option>
+                                    <option value="@customer.CustomerId">@customer.CustomerName</option>
                                 }
                             }
-
                         </select>
 
                         <small class="transaction-help">
                             Customer is required when recording an utang.
                         </small>
-
                     </div>
-
 
                     <!-- DUE DATE -->
                     <div class="transaction-section">
-
-                        <label for="dueDate"
-                               class="transaction-label">
-                            Due Date
-                        </label>
+                        <label for="dueDate" class="transaction-label">Due Date</label>
 
                         <input type="date"
                                id="dueDate"
@@ -169,187 +111,111 @@
                         <small class="transaction-help">
                             Select when the customer should pay the remaining balance.
                         </small>
-
                     </div>
-
 
                     <!-- ADD PRODUCT -->
                     <div class="transaction-section">
+                        <label for="productSelector" class="transaction-label">Add Product</label>
 
-                        <label for="productSelector"
-                               class="transaction-label">
-                            Add Product
-                        </label>
+                        <select id="productSelector" class="form-select transaction-select">
 
-                        <select id="productSelector"
-                                class="form-select transaction-select">
-
-                            <option value="">
-                                Select a product to add...
-                            </option>
+                            <option value="">Select a product to add...</option>
 
                             @if (ViewBag.Products != null)
                             {
                                 foreach (var product in ViewBag.Products)
                                 {
                                     <option value="@product.ProductId"
-                                            data-price="@product.Price"
+                                            data-price="@product.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
                                             data-stock="@product.Quantity">
-
-                                        @product.ProductName —
-                                        ₱@product.Price.ToString("N2")
-                                        (@product.Quantity in stock)
-
+                                        @product.ProductName — ₱@product.Price.ToString("N2") (@product.Quantity in stock)
                                     </option>
                                 }
                             }
-
                         </select>
 
                         <small class="transaction-help">
                             Select a product to add it to the transaction.
                         </small>
-
                     </div>
-
 
                     <!-- SELECTED PRODUCTS -->
                     <div class="transaction-section">
-
-                        <label class="transaction-label">
-                            Selected Products
-                        </label>
+                        <label class="transaction-label">Selected Products</label>
 
                         <div class="transaction-products">
 
                             <div class="product-table-head">
-
                                 <div>Product</div>
                                 <div>Quantity</div>
                                 <div>Subtotal</div>
                                 <div></div>
-
                             </div>
 
-
                             <div id="saleProductsContainer">
-
-                                <div id="emptyProductMessage"
-                                     class="text-center text-muted py-3"
-                                     style="font-size: 11px;">
-
-                                    <i class="bi bi-cart3 me-1"></i>
-
+                                <div id="emptyProductMessage" class="empty-products">
+                                    <i class="bi bi-cart3"></i>
                                     No products added yet.
-
                                 </div>
-
                             </div>
 
                         </div>
-
                     </div>
-
 
                     <!-- PAYMENT -->
                     <div class="transaction-section">
-
                         <div class="transaction-payment">
 
                             <div class="payment-summary">
 
-
                                 <div class="payment-total">
-
-                                    <span>
-                                        Total Amount
-                                    </span>
-
-                                    <strong id="saleTotal">
-                                        ₱0.00
-                                    </strong>
-
+                                    <span>Total Amount</span>
+                                    <strong id="saleTotal">₱0.00</strong>
                                 </div>
 
-
                                 <div class="payment-input-group">
-
-                                    <label for="amountPaid">
-                                        Amount Paid
-                                    </label>
-
+                                    <label for="amountPaid">Amount Paid</label>
                                     <div class="money-input">
-
                                         <span>₱</span>
-
                                         <input type="number"
                                                id="amountPaid"
                                                name="AmountPaid"
                                                min="0"
                                                step="0.01"
                                                value="0" />
-
                                     </div>
-
                                 </div>
-
 
                                 <div class="payment-result">
-
-                                    <span id="paymentResultLabel">
-                                        Remaining Balance
-                                    </span>
-
-                                    <strong id="paymentResult">
-                                        ₱0.00
-                                    </strong>
-
+                                    <span id="paymentResultLabel">Remaining Balance</span>
+                                    <strong id="paymentResult">₱0.00</strong>
                                 </div>
-
 
                             </div>
 
-
-                            <div id="utangPaymentInfo"
-                                 class="transaction-note">
-
+                            <div id="utangPaymentInfo" class="transaction-note">
                                 <i class="bi bi-info-circle"></i>
-
                                 <div>
                                     The remaining amount will be recorded
                                     as the customer's utang balance.
                                 </div>
-
                             </div>
 
                         </div>
-
                     </div>
 
                 </div>
 
-
                 <!-- FOOTER -->
                 <div class="modal-footer transaction-footer">
-
-                    <button type="button"
-                            class="btn transaction-cancel-btn"
-                            data-bs-dismiss="modal">
-
+                    <button type="button" class="btn transaction-cancel-btn" data-bs-dismiss="modal">
                         Cancel
-
                     </button>
 
-
-                    <button type="submit"
-                            class="btn transaction-submit-btn">
-
+                    <button type="submit" class="btn transaction-submit-btn">
                         <i class="bi bi-wallet2 me-1"></i>
-
                         Record Utang
-
                     </button>
-
                 </div>
 
             </form>
@@ -359,3 +225,492 @@
     </div>
 
 </div>
+
+
+<!-- ===================================================== -->
+<!-- STYLES: selected product rows                          -->
+<!-- ===================================================== -->
+<style>
+    .modal-content.transaction-modal .product-table-head,
+    .modal-content.transaction-modal .product-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 92px 92px 32px;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-content.transaction-modal .product-row {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--color-border);
+        animation: slRow .3s var(--ease-out) backwards;
+    }
+
+    .modal-content.transaction-modal .product-row:last-child { border-bottom: 0; }
+
+    .modal-content.transaction-modal .product-row-name {
+        min-width: 0;
+        font-size: .85rem;
+        font-weight: 700;
+        color: var(--color-text);
+    }
+
+    .modal-content.transaction-modal .product-row-name span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .modal-content.transaction-modal .product-row-name small {
+        display: block;
+        margin-top: 1px;
+        font-size: .72rem;
+        font-weight: 500;
+        color: var(--color-text-muted);
+    }
+
+    .modal-content.transaction-modal .product-row-qty {
+        width: 100%;
+        padding: 6px 8px;
+        font-size: .85rem;
+        font-weight: 600;
+        text-align: center;
+        color: var(--color-text);
+        background: var(--color-surface);
+        border: 1.5px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        outline: 0;
+    }
+
+    .modal-content.transaction-modal .product-row-qty:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(228, 119, 46, .15);
+    }
+
+    .modal-content.transaction-modal .product-row-subtotal {
+        font-size: .85rem;
+        font-weight: 800;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        color: var(--color-primary-dark);
+    }
+
+    .modal-content.transaction-modal .product-row-remove {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        color: var(--color-danger);
+        background: transparent;
+        border: 1.5px solid color-mix(in srgb, var(--color-danger) 30%, white);
+        border-radius: 50%;
+        transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease);
+    }
+
+    .modal-content.transaction-modal .product-row-remove:hover {
+        color: #fff;
+        background: var(--color-danger);
+    }
+
+    .modal-content.transaction-modal .product-table-head div:nth-child(2) { text-align: center; }
+    .modal-content.transaction-modal .product-table-head div:nth-child(3) { text-align: right; }
+
+    @@media (max-width: 480px) {
+        .modal-content.transaction-modal .product-table-head,
+        .modal-content.transaction-modal .product-row {
+            grid-template-columns: minmax(0, 1fr) 70px 74px 30px;
+            gap: 6px;
+        }
+    }
+</style>
+
+
+<!-- ===================================================== -->
+<!-- SCRIPT: multiple products, totals, balance             -->
+<!-- ===================================================== -->
+```html
+<script>
+(function () {
+    const form       = document.getElementById("saleForm");
+    const selector   = document.getElementById("productSelector");
+    const container  = document.getElementById("saleProductsContainer");
+    const emptyMsg   = document.getElementById("emptyProductMessage");
+    const totalEl    = document.getElementById("saleTotal");
+    const paidInput  = document.getElementById("amountPaid");
+    const resultEl   = document.getElementById("paymentResult");
+    const resultLbl  = document.getElementById("paymentResultLabel");
+
+    if (!form || !selector || !container) {
+        return;
+    }
+
+    let items = [];
+
+    // =========================================================
+    // PESO FORMAT
+    // =========================================================
+
+    const peso = n => "₱" + Number(n).toLocaleString("en-PH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    // =========================================================
+    // UPDATE TOTALS
+    // =========================================================
+
+    function updateTotals() {
+
+        const total = items.reduce(
+            (sum, item) =>
+                sum + (item.price * item.qty),
+            0
+        );
+
+        const paid =
+            parseFloat(paidInput.value) || 0;
+
+        totalEl.textContent =
+            peso(total);
+
+        if (paid > total && total > 0) {
+
+            resultLbl.textContent =
+                "Change";
+
+            resultEl.textContent =
+                peso(paid - total);
+
+        } else {
+
+            resultLbl.textContent =
+                "Remaining Balance";
+
+            resultEl.textContent =
+                peso(
+                    Math.max(
+                        total - paid,
+                        0
+                    )
+                );
+        }
+    }
+
+    // =========================================================
+    // RENDER PRODUCTS
+    // =========================================================
+
+    function render() {
+
+        // Remove previous product rows
+        container
+            .querySelectorAll(".product-row")
+            .forEach(row => row.remove());
+
+        // Show / hide empty message
+        emptyMsg.style.display =
+            items.length > 0
+                ? "none"
+                : "";
+
+        // Create product rows
+        items.forEach(item => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "product-row";
+
+            row.innerHTML = `
+                <div class="product-row-name">
+
+                    <span></span>
+
+                    <small>
+                        ${peso(item.price)} each ·
+                        ${item.stock} in stock
+                    </small>
+
+                    <input
+                        type="hidden"
+                        name="ProductId"
+                        value="${item.id}" />
+
+                </div>
+
+                <input
+                    type="number"
+                    class="product-row-qty"
+                    name="Quantity"
+                    min="1"
+                    max="${item.stock}"
+                    value="${item.qty}" />
+
+                <div class="product-row-subtotal">
+                    ${peso(item.price * item.qty)}
+                </div>
+
+                <button
+                    type="button"
+                    class="product-row-remove"
+                    aria-label="Remove">
+
+                    <i class="bi bi-x-lg"></i>
+
+                </button>
+            `;
+
+            // Product name
+            row.querySelector(
+                ".product-row-name span"
+            ).textContent = item.name;
+
+            // Quantity input
+            const qtyInput =
+                row.querySelector(
+                    ".product-row-qty"
+                );
+
+            // Subtotal
+            const subtotal =
+                row.querySelector(
+                    ".product-row-subtotal"
+                );
+
+            // =================================================
+            // QUANTITY CHANGE
+            // =================================================
+
+            qtyInput.addEventListener(
+                "input",
+                function () {
+
+                    let quantity =
+                        parseInt(
+                            qtyInput.value,
+                            10
+                        ) || 1;
+
+                    quantity =
+                        Math.min(
+                            Math.max(
+                                quantity,
+                                1
+                            ),
+                            item.stock
+                        );
+
+                    item.qty =
+                        quantity;
+
+                    qtyInput.value =
+                        quantity;
+
+                    subtotal.textContent =
+                        peso(
+                            item.price *
+                            quantity
+                        );
+
+                    updateTotals();
+                }
+            );
+
+            qtyInput.addEventListener(
+                "blur",
+                function () {
+
+                    qtyInput.value =
+                        item.qty;
+                }
+            );
+
+            // =================================================
+            // REMOVE PRODUCT
+            // =================================================
+
+            row.querySelector(
+                ".product-row-remove"
+            ).addEventListener(
+                "click",
+                function () {
+
+                    items =
+                        items.filter(
+                            i => i.id !== item.id
+                        );
+
+                    render();
+                }
+            );
+
+            container.appendChild(row);
+        });
+
+        updateTotals();
+    }
+
+    // =========================================================
+    // ADD PRODUCT
+    // =========================================================
+
+    selector.addEventListener(
+        "change",
+        function () {
+
+            const option =
+                selector.selectedOptions[0];
+
+            if (!option || !option.value) {
+                return;
+            }
+
+            const id =
+                option.value;
+
+            const stock =
+                parseInt(
+                    option.dataset.stock,
+                    10
+                ) || 0;
+
+            const price =
+                parseFloat(
+                    option.dataset.price
+                ) || 0;
+
+            const name =
+                option.textContent
+                    .split("—")[0]
+                    .trim();
+
+            // =================================================
+            // STOCK CHECK
+            // =================================================
+
+            if (stock <= 0) {
+
+                alert(
+                    name +
+                    " is out of stock."
+                );
+
+                selector.value = "";
+
+                return;
+            }
+
+            // =================================================
+            // CHECK EXISTING PRODUCT
+            // =================================================
+
+            const existing =
+                items.find(
+                    item => item.id === id
+                );
+
+            if (existing) {
+
+                if (existing.qty < stock) {
+
+                    existing.qty++;
+
+                } else {
+
+                    alert(
+                        "Maximum available stock for " +
+                        name +
+                        " is " +
+                        stock +
+                        "."
+                    );
+                }
+
+            } else {
+
+                items.push({
+                    id: id,
+                    name: name,
+                    price: price,
+                    stock: stock,
+                    qty: 1
+                });
+            }
+
+            render();
+
+            // Reset selector
+            selector.value = "";
+        }
+    );
+
+    // =========================================================
+    // PAYMENT INPUT
+    // =========================================================
+
+    paidInput.addEventListener(
+        "input",
+        updateTotals
+    );
+<!-- =========================================================
+     FORM SUBMIT
+========================================================= -->
+
+form.addEventListener("submit", function (event) {
+
+    // Check the actual hidden ProductId inputs
+    const selectedProducts =
+        form.querySelectorAll('input[name="ProductId"]');
+
+    // No product selected
+    if (selectedProducts.length === 0) {
+
+        event.preventDefault();
+
+        alert("Please add at least one product.");
+
+        return;
+    }
+
+    // Product exists:
+    // allow the form to submit normally.
+});
+
+
+    // =========================================================
+    // RESET WHEN MODAL CLOSES
+    // =========================================================
+
+    const modal =
+        document.getElementById(
+            "newSaleModal"
+        );
+
+    if (modal) {
+
+        modal.addEventListener(
+            "hidden.bs.modal",
+            function () {
+
+                items = [];
+
+                paidInput.value = "0";
+
+                selector.value = "";
+
+                render();
+            }
+        );
+    }
+
+    // =========================================================
+    // INITIAL RENDER
+    // =========================================================
+
+    render();
+
+})();
+</script>

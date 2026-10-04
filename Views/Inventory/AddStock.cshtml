@@ -2,115 +2,165 @@
 
 @{
     ViewData["Title"] = "Add Stock";
+
+    var currentQty = Model.Quantity;
 }
 
-<div class="mb-4">
-    <h1 class="fw-bold mb-1">Add Stock</h1>
-    <p class="text-muted mb-0">
-        Increase the available stock of a product.
-    </p>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/inventory.css" asp-append-version="true" />
+}
 
-<div class="row">
+<div class="inventory-page">
 
-    <div class="col-md-6">
+    <!-- PAGE HEADER -->
+    <div class="inventory-header">
+        <div class="inventory-title-row">
+            <div class="inventory-page-icon">
+                <i class="bi bi-plus-lg"></i>
+            </div>
+            <div>
+                <h1>Add Stock</h1>
+                <p>Increase the available stock of a product.</p>
+            </div>
+        </div>
 
-        <div class="card border-0 shadow-sm">
+        <a asp-action="Index" class="btn modal-cancel-btn">
+            <i class="bi bi-arrow-left"></i>
+            Back to Inventory
+        </a>
+    </div>
 
-            <div class="card-body p-4">
+    <div class="row g-4">
 
-                <h5 class="fw-bold mb-4">Product Information</h5>
+        <!-- FORM -->
+        <div class="col-lg-7">
+            <div class="stock-form-card">
 
-                <div class="mb-3">
-                    <label class="form-label text-muted">
-                        Product
-                    </label>
-
-                    <input type="text"
-                           class="form-control"
-                           value="@Model.ProductName"
-                           readonly>
+                <div class="stock-form-header">
+                    <div class="section-title">
+                        <div class="section-title-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <div>
+                            <h5>Product Information</h5>
+                            <p>Review the product before adding stock.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label text-muted">
-                        Category
-                    </label>
+                <div class="stock-form-body">
 
-                    <input type="text"
-                           class="form-control"
-                           value="@(Model.Category?.CategoryName ?? "No Category")"
-                           readonly>
+                    <div class="stock-product-summary">
+                        <div class="product-icon">
+                            <i class="bi bi-box"></i>
+                        </div>
+                        <div>
+                            <h4>@Model.ProductName</h4>
+                            <span class="category-badge">@(Model.Category?.CategoryName ?? "No Category")</span>
+                        </div>
+                    </div>
+
+                    <div class="stock-info-grid">
+                        <div class="stock-info">
+                            <span>Product ID</span>
+                            <strong>#@Model.ProductId</strong>
+                        </div>
+                        <div class="stock-info">
+                            <span>Price</span>
+                            <strong>₱@Model.Price.ToString("N2")</strong>
+                        </div>
+                        <div class="stock-info">
+                            <span>Current Stock</span>
+                            <strong>@currentQty</strong>
+                        </div>
+                    </div>
+
+                    <form asp-action="AddStock" method="post">
+
+                        <input type="hidden" name="id" value="@Model.ProductId" />
+
+                        <div asp-validation-summary="ModelOnly" class="stock-validation"></div>
+
+                        <div class="modal-field">
+                            <label for="quantity">Quantity to Add</label>
+                            <div class="input-icon-wrapper">
+                                <i class="bi bi-plus-circle"></i>
+                                <input type="number"
+                                       id="quantity"
+                                       name="quantity"
+                                       class="form-control"
+                                       min="1"
+                                       value="1"
+                                       data-current="@currentQty"
+                                       required />
+                            </div>
+                            <small>Enter the number of items you want to add.</small>
+                        </div>
+
+                        <div class="stock-form-actions">
+                            <button type="submit" class="btn modal-submit-btn">
+                                <i class="bi bi-plus-lg"></i>
+                                Add Stock
+                            </button>
+                            <a asp-action="Index" class="btn modal-cancel-btn">Cancel</a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- LIVE PREVIEW -->
+        <div class="col-lg-5">
+            <div class="stock-preview">
+
+                <h6>Stock Preview</h6>
+
+                <div class="stock-preview-row">
+                    <span>Current stock</span>
+                    <strong>@currentQty</strong>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label text-muted">
-                        Current Stock
-                    </label>
-
-                    <input type="text"
-                           class="form-control"
-                           value="@Model.Quantity"
-                           readonly>
+                <div class="stock-preview-row is-added">
+                    <span>Adding</span>
+                    <strong id="stockAddedValue">+1</strong>
                 </div>
 
-                <form asp-action="AddStock" method="post">
-
-                    <input type="hidden"
-                           name="id"
-                           value="@Model.ProductId" />
-
-                    <div asp-validation-summary="ModelOnly"
-                         class="text-danger mb-3">
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="quantity"
-                               class="form-label fw-semibold">
-                            Quantity to Add
-                        </label>
-
-                        <input type="number"
-                               id="quantity"
-                               name="quantity"
-                               class="form-control"
-                               min="1"
-                               value="1"
-                               required>
-
-                        <small class="text-muted">
-                            Enter the number of items you want to add.
-                        </small>
-                    </div>
-
-                    <div class="d-flex gap-2">
-
-                        <button type="submit"
-                                class="btn btn-success">
-                            <i class="bi bi-plus-lg"></i>
-                            Add Stock
-                        </button>
-
-                        <a asp-action="Index"
-                           class="btn btn-outline-secondary">
-                            Cancel
-                        </a>
-
-                    </div>
-
-                </form>
+                <div class="stock-preview-total">
+                    <span>New stock</span>
+                    <strong id="stockNewValue">@(currentQty + 1)</strong>
+                </div>
 
             </div>
-
         </div>
 
     </div>
-
 </div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-}
 
+    <script>
+        (function () {
+            const input = document.getElementById("quantity");
+            const added = document.getElementById("stockAddedValue");
+            const total = document.getElementById("stockNewValue");
+
+            if (!input) return;
+
+            const current = parseInt(input.dataset.current, 10) || 0;
+
+            function update() {
+                const qty = Math.max(parseInt(input.value, 10) || 0, 0);
+                added.textContent = "+" + qty;
+                total.textContent = current + qty;
+            }
+
+            input.addEventListener("input", update);
+            update();
+        })();
+    </script>
+}

@@ -4,193 +4,100 @@
     ViewData["Title"] = "Products";
 
     var products = Model?.ToList() ?? new List<mini_store.Models.Product>();
-
     var totalProducts = products.Count;
-
     var productValue = products.Sum(p => p.Price * p.Quantity);
-
     var lowStock = products.Count(p => p.Quantity > 0 && p.Quantity <= 10);
 }
 
 @section Styles {
-    <link rel="stylesheet"
-          href="~/css/products.css"
-          asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/products.css" asp-append-version="true" />
 }
 
 <div class="products-page">
 
-    <!-- ===================================================== -->
     <!-- HEADER -->
-    <!-- ===================================================== -->
-
     <div class="products-header">
-
         <div class="products-title-area">
-
             <div class="products-page-icon">
                 <i class="bi bi-box-seam"></i>
             </div>
-
             <div>
-                <h1 class="products-title">
-                    Products
-                </h1>
-
-                <p class="products-subtitle">
-                    Manage your store products, prices, and stock levels.
-                </p>
+                <h1 class="products-title">Products</h1>
+                <p class="products-subtitle">Manage your store products, prices, and stock levels.</p>
             </div>
-
         </div>
 
         <button type="button"
                 class="products-primary-btn"
                 data-bs-toggle="modal"
                 data-bs-target="#addProductModal">
-
             <i class="bi bi-plus-lg"></i>
             Add Product
-
         </button>
-
     </div>
 
-
-    <!-- ===================================================== -->
     <!-- SUMMARY CARDS -->
-    <!-- ===================================================== -->
-
     <div class="products-kpi-row">
 
-        <!-- TOTAL PRODUCTS -->
-
         <div class="products-stat-card">
-
             <div class="products-stat-icon stat-primary">
                 <i class="bi bi-box-seam"></i>
             </div>
-
             <div class="products-stat-content">
-
-                <span class="products-stat-label">
-                    Total Products
-                </span>
-
-                <strong class="products-stat-value">
-                    @totalProducts
-                </strong>
-
+                <span class="products-stat-label">Total Products</span>
+                <strong class="products-stat-value">@totalProducts</strong>
             </div>
-
         </div>
 
-
-        <!-- PRODUCT VALUE -->
-
         <div class="products-stat-card">
-
             <div class="products-stat-icon stat-gold">
                 <i class="bi bi-cash-stack"></i>
             </div>
-
             <div class="products-stat-content">
-
-                <span class="products-stat-label">
-                    Product Value
-                </span>
-
-                <strong class="products-stat-value">
-                    ₱@productValue.ToString("N2")
-                </strong>
-
+                <span class="products-stat-label">Product Value</span>
+                <strong class="products-stat-value">₱@productValue.ToString("N2")</strong>
             </div>
-
         </div>
 
-
-        <!-- LOW STOCK -->
-
         <div class="products-stat-card">
-
             <div class="products-stat-icon stat-warning">
                 <i class="bi bi-exclamation-triangle"></i>
             </div>
-
             <div class="products-stat-content">
-
-                <span class="products-stat-label">
-                    Low Stock
-                </span>
-
-                <strong class="products-stat-value">
-                    @lowStock
-                </strong>
-
+                <span class="products-stat-label">Low Stock</span>
+                <strong class="products-stat-value">@lowStock</strong>
             </div>
-
         </div>
 
     </div>
 
-
-    <!-- ===================================================== -->
     <!-- PRODUCT DIRECTORY -->
-    <!-- ===================================================== -->
-
     <div class="products-table-card">
-
-        <!-- TABLE HEADER -->
 
         <div class="products-table-header">
 
-            <div>
-
-                <div class="products-section-title">
-
-                    <div class="products-section-icon">
-                        <i class="bi bi-grid"></i>
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Product Directory
-                        </h2>
-
-                        <p>
-                            Manage your products and monitor their stock.
-                        </p>
-
-                    </div>
-
+            <div class="products-section-title">
+                <div class="products-section-icon">
+                    <i class="bi bi-grid"></i>
                 </div>
-
+                <div>
+                    <h2>Product Directory</h2>
+                    <p>Manage your products and monitor their stock.</p>
+                </div>
             </div>
-
-
-            <!-- ================================================= -->
-            <!-- SEARCH + FILTERS -->
-            <!-- ================================================= -->
 
             <div class="products-table-tools">
 
                 <!-- SEARCH -->
-
                 <div class="products-search">
-
                     <i class="bi bi-search"></i>
-
                     <input type="text"
                            id="productSearch"
                            placeholder="Search products..."
                            autocomplete="off" />
-
                 </div>
 
-
-                <!-- FILTER FORM -->
-
+                <!-- FILTERS -->
                 <form asp-controller="Products"
                       asp-action="Index"
                       method="get"
@@ -199,98 +106,61 @@
                     <div class="products-filter-group">
 
                         <!-- CATEGORY -->
-
                         <div class="products-filter">
-
                             <i class="bi bi-tags"></i>
-
                             <select name="categoryId">
-
-                                <option value="">
-                                    All Categories
-                                </option>
-
+                                <option value="">All Categories</option>
                                 @foreach (var category in ViewBag.Categories)
                                 {
-                                    @if (ViewBag.SelectedCategory?.ToString() == category.Value)
+                                    if (ViewBag.SelectedCategory?.ToString() == category.Value)
                                     {
-                                        <option value="@category.Value" selected>
-                                            @category.Text
-                                        </option>
+                                        <option value="@category.Value" selected>@category.Text</option>
                                     }
                                     else
                                     {
-                                        <option value="@category.Value">
-                                            @category.Text
-                                        </option>
+                                        <option value="@category.Value">@category.Text</option>
                                     }
                                 }
-
                             </select>
-
                         </div>
 
-
                         <!-- STOCK -->
-
                         <div class="products-filter">
-
                             <i class="bi bi-box-seam"></i>
-
                             <select name="stockStatus">
-
-                                <option value="">
-                                    All Stock
-                                </option>
+                                <option value="">All Stock</option>
 
                                 @if (ViewBag.SelectedStock == "InStock")
                                 {
-                                    <option value="InStock" selected>
-                                        In Stock
-                                    </option>
+                                    <option value="InStock" selected>In Stock</option>
                                 }
                                 else
                                 {
-                                    <option value="InStock">
-                                        In Stock
-                                    </option>
+                                    <option value="InStock">In Stock</option>
                                 }
 
                                 @if (ViewBag.SelectedStock == "LowStock")
                                 {
-                                    <option value="LowStock" selected>
-                                        Low Stock
-                                    </option>
+                                    <option value="LowStock" selected>Low Stock</option>
                                 }
                                 else
                                 {
-                                    <option value="LowStock">
-                                        Low Stock
-                                    </option>
+                                    <option value="LowStock">Low Stock</option>
                                 }
 
                                 @if (ViewBag.SelectedStock == "OutOfStock")
                                 {
-                                    <option value="OutOfStock" selected>
-                                        Out of Stock
-                                    </option>
+                                    <option value="OutOfStock" selected>Out of Stock</option>
                                 }
                                 else
                                 {
-                                    <option value="OutOfStock">
-                                        Out of Stock
-                                    </option>
+                                    <option value="OutOfStock">Out of Stock</option>
                                 }
-
                             </select>
-
                         </div>
 
-
                         <!-- PRICE RANGE -->
-
                         <div class="products-price-filter">
-
                             <i class="bi bi-cash-stack"></i>
 
                             <input type="number"
@@ -309,73 +179,39 @@
                                    min="0"
                                    step="0.01" />
 
-                            <button type="submit"
-                                    class="products-filter-btn">
-
+                            <button type="submit" class="products-filter-btn">
                                 <i class="bi bi-funnel"></i>
                                 Filter
-
                             </button>
-
                         </div>
 
-
                         <!-- CLEAR -->
-
                         <a asp-controller="Products"
                            asp-action="Index"
                            class="products-clear-filter">
-
                             <i class="bi bi-x-lg"></i>
                             Clear
-
                         </a>
 
                     </div>
-
                 </form>
 
             </div>
-
         </div>
 
-
-        <!-- ================================================= -->
-        <!-- PRODUCT TABLE -->
-        <!-- ================================================= -->
-
+        <!-- TABLE -->
         <div class="table-responsive">
-
             <table class="table products-table mb-0">
 
                 <thead>
-
                     <tr>
-
-                        <th>
-                            Product
-                        </th>
-
-                        <th>
-                            Category
-                        </th>
-
-                        <th>
-                            Price
-                        </th>
-
-                        <th>
-                            Stock
-                        </th>
-
-                        <th class="text-end">
-                            Actions
-                        </th>
-
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th class="text-end">Actions</th>
                     </tr>
-
                 </thead>
-
 
                 <tbody id="productsTableBody">
 
@@ -386,111 +222,66 @@
                             <tr class="product-row">
 
                                 <!-- PRODUCT -->
-
                                 <td>
-
                                     <div class="product-cell">
-
                                         <div class="product-avatar">
                                             <i class="bi bi-box-seam"></i>
                                         </div>
-
-                                        <div>
-
-                                            <strong class="product-name">
-                                                @product.ProductName
-                                            </strong>
-
-                                        </div>
-
+                                        <strong class="product-name">@product.ProductName</strong>
                                     </div>
-
                                 </td>
 
-
                                 <!-- CATEGORY -->
-
                                 <td>
-
                                     @if (product.Category != null)
                                     {
                                         <span class="category-badge">
-
                                             <i class="bi bi-tag"></i>
-
                                             @product.Category.CategoryName
-
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="category-badge category-none">
-                                            Uncategorized
-                                        </span>
+                                        <span class="category-badge category-none">Uncategorized</span>
                                     }
-
                                 </td>
-
 
                                 <!-- PRICE -->
-
                                 <td>
-
-                                    <strong class="product-price">
-                                        ₱@product.Price.ToString("N2")
-                                    </strong>
-
+                                    <strong class="product-price">₱@product.Price.ToString("N2")</strong>
                                 </td>
 
-
                                 <!-- STOCK -->
-
                                 <td>
-
                                     @if (product.Quantity == 0)
                                     {
                                         <span class="stock-badge stock-out">
-
                                             <span class="stock-dot"></span>
-
                                             Out of Stock
-
                                         </span>
                                     }
                                     else if (product.Quantity <= 10)
                                     {
                                         <span class="stock-badge stock-low">
-
                                             <span class="stock-dot"></span>
-
                                             @product.Quantity Low Stock
-
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="stock-badge stock-good">
-
                                             <span class="stock-dot"></span>
-
                                             @product.Quantity In Stock
-
                                         </span>
                                     }
-
                                 </td>
 
-
                                 <!-- ACTIONS -->
-
                                 <td class="text-end">
-
                                     <div class="product-actions">
 
-                                        <!-- VIEW -->
-
                                         <button type="button"
-                                                class="btn btn-sm btn-outline-secondary view-product-btn"
+                                                class="product-action-btn view-product-btn"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#viewProductModal"
                                                 data-product-id="@product.ProductId"
@@ -498,14 +289,9 @@
                                                 data-category="@product.Category?.CategoryName"
                                                 data-price="@product.Price.ToString("N2")"
                                                 data-quantity="@product.Quantity">
-
                                             <i class="bi bi-eye"></i>
                                             View
-
                                         </button>
-
-
-                                        <!-- EDIT -->
 
                                         <button type="button"
                                                 class="product-action-btn product-edit-btn edit-product-btn"
@@ -516,14 +302,9 @@
                                                 data-category-id="@product.CategoryId"
                                                 data-price="@product.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
                                                 data-quantity="@product.Quantity">
-
                                             <i class="bi bi-pencil"></i>
                                             Edit
-
                                         </button>
-
-
-                                        <!-- DELETE -->
 
                                         <button type="button"
                                                 class="product-action-btn product-delete-btn delete-product-btn"
@@ -534,14 +315,11 @@
                                                 data-category="@product.Category?.CategoryName"
                                                 data-price="@product.Price.ToString("N2")"
                                                 data-stock="@product.Quantity">
-
                                             <i class="bi bi-trash3"></i>
                                             Delete
-
                                         </button>
 
                                     </div>
-
                                 </td>
 
                             </tr>
@@ -550,47 +328,29 @@
                     else
                     {
                         <tr>
-
                             <td colspan="5">
-
                                 <div class="products-empty">
-
                                     <div class="empty-icon">
                                         <i class="bi bi-box-seam"></i>
                                     </div>
-
-                                    <h5>
-                                        No Products Found
-                                    </h5>
-
-                                    <p>
-                                        No products match your current filters.
-                                    </p>
-
+                                    <h5>No Products Found</h5>
+                                    <p>No products match your current filters.</p>
                                     <a asp-controller="Products"
                                        asp-action="Index"
                                        class="products-primary-btn">
-
                                         <i class="bi bi-arrow-counterclockwise"></i>
                                         Clear Filters
-
                                     </a>
-
                                 </div>
-
                             </td>
-
                         </tr>
                     }
 
                 </tbody>
-
             </table>
-
         </div>
 
     </div>
-
 </div>
 
 
@@ -598,112 +358,52 @@
 <!-- ADD PRODUCT MODAL -->
 <!-- ========================================================= -->
 
-<div class="modal fade"
-     id="addProductModal"
-     tabindex="-1"
-     aria-labelledby="addProductModalLabel"
-     aria-hidden="true">
-
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-
         <div class="modal-content product-modal">
 
             <div class="modal-header">
-
                 <div>
-
-                    <h5 class="modal-title fw-bold"
-                        id="addProductModalLabel">
-
+                    <h5 class="modal-title fw-bold" id="addProductModalLabel">
                         <i class="bi bi-box-seam me-2"></i>
                         Add Product
-
                     </h5>
-
-                    <small class="text-muted">
-                        Add a new product to your store.
-                    </small>
-
+                    <small class="text-muted">Add a new product to your store.</small>
                 </div>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
-
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-
-            <form asp-action="Create"
-                  method="post">
-
+            <form asp-action="Create" method="post">
                 @Html.AntiForgeryToken()
 
                 <div class="modal-body">
 
-                    <!-- PRODUCT NAME -->
-
                     <div class="mb-3">
-
-                        <label class="form-label">
-                            Product Name
-                        </label>
-
+                        <label class="form-label">Product Name</label>
                         <input type="text"
                                name="ProductName"
                                class="form-control"
                                placeholder="Enter product name"
                                required />
-
                     </div>
-
-
-                    <!-- CATEGORY -->
 
                     <div class="mb-3">
-
-                        <label class="form-label">
-                            Category
-                        </label>
-
-                        <select name="CategoryId"
-                                class="form-select"
-                                required>
-
-                            <option value="">
-                                -- Select Category --
-                            </option>
-
+                        <label class="form-label">Category</label>
+                        <select name="CategoryId" class="form-select" required>
+                            <option value="">-- Select Category --</option>
                             @foreach (var category in ViewBag.Categories)
                             {
-                                <option value="@category.Value">
-                                    @category.Text
-                                </option>
+                                <option value="@category.Value">@category.Text</option>
                             }
-
                         </select>
-
                     </div>
 
-
-                    <!-- PRICE + QUANTITY -->
-
                     <div class="row">
-
                         <div class="col-md-6">
-
                             <div class="mb-3">
-
-                                <label class="form-label">
-                                    Price
-                                </label>
-
+                                <label class="form-label">Price</label>
                                 <div class="input-group">
-
-                                    <span class="input-group-text">
-                                        ₱
-                                    </span>
-
+                                    <span class="input-group-text">₱</span>
                                     <input type="number"
                                            name="Price"
                                            class="form-control"
@@ -711,65 +411,39 @@
                                            min="0"
                                            placeholder="0.00"
                                            required />
-
                                 </div>
-
                             </div>
-
                         </div>
 
-
                         <div class="col-md-6">
-
                             <div class="mb-3">
-
-                                <label class="form-label">
-                                    Quantity
-                                </label>
-
+                                <label class="form-label">Quantity</label>
                                 <input type="number"
                                        name="Quantity"
                                        class="form-control"
                                        min="0"
                                        placeholder="0"
                                        required />
-
                             </div>
-
                         </div>
-
                     </div>
 
                 </div>
 
-
                 <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-light border"
-                            data-bs-dismiss="modal">
-
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg"></i>
                         Cancel
-
                     </button>
-
-                    <button type="submit"
-                            class="btn btn-primary">
-
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg"></i>
                         Save Product
-
                     </button>
-
                 </div>
-
             </form>
 
         </div>
-
     </div>
-
 </div>
 
 
@@ -777,237 +451,90 @@
 <!-- VIEW PRODUCT MODAL -->
 <!-- ========================================================= -->
 
-<div class="modal fade"
-     id="viewProductModal"
-     tabindex="-1"
-     aria-labelledby="viewProductModalLabel"
-     aria-hidden="true">
-
+<div class="modal fade" id="viewProductModal" tabindex="-1" aria-labelledby="viewProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-
         <div class="modal-content view-product-modal">
 
-            <!-- HEADER -->
-
             <div class="modal-header">
-
                 <div class="view-product-title">
-
                     <div class="view-product-icon">
-
                         <i class="bi bi-box-seam"></i>
-
                     </div>
-
                     <div>
-
-                        <h5 class="modal-title"
-                            id="viewProductModalLabel">
-
-                            Product Details
-
-                        </h5>
-
-                        <p>
-                            View product information and stock status.
-                        </p>
-
+                        <h5 class="modal-title" id="viewProductModalLabel">Product Details</h5>
+                        <p>View product information and stock status.</p>
                     </div>
-
                 </div>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
-
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
-
-            <!-- BODY -->
 
             <div class="modal-body view-product-body">
 
-                <!-- PRODUCT SUMMARY -->
-
                 <div class="view-product-summary">
-
                     <div class="view-product-main-icon">
-
                         <i class="bi bi-box-seam"></i>
-
                     </div>
-
                     <div>
-
-                        <h4 id="viewProductName">
-                            Product Name
-                        </h4>
-
-                        <span id="viewProductCategory"
-                              class="view-category-badge">
-
-                            Category
-
-                        </span>
-
+                        <h4 id="viewProductName">Product Name</h4>
+                        <span id="viewProductCategory" class="view-category-badge">Category</span>
                     </div>
-
                 </div>
-
-
-                <!-- PRODUCT INFORMATION -->
 
                 <div class="view-product-section">
-
                     <div class="view-product-section-title">
-
                         <i class="bi bi-info-circle"></i>
-
-                        <span>
-                            Product Information
-                        </span>
-
+                        <span>Product Information</span>
                     </div>
-
 
                     <div class="view-product-info-grid">
-
-                        <!-- PRODUCT NAME -->
-
                         <div class="view-product-info">
-
-                            <span>
-                                Product Name
-                            </span>
-
-                            <strong id="viewProductNameInfo">
-                                -
-                            </strong>
-
+                            <span>Product Name</span>
+                            <strong id="viewProductNameInfo">-</strong>
                         </div>
-
-
-                        <!-- CATEGORY -->
-
                         <div class="view-product-info">
-
-                            <span>
-                                Category
-                            </span>
-
-                            <strong id="viewProductCategoryInfo">
-                                -
-                            </strong>
-
+                            <span>Category</span>
+                            <strong id="viewProductCategoryInfo">-</strong>
                         </div>
-
-
-                        <!-- PRICE -->
-
                         <div class="view-product-info">
-
-                            <span>
-                                Price
-                            </span>
-
-                            <strong id="viewProductPrice">
-                                ₱0.00
-                            </strong>
-
+                            <span>Price</span>
+                            <strong id="viewProductPrice">₱0.00</strong>
                         </div>
-
-
-                        <!-- STOCK -->
-
                         <div class="view-product-info">
-
-                            <span>
-                                Current Stock
-                            </span>
-
-                            <strong id="viewProductQuantity">
-                                0 units
-                            </strong>
-
+                            <span>Current Stock</span>
+                            <strong id="viewProductQuantity">0 units</strong>
                         </div>
-
                     </div>
-
                 </div>
 
-
-                <!-- INVENTORY STATUS -->
-
                 <div class="view-stock-section">
-
                     <div class="view-product-section-title">
-
                         <i class="bi bi-boxes"></i>
-
-                        <span>
-                            Inventory Status
-                        </span>
-
+                        <span>Inventory Status</span>
                     </div>
-
 
                     <div class="view-stock-card">
-
                         <div class="view-stock-icon">
-
                             <i class="bi bi-box-seam"></i>
-
                         </div>
-
-
                         <div class="view-stock-content">
-
-                            <span>
-                                Current Quantity
-                            </span>
-
-                            <strong id="viewStockQuantity">
-                                0 units
-                            </strong>
-
+                            <span>Current Quantity</span>
+                            <strong id="viewStockQuantity">0 units</strong>
                         </div>
-
-
-                        <span id="viewStockStatus"
-                              class="view-stock-badge">
-
-                            In Stock
-
-                        </span>
-
+                        <span id="viewStockStatus" class="view-stock-badge">In Stock</span>
                     </div>
-
                 </div>
 
             </div>
 
-
-            <!-- FOOTER -->
-
             <div class="modal-footer view-product-footer">
-
-                <button type="button"
-                        class="btn view-product-close-btn"
-                        data-bs-dismiss="modal">
-
+                <button type="button" class="btn view-product-close-btn" data-bs-dismiss="modal">
                     <i class="bi bi-x-lg"></i>
-
                     Close
-
                 </button>
-
             </div>
 
         </div>
-
     </div>
-
 </div>
 
 
@@ -1015,121 +542,55 @@
 <!-- EDIT PRODUCT MODAL -->
 <!-- ========================================================= -->
 
-<div class="modal fade"
-     id="editProductModal"
-     tabindex="-1"
-     aria-labelledby="editProductModalLabel"
-     aria-hidden="true">
-
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-
         <div class="modal-content product-modal">
 
             <div class="modal-header">
-
                 <div>
-
-                    <h5 class="modal-title fw-bold"
-                        id="editProductModalLabel">
-
+                    <h5 class="modal-title fw-bold" id="editProductModalLabel">
                         <i class="bi bi-pencil-square me-2"></i>
                         Edit Product
-
                     </h5>
-
-                    <small class="text-muted">
-                        Update the product information.
-                    </small>
-
+                    <small class="text-muted">Update the product information.</small>
                 </div>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
-
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-
-            <form asp-action="Edit"
-                  method="post">
-
+            <form asp-action="Edit" method="post">
                 @Html.AntiForgeryToken()
 
                 <div class="modal-body">
 
-                    <!-- PRODUCT ID -->
-
-                    <input type="hidden"
-                           id="editProductId"
-                           name="ProductId" />
-
-
-                    <!-- PRODUCT NAME -->
-
+<input type="hidden" id="editProductId" name="ProductId" />
+<input type="hidden" id="editProductIdParameter" name="id" />
                     <div class="mb-3">
-
-                        <label class="form-label">
-                            Product Name
-                        </label>
-
+                        <label class="form-label">Product Name</label>
                         <input type="text"
                                id="editProductName"
                                name="ProductName"
                                class="form-control"
                                placeholder="Enter product name"
                                required />
-
                     </div>
-
-
-                    <!-- CATEGORY -->
 
                     <div class="mb-3">
-
-                        <label class="form-label">
-                            Category
-                        </label>
-
-                        <select id="editCategoryId"
-                                name="CategoryId"
-                                class="form-select"
-                                required>
-
-                            <option value="">
-                                -- Select Category --
-                            </option>
-
+                        <label class="form-label">Category</label>
+                        <select id="editCategoryId" name="CategoryId" class="form-select" required>
+                            <option value="">-- Select Category --</option>
                             @foreach (var category in ViewBag.Categories)
                             {
-                                <option value="@category.Value">
-                                    @category.Text
-                                </option>
+                                <option value="@category.Value">@category.Text</option>
                             }
-
                         </select>
-
                     </div>
 
-
-                    <!-- PRICE + QUANTITY -->
-
                     <div class="row">
-
                         <div class="col-md-6">
-
                             <div class="mb-3">
-
-                                <label class="form-label">
-                                    Price
-                                </label>
-
+                                <label class="form-label">Price</label>
                                 <div class="input-group">
-
-                                    <span class="input-group-text">
-                                        ₱
-                                    </span>
-
+                                    <span class="input-group-text">₱</span>
                                     <input type="number"
                                            id="editPrice"
                                            name="Price"
@@ -1137,65 +598,39 @@
                                            step="0.01"
                                            min="0"
                                            required />
-
                                 </div>
-
                             </div>
-
                         </div>
 
-
                         <div class="col-md-6">
-
                             <div class="mb-3">
-
-                                <label class="form-label">
-                                    Quantity
-                                </label>
-
+                                <label class="form-label">Quantity</label>
                                 <input type="number"
                                        id="editQuantity"
                                        name="Quantity"
                                        class="form-control"
                                        min="0"
                                        required />
-
                             </div>
-
                         </div>
-
                     </div>
 
                 </div>
 
-
                 <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-light border"
-                            data-bs-dismiss="modal">
-
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg"></i>
                         Cancel
-
                     </button>
-
-                    <button type="submit"
-                            class="btn btn-primary">
-
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg"></i>
                         Update Product
-
                     </button>
-
                 </div>
-
             </form>
 
         </div>
-
     </div>
-
 </div>
 
 
@@ -1203,178 +638,85 @@
 <!-- DELETE PRODUCT MODAL -->
 <!-- ========================================================= -->
 
-<div class="modal fade"
-     id="deleteProductModal"
-     tabindex="-1"
-     aria-labelledby="deleteProductModalLabel"
-     aria-hidden="true">
-
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-
         <div class="modal-content delete-modal">
 
             <div class="modal-header">
-
                 <div>
-
-                    <h5 class="modal-title fw-bold text-danger"
-                        id="deleteProductModalLabel">
-
+                    <h5 class="modal-title fw-bold text-danger" id="deleteProductModalLabel">
                         <i class="bi bi-trash3 me-2"></i>
                         Delete Product
-
                     </h5>
-
-                    <small class="text-muted">
-                        This action will permanently remove the product.
-                    </small>
-
+                    <small class="text-muted">This action will permanently remove the product.</small>
                 </div>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
-
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-
-            <form asp-action="Delete"
-                  method="post">
-
+            <form asp-action="Delete" method="post">
                 @Html.AntiForgeryToken()
 
                 <div class="modal-body">
 
-                    <!-- PRODUCT ID -->
-
-                    <input type="hidden"
-                           id="deleteProductId"
-                           name="id" />
-
-
-                    <!-- DELETE ICON -->
+                    <input type="hidden" id="deleteProductId" name="id" />
 
                     <div class="delete-icon">
-
                         <i class="bi bi-trash3"></i>
-
                     </div>
 
-
-                    <h5 class="text-center mt-3">
-                        Are you sure?
-                    </h5>
-
+                    <h5 class="text-center mt-3">Are you sure?</h5>
 
                     <p class="text-muted text-center mb-4">
-
                         You are about to delete:
-
                         <strong id="deleteProductName"></strong>
-
                     </p>
-
-
-                    <!-- PRODUCT INFORMATION -->
 
                     <div class="product-info">
-
                         <div class="info-row">
-
-                            <span>
-                                Product
-                            </span>
-
-                            <strong id="deleteProductNameInfo">
-                            </strong>
-
+                            <span>Product</span>
+                            <strong id="deleteProductNameInfo"></strong>
                         </div>
-
-
                         <div class="info-row">
-
-                            <span>
-                                Category
-                            </span>
-
-                            <strong id="deleteProductCategory">
-                            </strong>
-
+                            <span>Category</span>
+                            <strong id="deleteProductCategory"></strong>
                         </div>
-
-
                         <div class="info-row">
-
-                            <span>
-                                Price
-                            </span>
-
-                            <strong id="deleteProductPrice">
-                            </strong>
-
+                            <span>Price</span>
+                            <strong id="deleteProductPrice"></strong>
                         </div>
-
-
                         <div class="info-row">
-
-                            <span>
-                                Stock
-                            </span>
-
-                            <strong id="deleteProductStock">
-                            </strong>
-
+                            <span>Stock</span>
+                            <strong id="deleteProductStock"></strong>
                         </div>
-
                     </div>
 
-
                     <p class="text-danger small text-center mt-3 mb-0">
-
                         <i class="bi bi-exclamation-triangle"></i>
-
                         This action cannot be undone.
-
                     </p>
 
                 </div>
 
-
                 <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-light border"
-                            data-bs-dismiss="modal">
-
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg"></i>
                         Cancel
-
                     </button>
-
-                    <button type="submit"
-                            class="btn btn-danger">
-
+                    <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash3"></i>
                         Delete Product
-
                     </button>
-
                 </div>
-
             </form>
 
         </div>
-
     </div>
-
 </div>
 
 
 @section Scripts {
 
-    <script src="~/js/products.js"
-            asp-append-version="true"></script>
+    <script src="~/js/products.js" asp-append-version="true"></script>
 
     @if (ViewBag.OpenProductId != null)
     {

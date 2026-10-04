@@ -1,38 +1,101 @@
-document.addEventListener("DOMContentLoaded", function () {
+(function () {
 
+    function init() {
 
-// =========================================================
-// UTANG SEARCH
-// =========================================================
+        // =========================================================
+        // SEARCH + STATUS FILTER
+        // One function applies both, so they never overwrite each other.
+        // =========================================================
 
-const searchInput =
-    document.getElementById("utangSearch");
+        var table = document.getElementById("utangTable");
+        var rows = table
+            ? Array.prototype.slice.call(table.querySelectorAll("tbody tr[data-status]"))
+            : [];
 
-const utangTable =
-    document.getElementById("utangTable");
+        var chips = document.querySelectorAll("#utangFilters .ut-chip");
+        var search = document.getElementById("utangSearch");
+        var noResults = document.getElementById("utangNoResults");
+        var shown = document.getElementById("utangShown");
+        var clearBtn = document.getElementById("utangClear");
 
-if (searchInput && utangTable) {
+        var activeFilter = "all";
 
-    searchInput.addEventListener("input", function () {
+        function matchesFilter(row) {
+            if (activeFilter === "all") return true;
+            if (activeFilter === "overdue") return row.dataset.overdue === "true";
+            return row.dataset.status === activeFilter;
+        }
 
-        const searchValue =
-            this.value.toLowerCase().trim();
+        function apply() {
+            var query = search ? search.value.toLowerCase().trim() : "";
+            var visible = 0;
 
-        const rows =
-            utangTable.querySelectorAll("tbody tr");
+            rows.forEach(function (row) {
+                var show =
+                    matchesFilter(row) &&
+                    (!query || (row.dataset.search || "").indexOf(query) !== -1);
 
-        rows.forEach(function (row) {
+                row.hidden = !show;
+                if (show) visible++;
+            });
 
-            const rowText =
-                row.innerText.toLowerCase();
+            if (noResults) noResults.hidden = rows.length === 0 || visible !== 0;
+            if (shown) shown.textContent = "Showing " + visible + " of " + rows.length;
+        }
 
-            row.style.display =
-                rowText.includes(searchValue)
-                    ? ""
-                    : "none";
+        function setFilter(filter) {
+            activeFilter = filter;
+
+            chips.forEach(function (chip) {
+                var on = chip.dataset.filter === filter;
+                chip.classList.toggle("active", on);
+                chip.setAttribute("aria-pressed", on ? "true" : "false");
+            });
+
+            apply();
+        }
+
+        chips.forEach(function (chip) {
+            chip.addEventListener("click", function () {
+                setFilter(chip.dataset.filter);
+            });
         });
-    });
-}
+
+        if (search) {
+            search.addEventListener("input", apply);
+            search.addEventListener("search", apply);
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener("click", function () {
+                if (search) search.value = "";
+                setFilter("all");
+            });
+        }
 
 
-});
+        // =========================================================
+        // DELETE MODAL: fill it with the clicked record
+        // =========================================================
+
+        var deleteModal = document.getElementById("deleteUtangModal");
+
+        if (deleteModal) {
+            deleteModal.addEventListener("show.bs.modal", function (event) {
+                var btn = event.relatedTarget;
+                if (!btn) return;
+
+                document.getElementById("deleteUtangId").value = btn.getAttribute("data-id");
+                document.getElementById("deleteUtangName").textContent = btn.getAttribute("data-name") + "'s";
+                document.getElementById("deleteUtangAmount").textContent = btn.getAttribute("data-amount");
+            });
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+
+})();
