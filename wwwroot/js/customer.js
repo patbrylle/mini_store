@@ -5,29 +5,32 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==============================
 
     const searchInput = document.getElementById("customerSearch");
-    const customerRows = document.querySelectorAll(".customer-row");
+    const table = document.getElementById("customerTable");
 
-    if (searchInput) {
+    if (searchInput && table) {
 
-        searchInput.addEventListener("input", function () {
-
-            const searchValue = this.value.toLowerCase().trim();
-
-            customerRows.forEach(function (row) {
-
-                const customerText =
-                    row.textContent.toLowerCase();
-
-                if (customerText.includes(searchValue)) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-
-            });
-
+        // Real customer rows only (skip the "No Customers" empty-state row)
+        const customerRows = Array.from(
+            table.querySelectorAll("tbody tr")
+        ).filter(function (row) {
+            return !row.querySelector("td[colspan]");
         });
 
+        function filterCustomers() {
+            const searchValue = searchInput.value.toLowerCase().trim();
+
+            customerRows.forEach(function (row) {
+                const customerText = row.textContent.toLowerCase();
+
+                row.style.display = customerText.includes(searchValue)
+                    ? ""
+                    : "none";
+            });
+        }
+
+        ["input", "keyup", "search"].forEach(function (evt) {
+            searchInput.addEventListener(evt, filterCustomers);
+        });
     }
 
 
@@ -35,25 +38,16 @@ document.addEventListener("DOMContentLoaded", function () {
     // ADD CUSTOMER MODAL
     // ==============================
 
-    const addCustomerModal =
-        document.getElementById("addCustomerModal");
+    const addCustomerModal = document.getElementById("addCustomerModal");
 
     if (addCustomerModal) {
+        addCustomerModal.addEventListener("hidden.bs.modal", function () {
+            const form = addCustomerModal.querySelector("form");
 
-        addCustomerModal.addEventListener(
-            "hidden.bs.modal",
-            function () {
-
-                const form =
-                    addCustomerModal.querySelector("form");
-
-                if (form) {
-                    form.reset();
-                }
-
+            if (form) {
+                form.reset();
             }
-        );
-
+        });
     }
 
 });

@@ -24,6 +24,42 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<script>
+    (function () {
+        var KEY = 'ms-theme';
+        var mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function stored() {
+            try { return localStorage.getItem(KEY) || 'system'; } catch (e) { return 'system'; }
+        }
+
+        function apply(pref) {
+            var theme = pref === 'system' ? (mq.matches ? 'dark' : 'light') : pref;
+            var root = document.documentElement;
+            root.setAttribute('data-theme', theme);
+            root.setAttribute('data-bs-theme', theme);
+        }
+
+        apply(stored());
+
+        function onSystemChange() { if (stored() === 'system') apply('system'); }
+        if (mq.addEventListener) mq.addEventListener('change', onSystemChange);
+        else if (mq.addListener) mq.addListener(onSystemChange);
+
+        // keep other open tabs in sync
+        window.addEventListener('storage', function (e) { if (e.key === 'ms-theme') apply(stored()); });
+
+        window.msTheme = {
+            get: stored,
+            set: function (pref) {
+                try { localStorage.setItem(KEY, pref); } catch (e) { }
+                apply(pref);
+            }
+        };
+    })();
+</script>
 </head>
 
 <body>
@@ -166,9 +202,9 @@
 
                     @await Component.InvokeAsync("NotificationBell")
 
-                    <button class="topbar-icon" type="button" title="Settings" aria-label="Settings">
-                        <i class="bi bi-gear-fill"></i>
-                    </button>
+                   <a asp-controller="Settings" asp-action="Index" class="topbar-icon" title="Settings" aria-label="Settings">
+    <i class="bi bi-gear-fill"></i>
+</a>
 
                     <div class="topbar-divider"></div>
 
@@ -191,32 +227,41 @@
                             <i class="bi bi-chevron-down profile-arrow"></i>
                         </button>
 
-                        <div class="profile-menu" id="profileMenu" role="menu">
+                       <div class="profile-menu" id="profileMenu" role="menu">
 
-                            <div class="profile-menu-header">
-                                <div class="profile-avatar profile-avatar-lg">@avatarLetter</div>
-                                <div class="profile-menu-user">
-                                    <strong title="@userName">@userName</strong>
-                                    <small>@userRole</small>
-                                </div>
-                            </div>
+    <div class="profile-menu-header">
+        <div class="profile-avatar profile-avatar-lg">@avatarLetter</div>
+        <div class="profile-menu-user">
+            <strong title="@userName">@userName</strong>
+            <small>@userRole</small>
+        </div>
+    </div>
 
-                            <a asp-controller="Account" asp-action="ChangePassword"
-                               class="profile-menu-item" role="menuitem">
-                                <i class="bi bi-key-fill"></i>
-                                <span>Change Password</span>
-                            </a>
+    <a asp-controller="Settings" asp-action="Index"
+       class="profile-menu-item" role="menuitem">
+        <i class="bi bi-gear-fill"></i>
+        <span>Settings</span>
+    </a>
 
-                            <div class="profile-menu-divider"></div>
+    @if (isAdmin)
+    {
+        <a asp-controller="Account" asp-action="ChangePassword"
+           class="profile-menu-item" role="menuitem">
+            <i class="bi bi-key-fill"></i>
+            <span>Change Password</span>
+        </a>
+    }
 
-                            <form asp-controller="Account" asp-action="Logout" method="post">
-                                <button type="submit" class="profile-menu-item profile-logout" role="menuitem">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                    <span>Logout</span>
-                                </button>
-                            </form>
+    <div class="profile-menu-divider"></div>
 
-                        </div>
+    <form asp-controller="Account" asp-action="Logout" method="post">
+        <button type="submit" class="profile-menu-item profile-logout" role="menuitem">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </button>
+    </form>
+
+</div>
                     </div>
 
                 </div>

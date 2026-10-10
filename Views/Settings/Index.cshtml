@@ -1,0 +1,369 @@
+@{
+    ViewData["Title"] = "Settings";
+
+    bool isAdmin = User.IsInRole("Admin");
+    string userName = User.Identity?.Name ?? "User";
+    string roleName = isAdmin ? "Administrator" : "Staff";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
+}
+
+<div class="st-page">
+
+    <!-- HEADER -->
+    <div class="st-header">
+        <div class="st-page-icon">
+            <i class="bi bi-gear-fill"></i>
+        </div>
+
+        <div>
+            <h1>Settings</h1>
+            <p>Personalize how Mini Store looks and find help when you need it.</p>
+        </div>
+    </div>
+
+    <div class="st-layout">
+
+        <!-- TABS -->
+        <nav class="st-nav" role="tablist" aria-label="Settings sections" aria-orientation="vertical">
+
+            <button type="button" class="st-tab active" role="tab" id="tab-appearance"
+                    data-panel="appearance" aria-selected="true" aria-controls="panel-appearance">
+                <span class="st-tab-icon"><i class="bi bi-palette"></i></span>
+                <span>Appearance</span>
+            </button>
+
+            <button type="button" class="st-tab" role="tab" id="tab-help"
+                    data-panel="help" aria-selected="false" aria-controls="panel-help">
+                <span class="st-tab-icon"><i class="bi bi-life-preserver"></i></span>
+                <span>Help &amp; Support</span>
+            </button>
+
+        </nav>
+
+        <div class="st-panels">
+
+            <!-- =====================================================
+                 APPEARANCE
+            ===================================================== -->
+            <section class="st-panel active" id="panel-appearance" role="tabpanel" aria-labelledby="tab-appearance">
+
+                <div class="st-card">
+
+                    <div class="st-card-head">
+                        <div class="st-card-icon"><i class="bi bi-circle-half"></i></div>
+                        <div>
+                            <h5>Theme</h5>
+                            <p>Choose how Mini Store looks on this device.</p>
+                        </div>
+                    </div>
+
+                    <div class="st-card-body">
+
+                        <div class="st-themes" id="themeGroup" role="radiogroup" aria-label="Theme">
+
+                            <!-- LIGHT -->
+                            <button type="button" class="st-theme" role="radio" aria-checked="false" data-mode="light">
+                                <div class="st-preview">
+                                    <div class="st-pv-side"></div>
+                                    <div class="st-pv-main">
+                                        <span class="st-pv-bar"></span>
+                                        <span class="st-pv-card"></span>
+                                        <span class="st-pv-card short"></span>
+                                    </div>
+                                </div>
+                                <div class="st-theme-label">
+                                    <i class="bi bi-sun"></i>
+                                    <div>
+                                        <strong>Light</strong>
+                                        <small>Bright and warm</small>
+                                    </div>
+                                    <i class="bi bi-check-circle-fill st-theme-check"></i>
+                                </div>
+                            </button>
+
+                            <!-- DARK -->
+                            <button type="button" class="st-theme" role="radio" aria-checked="false" data-mode="dark">
+                                <div class="st-preview is-dark">
+                                    <div class="st-pv-side"></div>
+                                    <div class="st-pv-main">
+                                        <span class="st-pv-bar"></span>
+                                        <span class="st-pv-card"></span>
+                                        <span class="st-pv-card short"></span>
+                                    </div>
+                                </div>
+                                <div class="st-theme-label">
+                                    <i class="bi bi-moon-stars"></i>
+                                    <div>
+                                        <strong>Dark</strong>
+                                        <small>Easy on the eyes at night</small>
+                                    </div>
+                                    <i class="bi bi-check-circle-fill st-theme-check"></i>
+                                </div>
+                            </button>
+
+                            <!-- SYSTEM -->
+                            <button type="button" class="st-theme" role="radio" aria-checked="false" data-mode="system">
+                                <div class="st-split">
+                                    <div class="st-preview">
+                                        <div class="st-pv-side"></div>
+                                        <div class="st-pv-main">
+                                            <span class="st-pv-bar"></span>
+                                            <span class="st-pv-card"></span>
+                                            <span class="st-pv-card short"></span>
+                                        </div>
+                                    </div>
+                                    <div class="st-preview is-dark">
+                                        <div class="st-pv-side"></div>
+                                        <div class="st-pv-main">
+                                            <span class="st-pv-bar"></span>
+                                            <span class="st-pv-card"></span>
+                                            <span class="st-pv-card short"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="st-theme-label">
+                                    <i class="bi bi-display"></i>
+                                    <div>
+                                        <strong>System</strong>
+                                        <small>Match your device</small>
+                                    </div>
+                                    <i class="bi bi-check-circle-fill st-theme-check"></i>
+                                </div>
+                            </button>
+
+                        </div>
+
+                        <div class="st-status">
+                            <i class="bi bi-info-circle"></i>
+                            <span id="themeStatus">Saved on this device only.</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 HELP & SUPPORT
+            ===================================================== -->
+            <section class="st-panel" id="panel-help" role="tabpanel" aria-labelledby="tab-help">
+
+                <!-- QUICK GUIDE -->
+                <div class="st-card">
+
+                    <div class="st-card-head">
+                        <div class="st-card-icon"><i class="bi bi-journal-text"></i></div>
+                        <div>
+                            <h5>Quick guide</h5>
+                            <p>Short answers for the things you do every day.</p>
+                        </div>
+                    </div>
+
+                    <div class="st-card-body">
+
+                        <div class="st-group-title">Everyone</div>
+
+                        <details class="st-faq">
+                            <summary>
+                                <span class="st-faq-icon"><i class="bi bi-receipt"></i></span>
+                                <span class="st-faq-title">How do I record a sale?</span>
+                                <i class="bi bi-chevron-down st-faq-arrow"></i>
+                            </summary>
+                            <div class="st-faq-body">
+                                <ol class="st-steps">
+                                    <li>Open <strong>Sales</strong> from the sidebar.</li>
+                                    <li>Start a new sale and add the items the customer is buying.</li>
+                                    <li>If the customer will pay later, record it as <strong>Utang</strong> so it appears in Utang Records.</li>
+                                    <li>Save the sale. Paid sales show up in the Sales list.</li>
+                                </ol>
+                            </div>
+                        </details>
+
+                        <details class="st-faq">
+                            <summary>
+                                <span class="st-faq-icon"><i class="bi bi-cash-coin"></i></span>
+                                <span class="st-faq-title">How do I record an Utang payment?</span>
+                                <i class="bi bi-chevron-down st-faq-arrow"></i>
+                            </summary>
+                            <div class="st-faq-body">
+                                <ol class="st-steps">
+                                    <li>Open <strong>Utang Records</strong> from the sidebar.</li>
+                                    <li>Find the customer using the search box, or filter by <em>Unpaid</em>, <em>Partial</em>, <em>Paid</em> or <em>Overdue</em>.</li>
+                                    <li>Click <strong>Pay</strong> on their record and enter the amount received.</li>
+                                    <li>A partial payment keeps the record as <em>Partial</em> until the balance is fully paid.</li>
+                                </ol>
+                            </div>
+                        </details>
+
+                        <details class="st-faq">
+                            <summary>
+                                <span class="st-faq-icon"><i class="bi bi-people-fill"></i></span>
+                                <span class="st-faq-title">How do I add a customer?</span>
+                                <i class="bi bi-chevron-down st-faq-arrow"></i>
+                            </summary>
+                            <div class="st-faq-body">
+                                <ol class="st-steps">
+                                    <li>Open <strong>Customers</strong> from the sidebar.</li>
+                                    <li>Search the name first to avoid adding a duplicate.</li>
+                                    <li>Use the add button, fill in the details and save.</li>
+                                </ol>
+                            </div>
+                        </details>
+
+                        <details class="st-faq">
+                            <summary>
+                                <span class="st-faq-icon"><i class="bi bi-bell"></i></span>
+                                <span class="st-faq-title">What does the bell icon do?</span>
+                                <i class="bi bi-chevron-down st-faq-arrow"></i>
+                            </summary>
+                            <div class="st-faq-body">
+                                <p>The bell in the top bar shows alerts from the store. Click it to see them, then click an alert to open the related page.</p>
+                            </div>
+                        </details>
+
+                        <details class="st-faq">
+                            <summary>
+                                <span class="st-faq-icon"><i class="bi bi-shield-lock"></i></span>
+                                <span class="st-faq-title">I forgot my password. What do I do?</span>
+                                <i class="bi bi-chevron-down st-faq-arrow"></i>
+                            </summary>
+                            <div class="st-faq-body">
+                                <p>Staff can't change their own password. Ask an administrator to reset it for you from <strong>User Management</strong>.</p>
+                            </div>
+                        </details>
+
+                        @if (isAdmin)
+                        {
+                            <div class="st-group-title">Administrators</div>
+
+                            <details class="st-faq">
+                                <summary>
+                                    <span class="st-faq-icon"><i class="bi bi-person-plus"></i></span>
+                                    <span class="st-faq-title">How do I add a staff account?</span>
+                                    <i class="bi bi-chevron-down st-faq-arrow"></i>
+                                </summary>
+                                <div class="st-faq-body">
+                                    <ol class="st-steps">
+                                        <li>Open <strong>User Management</strong> from the sidebar.</li>
+                                        <li>Click <strong>Add Staff</strong>.</li>
+                                        <li>Enter the staff member's email and a starting password, then save.</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <details class="st-faq">
+                                <summary>
+                                    <span class="st-faq-icon"><i class="bi bi-key"></i></span>
+                                    <span class="st-faq-title">How do I reset a staff password?</span>
+                                    <i class="bi bi-chevron-down st-faq-arrow"></i>
+                                </summary>
+                                <div class="st-faq-body">
+                                    <ol class="st-steps">
+                                        <li>Open <strong>User Management</strong>.</li>
+                                        <li>Click <strong>Reset</strong> on the staff member's row.</li>
+                                        <li>Type the new password twice (use the eye icon to check it) and confirm.</li>
+                                    </ol>
+                                </div>
+                            </details>
+
+                            <details class="st-faq">
+                                <summary>
+                                    <span class="st-faq-icon"><i class="bi bi-person-gear"></i></span>
+                                    <span class="st-faq-title">Disable or delete: what's the difference?</span>
+                                    <i class="bi bi-chevron-down st-faq-arrow"></i>
+                                </summary>
+                                <div class="st-faq-body">
+                                    <p><strong>Disable</strong> blocks the account from signing in but keeps it, so you can <strong>Enable</strong> it again later. <strong>Delete</strong> removes the account permanently and can't be undone. Administrator accounts are protected and can't be edited, disabled or deleted from the list.</p>
+                                </div>
+                            </details>
+
+                            <details class="st-faq">
+                                <summary>
+                                    <span class="st-faq-icon"><i class="bi bi-lock"></i></span>
+                                    <span class="st-faq-title">How do I change my own password?</span>
+                                    <i class="bi bi-chevron-down st-faq-arrow"></i>
+                                </summary>
+                                <div class="st-faq-body">
+                                    <p>Click your name in the top right, then choose <strong>Change Password</strong>.</p>
+                                </div>
+                            </details>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONTACT + ABOUT -->
+                <div class="st-info-grid">
+
+                    <div class="st-card">
+                        <div class="st-card-head">
+                            <div class="st-card-icon"><i class="bi bi-headset"></i></div>
+                            <div>
+                                <h5>Need more help?</h5>
+                                <p>Reach out to your store administrator.</p>
+                            </div>
+                        </div>
+
+                        <div class="st-card-body">
+                            <!-- TODO: replace the placeholders below with your real contact details -->
+                            <div class="st-row">
+                                <i class="bi bi-person"></i>
+                                <div><small>Contact person</small><strong>Store Owner</strong></div>
+                            </div>
+                            <div class="st-row">
+                                <i class="bi bi-envelope"></i>
+                                <div><small>Email</small><a href="mailto:owner@example.com">owner@example.com</a></div>
+                            </div>
+                            <div class="st-row">
+                                <i class="bi bi-telephone"></i>
+                                <div><small>Phone</small><strong>+63 900 000 0000</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="st-card">
+                        <div class="st-card-head">
+                            <div class="st-card-icon"><i class="bi bi-info-circle"></i></div>
+                            <div>
+                                <h5>About</h5>
+                                <p>Mini Store Management System</p>
+                            </div>
+                        </div>
+
+                        <div class="st-card-body">
+                            <div class="st-row">
+                                <i class="bi bi-person-circle"></i>
+                                <div><small>Signed in as</small><strong>@userName</strong></div>
+                            </div>
+                            <div class="st-row">
+                                <i class="bi bi-shield-check"></i>
+                                <div><small>Role</small><strong>@roleName</strong></div>
+                            </div>
+                            <div class="st-row">
+                                <i class="bi bi-tag"></i>
+                                <div><small>Version</small><strong>1.0.0</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+    <script src="~/js/settings.js" asp-append-version="true"></script>
+}

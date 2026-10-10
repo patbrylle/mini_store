@@ -1,9 +1,8 @@
-using mini_store.Data;
-using mini_store.Models;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using mini_store.Data;
+using mini_store.Models;
 using mini_store.ViewModels.Account;
 
 namespace mini_store.Controllers
@@ -14,15 +13,12 @@ namespace mini_store.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ApplicationDbContext _context;
 
-
         public UserController(
             UserManager<IdentityUser> userManager,
-                ApplicationDbContext context)
-
+            ApplicationDbContext context)
         {
             _userManager = userManager;
-                _context = context;
-
+            _context = context;
         }
 
         // =========================================================
@@ -32,15 +28,12 @@ namespace mini_store.Controllers
         public async Task<IActionResult> Index()
         {
             var users = _userManager.Users.ToList();
-
             var model = new List<UserListViewModel>();
 
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-
-                var lockoutEnd =
-                    await _userManager.GetLockoutEndDateAsync(user);
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
 
                 var isActive =
                     !lockoutEnd.HasValue ||
@@ -58,7 +51,6 @@ namespace mini_store.Controllers
             return View(model);
         }
 
-
         // =========================================================
         // CREATE STAFF
         // =========================================================
@@ -71,8 +63,7 @@ namespace mini_store.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateStaff(
-            CreateStaffViewModel model)
+        public async Task<IActionResult> CreateStaff(CreateStaffViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -85,57 +76,28 @@ namespace mini_store.Controllers
                 Email = model.Email
             };
 
-            var result = await _userManager.CreateAsync(
-                user,
-                model.Password
-            );
+            var result = await _userManager.CreateAsync(user, model.Password);
 
-          if (result.Succeeded)
-{
-    await _userManager.AddToRoleAsync(
-        user,
-        "Staff"
-    );
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "Staff");
 
-    // ==========================================
-    // CREATE NOTIFICATION
-    // ==========================================
+                await Notify(
+                    "New Staff Account",
+                    $"Staff account {user.Email} was created successfully.",
+                    "info");
 
-    var notification = new Notification
-    {
-        Title = "New Staff Account",
-        Message =
-            $"Staff account {user.Email} was created successfully.",
-        Type = "info",
-        CreatedAt = DateTime.Now,
-        IsRead = false,
-        Link = Url.Action(
-            "Index",
-            "User"
-        ) ?? "#"
-    };
-
-    _context.Notifications.Add(notification);
-
-    await _context.SaveChangesAsync();
-
-    TempData["SuccessMessage"] =
-        "Staff account created successfully.";
-
-    return RedirectToAction(nameof(Index));
-}
+                TempData["SuccessMessage"] = "Staff account created successfully.";
+                return RedirectToAction(nameof(Index));
+            }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(
-                    "",
-                    error.Description
-                );
+                ModelState.AddModelError("", error.Description);
             }
 
             return View(model);
         }
-
 
         // =========================================================
         // EDIT USER
@@ -153,20 +115,17 @@ namespace mini_store.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            var model = new EditUserViewModel
+            return View(new EditUserViewModel
             {
                 Id = user.Id,
                 Email = user.Email ?? user.UserName ?? "",
                 Role = roles.FirstOrDefault() ?? "Staff"
-            };
-
-            return View(model);
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            EditUserViewModel model)
+        public async Task<IActionResult> Edit(EditUserViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -180,63 +139,157 @@ namespace mini_store.Controllers
                 return NotFound();
             }
 
-            // Prevent invalid roles
-            if (model.Role != "Staff" &&
-                model.Role != "Admin")
+            if (model.Role != "Staff" && model.Role != "Admin")
             {
-                ModelState.AddModelError(
-                    "Role",
-                    "Invalid role selected."
-                );
-
+                ModelState.AddModelError("Role", "Invalid role selected.");
                 return View(model);
             }
 
-            // Update email
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            bool roleChanged = !currentRoles.Contains(model.Role) || currentRoles.Count != 1;
+
+            // An admin cannot change their own role (prevents locking everyone out)
+            var me = await _userManager.GetUserAsync(User);
+
+            if (roleChanged && me != null && me.Id == user.Id)
+            {
+                ModelState.AddModelError("Role", "You cannot change your own role.");
+                return View(model);
+            }
+
+            // Update email / username
             user.Email = model.Email;
             user.UserName = model.Email;
 
-            var updateResult =
-                await _userManager.UpdateAsync(user);
+            var updateResult = await _userManager.UpdateAsync(user);
 
             if (!updateResult.Succeeded)
             {
                 foreach (var error in updateResult.Errors)
                 {
-                    ModelState.AddModelError(
-                        "",
-                        error.Description
-                    );
+                    ModelState.AddModelError("", error.Description);
                 }
 
                 return View(model);
             }
 
-            // Get current roles
-            var currentRoles =
-                await _userManager.GetRolesAsync(user);
-
-            // Remove existing roles
-            if (currentRoles.Any())
+            // Update role
+            if (roleChanged)
             {
-                await _userManager.RemoveFromRolesAsync(
-                    user,
-                    currentRoles
-                );
+                if (currentRoles.Any())
+                {
+                    var removeResult =
+                        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+                    if (!removeResult.Succeeded)
+                    {
+                        ModelState.AddModelError("", "Could not update the user's role.");
+                        return View(model);
+                    }
+                }
+
+                var addResult = await _userManager.AddToRoleAsync(user, model.Role);
+
+                if (!addResult.Succeeded)
+                {
+                    // put the old roles back so the user is never left without one
+                    if (currentRoles.Any())
+                    {
+                        await _userManager.AddToRolesAsync(user, currentRoles);
+                    }
+
+                    ModelState.AddModelError("", "Could not update the user's role.");
+                    return View(model);
+                }
+
+                // Force the user to sign in again so the new role applies now
+                await _userManager.UpdateSecurityStampAsync(user);
             }
 
-            // Add selected role
-            await _userManager.AddToRoleAsync(
-                user,
-                model.Role
-            );
-
-            TempData["SuccessMessage"] =
-                "User account updated successfully.";
-
+            TempData["SuccessMessage"] = "User account updated successfully.";
             return RedirectToAction(nameof(Index));
         }
 
+        // =========================================================
+        // RESET PASSWORD (admin resets a Staff password)
+        // =========================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if (!roles.Contains("Staff"))
+            {
+                TempData["ErrorMessage"] = "Only Staff passwords can be reset here.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(new ResetUserPasswordViewModel
+            {
+                Id = user.Id,
+                Email = user.Email ?? user.UserName ?? ""
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetUserPasswordViewModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.Id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if (!roles.Contains("Staff"))
+            {
+                TempData["ErrorMessage"] = "Only Staff passwords can be reset here.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            model.Email = user.Email ?? user.UserName ?? "";
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                return View(model);
+            }
+
+            // Sign the user out everywhere and clear any lockout from failed attempts
+            await _userManager.UpdateSecurityStampAsync(user);
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+            await Notify(
+                "Staff Password Reset",
+                $"The password for {user.Email} was reset by an administrator.",
+                "info");
+
+            TempData["SuccessMessage"] = "Password reset successfully.";
+            return RedirectToAction(nameof(Index));
+        }
 
         // =========================================================
         // ENABLE / DISABLE USER
@@ -255,17 +308,14 @@ namespace mini_store.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Only Staff accounts can be disabled/enabled.
             if (!roles.Contains("Staff"))
             {
                 TempData["ErrorMessage"] =
                     "Only Staff accounts can be disabled or enabled.";
-
                 return RedirectToAction(nameof(Index));
             }
 
-            var lockoutEnd =
-                await _userManager.GetLockoutEndDateAsync(user);
+            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
 
             var isCurrentlyActive =
                 !lockoutEnd.HasValue ||
@@ -273,69 +323,34 @@ namespace mini_store.Controllers
 
             if (isCurrentlyActive)
             {
-                await _userManager.SetLockoutEnabledAsync(
-                    user,
-                    true
-                );
+                await _userManager.SetLockoutEnabledAsync(user, true);
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
 
-                await _userManager.SetLockoutEndDateAsync(
-                    user,
-                    DateTimeOffset.MaxValue
-                );
+                // Kick out any session that is already logged in
+                await _userManager.UpdateSecurityStampAsync(user);
 
-                TempData["SuccessMessage"] =
-    "Staff account disabled successfully.";
+                await Notify(
+                    "Staff Account Disabled",
+                    $"Staff account {user.Email} has been disabled.",
+                    "danger");
 
-var notification = new Notification
-{
-    Title = "Staff Account Disabled",
-    Message =
-        $"Staff account {user.Email} has been disabled.",
-    Type = "danger",
-    CreatedAt = DateTime.Now,
-    IsRead = false,
-    Link = Url.Action(
-        "Index",
-        "User"
-    ) ?? "#"
-};
-
-_context.Notifications.Add(notification);
-
-await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Staff account disabled successfully.";
             }
             else
             {
-                await _userManager.SetLockoutEndDateAsync(
-                    user,
-                    null
-                );
+                await _userManager.SetLockoutEndDateAsync(user, null);
+                await _userManager.ResetAccessFailedCountAsync(user);
 
-                TempData["SuccessMessage"] =
-    "Staff account enabled successfully.";
+                await Notify(
+                    "Staff Account Enabled",
+                    $"Staff account {user.Email} has been enabled.",
+                    "success");
 
-var notification = new Notification
-{
-    Title = "Staff Account Enabled",
-    Message =
-        $"Staff account {user.Email} has been enabled.",
-    Type = "success",
-    CreatedAt = DateTime.Now,
-    IsRead = false,
-    Link = Url.Action(
-        "Index",
-        "User"
-    ) ?? "#"
-};
-
-_context.Notifications.Add(notification);
-
-await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Staff account enabled successfully.";
             }
 
             return RedirectToAction(nameof(Index));
         }
-
 
         // =========================================================
         // DELETE STAFF
@@ -354,65 +369,58 @@ await _context.SaveChangesAsync();
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Only Staff accounts can be deleted here.
             if (!roles.Contains("Staff"))
             {
                 TempData["ErrorMessage"] =
                     "Admin accounts are protected and cannot be deleted here.";
-
                 return RedirectToAction(nameof(Index));
             }
 
-            // Prevent deleting the currently logged-in account.
-            var currentUser =
-                await _userManager.GetUserAsync(User);
+            var currentUser = await _userManager.GetUserAsync(User);
 
-            if (currentUser != null &&
-                currentUser.Id == user.Id)
+            if (currentUser != null && currentUser.Id == user.Id)
             {
-                TempData["ErrorMessage"] =
-                    "You cannot delete your own account.";
-
+                TempData["ErrorMessage"] = "You cannot delete your own account.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var result =
-                await _userManager.DeleteAsync(user);
+            var result = await _userManager.DeleteAsync(user);
 
-          if (result.Succeeded)
-{
-    var notification = new Notification
-    {
-        Title = "Staff Account Deleted",
-        Message =
-            $"Staff account {user.Email} was deleted.",
-        Type = "danger",
-        CreatedAt = DateTime.Now,
-        IsRead = false,
-        Link = Url.Action(
-            "Index",
-            "User"
-        ) ?? "#"
-    };
+            if (result.Succeeded)
+            {
+                await Notify(
+                    "Staff Account Deleted",
+                    $"Staff account {user.Email} was deleted.",
+                    "danger");
 
-    _context.Notifications.Add(notification);
-
-    await _context.SaveChangesAsync();
-
-    TempData["SuccessMessage"] =
-        "Staff account deleted successfully.";
-}
+                TempData["SuccessMessage"] = "Staff account deleted successfully.";
+            }
             else
             {
-                foreach (var error in result.Errors)
-                {
-                    TempData["ErrorMessage"] =
-                        error.Description;
-                }
+                TempData["ErrorMessage"] =
+                    string.Join(" ", result.Errors.Select(e => e.Description));
             }
 
             return RedirectToAction(nameof(Index));
         }
+
+        // =========================================================
+        // HELPER
+        // =========================================================
+
+        private async Task Notify(string title, string message, string type)
+        {
+            _context.Notifications.Add(new Notification
+            {
+                Title = title,
+                Message = message,
+                Type = type,
+                CreatedAt = DateTime.Now,
+                IsRead = false,
+                Link = Url.Action("Index", "User") ?? "#"
+            });
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
-

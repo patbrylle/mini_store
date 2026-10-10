@@ -40,18 +40,11 @@ bool openUtang = string.Equals(
 
 }
 
-@section Styles { <link rel="stylesheet"
-       href="~/css/sales.css"
-       asp-append-version="true" />
-
-<link rel="stylesheet"
-      href="~/css/utang.css"
-      asp-append-version="true" />
-
-<link rel="stylesheet"
-      href="~/css/sales-modern.css"
-      asp-append-version="true" />
-
+@section Styles {
+    <link rel="stylesheet" href="~/css/sales.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/utang.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/sales-modern.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/transaction-modal.css" asp-append-version="true" />  @* must be LAST *@
 }
 
 <div class="sales-page">
@@ -537,7 +530,6 @@ bool openUtang = string.Equals(
     </div>
 
 </div>
-```
 
 </div>
 
@@ -551,7 +543,6 @@ bool openUtang = string.Equals(
      aria-labelledby="newSaleModalLabel"
      aria-hidden="true">
 
-```
 <div class="modal-dialog modal-dialog-centered">
 
     <div class="modal-content transaction-modal">
@@ -1410,6 +1401,18 @@ out var matchingUtang
 }
 
 @section Scripts {
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("new") === "true") {
+            var el = document.getElementById("newSaleModal");
+            if (el) bootstrap.Modal.getOrCreateInstance(el).show();
+            history.replaceState({}, "", window.location.pathname);
+        }
+    });
+
+</script>
+        <script src="~/js/transaction-modal.js" asp-append-version="true"></script>
 
 <script src="~/js/sales.js"
         asp-append-version="true">

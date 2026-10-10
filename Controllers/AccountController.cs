@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using mini_store.ViewModels.Account;
 
 namespace mini_store.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -17,336 +19,155 @@ namespace mini_store.Controllers
             _userManager = userManager;
         }
 
-        // =========================
-        // LOGIN
-        // =========================
+        // =========================================================
+        // LOGIN (public)
+        // =========================================================
 
-        // GET: /Account/Login
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             return View();
         }
 
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Login(LoginViewModel model)
-{
-    if (!ModelState.IsValid)
-    {
-        return View(model);
-    }
-
-    var user = await _userManager.FindByEmailAsync(model.Email);
-
-    if (user != null)
-    {
-        var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
-
-        if (lockoutEnd.HasValue &&
-            lockoutEnd.Value > DateTimeOffset.UtcNow)
-        {
-            ModelState.AddModelError(
-                "",
-                "Your account has been disabled. Please contact an administrator."
-            );
-
-            return View(model);
-        }
-    }
-
-    var result = await _signInManager.PasswordSignInAsync(
-        model.Email,
-        model.Password,
-        model.RememberMe,
-        lockoutOnFailure: false
-    );
-
-    if (result.Succeeded)
-    {
-        return RedirectToAction("Index", "Dashboard");
-    }
-
-    ModelState.AddModelError(
-        "",
-        "Invalid email or password."
-    );
-
-    return View(model);
-}
-
-        // =========================
-        // REGISTER
-        // =========================
-
-        // GET: /Account/Register
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        // POST: /Account/Register
+        [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            var user = new IdentityUser
-            {
-                UserName = model.Email,
-                Email = model.Email
-            };
-
-            var result = await _userManager.CreateAsync(
-                user,
-                model.Password
-            );
-
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "Staff");
-                
-                return RedirectToAction("Login");
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(
-                    "",
-                    error.Description
-                );
-            }
-
-            return View(model);
-        }
-
-        // =========================
-        // FORGOT PASSWORD
-        // =========================
-
-        // GET: /Account/ForgotPassword
-        [HttpGet]
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
-
-        // POST: /Account/ForgotPassword
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(
-            ForgotPasswordViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
+            // Admin-disabled accounts (lockout set far in the future)
             var user = await _userManager.FindByEmailAsync(model.Email);
 
-            if (user == null)
+            if (user != null)
             {
-                return RedirectToAction(
-                    "ForgotPasswordConfirmation");
-            }
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
 
-            var token =
-                await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            return RedirectToAction(
-                "ResetPassword",
-                new
+                if (lockoutEnd.HasValue &&
+                    lockoutEnd.Value > DateTimeOffset.UtcNow)
                 {
-                    email = user.Email,
-                    token = token
-                });
-        }
+                    ModelState.AddModelError(
+                        "",
+                        "This account is disabled or temporarily locked. " +
+                        "Try again later or contact an administrator."
+                    );
 
-        // GET: /Account/ForgotPasswordConfirmation
-        [HttpGet]
-        public IActionResult ForgotPasswordConfirmation()
-        {
-            return View();
-        }
-
-        // =========================
-        // RESET PASSWORD
-        // =========================
-
-        // GET: /Account/ResetPassword
-        [HttpGet]
-        public IActionResult ResetPassword(
-            string email,
-            string token)
-        {
-            if (string.IsNullOrEmpty(email) ||
-                string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("ForgotPassword");
+                    return View(model);
+                }
             }
 
-            var model = new ResetPasswordViewModel
+            var result = await _signInManager.PasswordSignInAsync(
+                model.Email,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: true   // enforces the 5-attempt rule
+            );
+
+            if (result.Succeeded)
             {
-                Email = email,
-                Token = token
-            };
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Too many failed attempts. Try again later or contact an administrator."
+                );
+
+                return View(model);
+            }
+
+            // Same message for wrong email or wrong password
+            ModelState.AddModelError("", "Invalid email or password.");
 
             return View(model);
         }
 
-        // POST: /Account/ResetPassword
+       
+
+        // =========================================================
+        // CHANGE PASSWORD (logged-in users)
+        // =========================================================
+[Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+[Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(
-            ResetPasswordViewModel model)
+        public async Task<IActionResult> ChangePassword(
+            ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            var user =
-                await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
-            {
-                return RedirectToAction(
-                    "ForgotPasswordConfirmation");
-            }
-
-            var result =
-                await _userManager.ResetPasswordAsync(
-                    user,
-                    model.Token,
-                    model.Password
-                );
-
-            if (result.Succeeded)
             {
                 return RedirectToAction("Login");
             }
 
+            var result = await _userManager.ChangePasswordAsync(
+                user,
+                model.CurrentPassword,
+                model.NewPassword
+            );
+
+            if (result.Succeeded)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+
+                TempData["Success"] =
+                    "Your password has been changed successfully.";
+
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(
-                    "",
-                    error.Description
-                );
+                ModelState.AddModelError("", error.Description);
             }
 
             return View(model);
         }
 
-        // =========================
-        // MAKE ADMIN
-        // =========================
-
-        // TEMPORARY: Assign Admin role
-        [HttpGet]
-        public async Task<IActionResult> MakeAdmin(string email)
-        {
-            var user =
-                await _userManager.FindByEmailAsync(email);
-
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            var result =
-                await _userManager.AddToRoleAsync(
-                    user,
-                    "Admin"
-                );
-
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
-
-            return Content(
-                $"{email} is now an Admin."
-            );
-        }
-        // =========================
-// CHANGE PASSWORD
-// =========================
-
-[HttpGet]
-public IActionResult ChangePassword()
-{
-    if (!User.Identity?.IsAuthenticated ?? true)
-    {
-        return RedirectToAction("Login");
-    }
-
-    return View();
-}
-
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> ChangePassword(
-    ChangePasswordViewModel model)
-{
-    if (!ModelState.IsValid)
-    {
-        return View(model);
-    }
-
-    var user = await _userManager.GetUserAsync(User);
-
-    if (user == null)
-    {
-        return RedirectToAction("Login");
-    }
-
-    var result = await _userManager.ChangePasswordAsync(
-        user,
-        model.CurrentPassword,
-        model.NewPassword
-    );
-
-    if (result.Succeeded)
-    {
-        await _signInManager.RefreshSignInAsync(user);
-
-        TempData["SuccessMessage"] =
-            "Your password has been changed successfully.";
-
-        return RedirectToAction("Index", "Dashboard");
-    }
-
-    foreach (var error in result.Errors)
-    {
-        ModelState.AddModelError(
-            "",
-            error.Description
-        );
-    }
-
-    return View(model);
-}
-
-        // =========================
+        // =========================================================
         // LOGOUT
-        // =========================
+        // =========================================================
 
-        // POST: /Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
 
-            return RedirectToAction(
-                "Login",
-                "Account"
-            );
+            return RedirectToAction("Login", "Account");
+        }
+
+        // =========================================================
+        // ACCESS DENIED (public, used by Program.cs)
+        // =========================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

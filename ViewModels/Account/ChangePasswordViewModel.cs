@@ -4,26 +4,17 @@ namespace mini_store.ViewModels.Account
 {
     public class ChangePasswordViewModel
     {
-        [Required(ErrorMessage = "Please enter your current password.")]
+        [Required]
         [DataType(DataType.Password)]
-        public string CurrentPassword { get; set; } = string.Empty;
+        public string CurrentPassword { get; set; } = "";
 
-        [Required(ErrorMessage = "Please enter your new password.")]
+        [Required]
         [DataType(DataType.Password)]
-        [StringLength(
-            100,
-            MinimumLength = 8,
-            ErrorMessage = "Password must be at least 8 characters."
-        )]
-        public string NewPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = "";
 
-        [Required(ErrorMessage = "Please confirm your new password.")]
+        [Required]
         [DataType(DataType.Password)]
-        [Compare(
-            "NewPassword",
-            ErrorMessage = "The new passwords do not match."
-        )]
-        public string ConfirmPassword { get; set; } = string.Empty;
+        [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
+        public string ConfirmPassword { get; set; } = "";
     }
 }
-

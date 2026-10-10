@@ -1344,7 +1344,91 @@ a {
         justify-content: center;
     }
 }
+/* =========================================================
+   DARK THEME  (applied when <html data-theme="dark">)
+   ========================================================= */
 
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-bg: #1A1511;
+    --color-surface: #251E18;
+    --color-surface-soft: #33261B;
+
+    --color-primary: #EB7F32;
+    --color-primary-dark: #D96A24;
+    --color-primary-light: #F4A15F;
+
+    --color-secondary: #D9663A;
+    --color-gold: #E8B04A;
+
+    --color-sidebar-bg: #15100C;
+    --color-sidebar-bg-soft: #1E1712;
+    --color-sidebar-text: #E9DDD0;
+    --color-sidebar-text-muted: #A89887;
+
+    --color-text: #F1E7DC;
+    --color-text-muted: #A89887;
+    --color-border: #3A2F26;
+
+    --color-success: #5DBB82;
+    --color-success-bg: #1C3427;
+    --color-danger: #EA6E5E;
+    --color-danger-bg: #3B201C;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+    --shadow-md: 0 6px 16px rgba(0, 0, 0, .4);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, .55);
+}
+
+/* ---- site.css colors that were hardcoded ---- */
+:root[data-theme="dark"] .topbar {
+    background: rgba(37, 30, 24, .86);
+}
+
+:root[data-theme="dark"] .sidebar-toggle:hover {
+    background: color-mix(in srgb, var(--color-primary) 24%, var(--color-surface));
+}
+
+:root[data-theme="dark"] .flash-success {
+    border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+    border-left-color: var(--color-success);
+}
+
+:root[data-theme="dark"] .flash-error {
+    border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+    border-left-color: var(--color-danger);
+}
+
+:root[data-theme="dark"] .flash-close:hover {
+    background: rgba(255, 255, 255, .08);
+}
+
+:root[data-theme="dark"] .field-input::placeholder {
+    color: #7D6E61;
+}
+
+/* Bootstrap modals (also covers Bootstrap versions older than 5.3) */
+:root[data-theme="dark"] .modal-content {
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+
+/* ---- users.css colors that were hardcoded ---- */
+:root[data-theme="dark"] .um-btn-disable {
+    color: var(--color-gold);
+    background: color-mix(in srgb, var(--color-gold) 16%, var(--color-surface));
+}
+
+:root[data-theme="dark"] .um-btn-disable:hover {
+    color: #1A1511;
+    background: var(--color-gold);
+}
+
+:root[data-theme="dark"] .um-note {
+    color: var(--color-gold);
+    background: color-mix(in srgb, var(--color-gold) 12%, var(--color-surface));
+}
 /* =========================================================
    REDUCED MOTION
    ========================================================= */

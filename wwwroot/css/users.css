@@ -504,7 +504,7 @@
     transform: translateY(-1px);
 }
 
-/* edit */
+/* edit + reset password */
 .um-btn-edit {
     color: var(--color-primary-dark);
     background: var(--color-surface-soft);
@@ -590,6 +590,26 @@
     background: color-mix(in srgb, var(--color-danger) 88%, black);
 }
 
+.um-btn-primary-solid {
+    padding: 9px 18px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border-color: transparent;
+    box-shadow: 0 6px 14px -4px rgba(228, 119, 46, .55);
+}
+
+.um-btn-primary-solid:hover {
+    color: #fff;
+    box-shadow: 0 10px 20px -6px rgba(228, 119, 46, .6);
+    filter: brightness(1.05);
+}
+
+.um-btn-primary-solid:disabled {
+    opacity: .7;
+    cursor: wait;
+    transform: none;
+}
+
 .um-protected {
     display: inline-flex;
     align-items: center;
@@ -645,7 +665,7 @@
 }
 
 /* =========================================================
-   DELETE MODAL
+   MODALS  (delete, reset password, edit user)
    ========================================================= */
 
 .um-modal .modal-content {
@@ -671,6 +691,12 @@
     font-size: 27px;
     color: var(--color-danger);
     background: var(--color-danger-bg);
+}
+
+/* orange variant (reset password + edit user) */
+.um-modal-icon.is-primary {
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
 }
 
 .um-modal-body h5 {
@@ -703,6 +729,107 @@
     gap: 10px;
     padding: 16px 24px 24px;
     border: 0;
+}
+
+/* ---- shared by the reset + edit modals ---- */
+.um-reset-fields,
+.um-edit-fields {
+    margin-top: 18px;
+    text-align: left;
+}
+
+.um-reset-error {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent);
+    border-radius: var(--radius-sm);
+}
+
+.um-reset-error[hidden] {
+    display: none;
+}
+
+/* ---- edit user modal ---- */
+.um-edit-dialog {
+    max-width: 560px;
+}
+
+/* ---- reset password modal ---- */
+.um-reset-field {
+    margin-bottom: 14px;
+}
+
+.um-reset-field label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.um-pw {
+    position: relative;
+}
+
+.um-pw-input {
+    width: 100%;
+    padding: 11px 46px 11px 14px;
+    font-size: .9rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease),
+                background-color var(--speed) var(--ease);
+}
+
+.um-pw-input::placeholder {
+    color: var(--color-text-muted);
+    opacity: .7;
+}
+
+.um-pw-input:focus {
+    background: var(--color-surface);
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.um-pw-input.is-invalid {
+    background: color-mix(in srgb, var(--color-danger) 5%, var(--color-surface));
+    border-color: var(--color-danger);
+}
+
+.um-pw-input.is-invalid:focus {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.um-pw-toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 34px;
+    height: 34px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease);
+}
+
+.um-pw-toggle:hover {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
 }
 
 /* =========================================================
@@ -992,7 +1119,7 @@
 }
 
 /* =========================================================
-   EDIT USER — role picker + notice
+   ROLE PICKER + NOTICE  (used by the edit user modal)
    ========================================================= */
 
 .um-role-grid {

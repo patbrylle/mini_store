@@ -40,6 +40,21 @@
     </div>
 
 
+    <!-- STATUS MESSAGES (remove if your _Layout already shows TempData) -->
+    @if (TempData["Success"] is string okMsg)
+    {
+        <div class="alert alert-success d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @okMsg
+        </div>
+    }
+    @if (TempData["Error"] is string errMsg)
+    {
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @errMsg
+        </div>
+    }
+
+
     <!-- SUMMARY CARDS -->
     <div class="row g-3 mb-4">
 
@@ -189,13 +204,30 @@
                                     {
                                         <div class="um-actions">
 
-                                            <!-- EDIT -->
-                                            <a asp-action="Edit"
-                                               asp-route-id="@user.Id"
-                                               class="um-btn um-btn-edit">
+                                            <!-- EDIT (opens the edit modal) -->
+                                            <button type="button"
+                                                    class="um-btn um-btn-edit"
+                                                    title="Edit user"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editUserModal"
+                                                    data-id="@user.Id"
+                                                    data-email="@email"
+                                                    data-role="@role">
                                                 <i class="bi bi-pencil"></i>
                                                 <span>Edit</span>
-                                            </a>
+                                            </button>
+
+                                            <!-- RESET PASSWORD (opens the reset modal) -->
+                                            <button type="button"
+                                                    class="um-btn um-btn-edit"
+                                                    title="Reset password"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#resetUserModal"
+                                                    data-id="@user.Id"
+                                                    data-email="@email">
+                                                <i class="bi bi-key"></i>
+                                                <span>Reset</span>
+                                            </button>
 
                                             <!-- ENABLE / DISABLE -->
                                             <form asp-action="ToggleStatus" method="post" class="d-inline">
@@ -332,62 +364,212 @@
 </div>
 
 
+<!-- =========================================================
+     RESET PASSWORD MODAL (one modal, filled by script)
+========================================================= -->
+
+<div class="modal fade um-modal"
+     id="resetUserModal"
+     tabindex="-1"
+     aria-labelledby="resetUserLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <form asp-action="ResetPassword" method="post" id="resetUserForm" data-min="6" novalidate>
+
+                <input type="hidden" name="Id" id="resetUserId" />
+
+                <div class="modal-body um-modal-body">
+
+                    <div class="um-modal-icon is-primary">
+                        <i class="bi bi-key"></i>
+                    </div>
+
+                    <h5 id="resetUserLabel">Reset password</h5>
+
+                    <p>Set a new password for <strong id="resetUserEmail"></strong>.</p>
+
+                    <div class="um-reset-fields">
+
+                        <div class="um-reset-error" id="resetError" role="alert" hidden></div>
+
+                        <div class="um-reset-field">
+                            <label for="resetNewPassword">New password</label>
+                            <div class="um-pw">
+                                <input type="password"
+                                       name="NewPassword"
+                                       id="resetNewPassword"
+                                       class="um-pw-input"
+                                       placeholder="At least 6 characters"
+                                       autocomplete="new-password" />
+                                <button type="button" class="um-pw-toggle" aria-label="Show password" aria-pressed="false">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="um-reset-field">
+                            <label for="resetConfirmPassword">Confirm password</label>
+                            <div class="um-pw">
+                                <input type="password"
+                                       name="ConfirmPassword"
+                                       id="resetConfirmPassword"
+                                       class="um-pw-input"
+                                       placeholder="Re-enter the password"
+                                       autocomplete="new-password" />
+                                <button type="button" class="um-pw-toggle" aria-label="Show password" aria-pressed="false">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer um-modal-footer">
+                    <button type="button" class="um-btn um-btn-ghost" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="um-btn um-btn-primary-solid" id="resetSubmit">
+                        <i class="bi bi-key"></i>
+                        Reset password
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     EDIT USER MODAL (one modal, filled by script)
+========================================================= -->
+
+<div class="modal fade um-modal"
+     id="editUserModal"
+     tabindex="-1"
+     aria-labelledby="editUserLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered um-edit-dialog">
+
+        <div class="modal-content">
+
+            <form asp-action="Edit" method="post" id="editUserForm" novalidate>
+
+                <input type="hidden" name="Id" id="editUserId" />
+
+                <div class="modal-body um-modal-body">
+
+                    <div class="um-modal-icon is-primary">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+
+                    <h5 id="editUserLabel">Edit user</h5>
+
+                    <p>Update the user's email address and role.</p>
+
+                    <div class="um-edit-fields">
+
+                        <div class="um-reset-error" id="editError" role="alert" hidden></div>
+
+                        <!-- EMAIL -->
+                        <div class="um-field">
+                            <label class="um-label" for="editEmail">Email Address</label>
+
+                            <div class="um-input-wrap">
+                                <i class="bi bi-envelope"></i>
+                                <input type="email"
+                                       name="Email"
+                                       id="editEmail"
+                                       class="um-input"
+                                       placeholder="Enter email address"
+                                       autocomplete="off" />
+                            </div>
+                        </div>
+
+                        <!-- ROLE -->
+                        <div class="um-field mb-0">
+
+                            <span class="um-label" id="editRoleLabel">Role</span>
+
+                            <div class="um-role-grid" role="radiogroup" aria-labelledby="editRoleLabel">
+
+                                <label class="um-role-option">
+                                    <input type="radio" name="Role" id="editRoleStaff" value="Staff" />
+
+                                    <div class="um-role-card">
+                                        <div class="um-role-card-icon staff">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Staff</strong>
+                                            <small>Day-to-day store access</small>
+                                        </div>
+                                        <i class="bi bi-check-circle-fill um-role-check"></i>
+                                    </div>
+                                </label>
+
+                                <label class="um-role-option">
+                                    <input type="radio" name="Role" id="editRoleAdmin" value="Admin" />
+
+                                    <div class="um-role-card">
+                                        <div class="um-role-card-icon admin">
+                                            <i class="bi bi-shield-fill"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Admin</strong>
+                                            <small>Full administrative access</small>
+                                        </div>
+                                        <i class="bi bi-check-circle-fill um-role-check"></i>
+                                    </div>
+                                </label>
+
+                            </div>
+
+                            <div class="um-note" id="editAdminNote" hidden>
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div>
+                                    Admin accounts are protected. After saving, this account can't be
+                                    edited, disabled or deleted from the user list.
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer um-modal-footer">
+                    <button type="button" class="um-btn um-btn-ghost" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="um-btn um-btn-primary-solid" id="editSubmit">
+                        <i class="bi bi-check-circle"></i>
+                        Save Changes
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 @section Scripts {
-    <script>
-        (function () {
-            // ---------- search + role/status filter (one function, so they never fight) ----------
-            var rows = Array.prototype.slice.call(document.querySelectorAll('#userTable tbody tr[data-role]'));
-            var chips = document.querySelectorAll('#userFilters .um-chip');
-            var search = document.getElementById('userSearch');
-            var noResults = document.getElementById('userNoResults');
-            var filter = 'all';
-
-            function apply() {
-                var q = search ? search.value.trim().toLowerCase() : '';
-                var visible = 0;
-
-                rows.forEach(function (row) {
-                    var okFilter =
-                        filter === 'all' ||
-                        (filter === 'disabled' ? row.dataset.active === 'false' : row.dataset.role === filter);
-
-                    var okSearch = !q || row.dataset.search.indexOf(q) !== -1;
-                    var show = okFilter && okSearch;
-
-                    row.hidden = !show;
-                    if (show) visible++;
-                });
-
-                if (noResults) noResults.hidden = !rows.length || visible !== 0;
-            }
-
-            chips.forEach(function (chip) {
-                chip.addEventListener('click', function () {
-                    filter = chip.dataset.filter;
-
-                    chips.forEach(function (c) {
-                        var on = c === chip;
-                        c.classList.toggle('active', on);
-                        c.setAttribute('aria-pressed', on ? 'true' : 'false');
-                    });
-
-                    apply();
-                });
-            });
-
-            if (search) search.addEventListener('input', apply);
-
-            // ---------- fill the delete modal with the clicked user ----------
-            var modal = document.getElementById('deleteUserModal');
-            if (modal) {
-                modal.addEventListener('show.bs.modal', function (e) {
-                    var btn = e.relatedTarget;
-                    if (!btn) return;
-
-                    document.getElementById('deleteUserId').value = btn.getAttribute('data-id');
-                    document.getElementById('deleteUserEmail').textContent = btn.getAttribute('data-email');
-                });
-            }
-        })();
-    </script>
+    <script src="~/js/users.js" asp-append-version="true"></script>
 }
