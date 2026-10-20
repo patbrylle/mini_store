@@ -1,0 +1,399 @@
+@{
+    var returnTo = ViewData["ReturnTo"]?.ToString() ?? "Sales";
+
+    var defaultType = ViewData["DefaultTransactionType"]?.ToString();
+
+    if (string.IsNullOrWhiteSpace(defaultType))
+    {
+        defaultType = Context.Request.Query["transactionType"].ToString();
+    }
+
+    if (string.IsNullOrWhiteSpace(defaultType))
+    {
+        defaultType = "Cash";
+    }
+
+    bool defaultIsUtang = defaultType.Equals(
+        "Utang",
+        StringComparison.OrdinalIgnoreCase
+    );
+}
+
+<!-- =========================================================
+     SHARED NEW TRANSACTION MODAL
+     Used by Sales and Utang pages
+========================================================== -->
+
+<div class="modal fade"
+     id="newSaleModal"
+     tabindex="-1"
+     aria-labelledby="newSaleModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content transaction-modal">
+
+            <form asp-controller="Sales"
+                  asp-action="Create"
+                  method="post"
+                  id="saleForm">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="ReturnTo"
+                       value="@returnTo" />
+
+                <!-- HEADER -->
+
+                <div class="modal-header transaction-header">
+
+                    <div class="transaction-title">
+
+                        <div class="transaction-icon">
+                            <i class="bi bi-cart-plus"></i>
+                        </div>
+
+                        <div>
+
+                            <h5 id="newSaleModalLabel">
+                                New Transaction
+                            </h5>
+
+                            <p>
+                                Create a sale or record an utang.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+
+                </div>
+
+                <!-- BODY -->
+
+                <div class="modal-body transaction-body">
+
+                    <!-- TRANSACTION TYPE -->
+
+                    <div class="transaction-section">
+
+                        <label class="transaction-label">
+                            Transaction Type
+                        </label>
+
+                        <div class="transaction-type-grid">
+
+                            <!-- CASH -->
+
+                            <label class="transaction-type-option">
+
+                                <input type="radio"
+                                       name="TransactionType"
+                                       value="Cash"
+                                       checked="@(!defaultIsUtang)" />
+
+                                <div class="transaction-type-card">
+
+                                    <div class="transaction-type-icon cash">
+                                        <i class="bi bi-cash"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            Cash Sale
+                                        </strong>
+
+                                        <small>
+                                            Customer pays immediately
+                                        </small>
+
+                                    </div>
+
+                                    <i class="bi bi-check-circle-fill selected-icon"></i>
+
+                                </div>
+
+                            </label>
+
+                            <!-- UTANG -->
+
+                            <label class="transaction-type-option">
+
+                                <input type="radio"
+                                       name="TransactionType"
+                                       value="Utang"
+                                       checked="@(defaultIsUtang)" />
+
+                                <div class="transaction-type-card">
+
+                                    <div class="transaction-type-icon utang">
+                                        <i class="bi bi-wallet2"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            Utang
+                                        </strong>
+
+                                        <small>
+                                            Record customer balance
+                                        </small>
+
+                                    </div>
+
+                                    <i class="bi bi-check-circle-fill selected-icon"></i>
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CUSTOMER -->
+
+                    <div class="transaction-section">
+
+                        <label for="customerSelect"
+                               class="transaction-label">
+
+                            Customer
+
+                        </label>
+
+                        <select id="customerSelect"
+                                name="CustomerId"
+                                class="form-select transaction-select">
+
+                            <option value="">
+                                Walk-in Customer
+                            </option>
+
+                            @if (ViewBag.Customers != null)
+                            {
+                                foreach (var customer in ViewBag.Customers)
+                                {
+                                    <option value="@customer.CustomerId">
+                                        @customer.CustomerName
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                        <small class="transaction-help">
+                            Customer is required when recording an utang.
+                        </small>
+
+                    </div>
+
+                    <!-- PRODUCT SELECTOR -->
+
+                    <div class="transaction-section">
+
+                        <label for="productSelector"
+                               class="transaction-label">
+
+                            Add Product
+
+                        </label>
+
+                        <select id="productSelector"
+                                class="form-select transaction-select">
+
+                            <option value="">
+                                Select a product to add...
+                            </option>
+
+                            @if (ViewBag.Products != null)
+                            {
+                                foreach (var product in ViewBag.Products)
+                                {
+                                    <option value="@product.ProductId"
+                                            data-price="@product.Price.ToString(
+                                                "0.00",
+                                                System.Globalization.CultureInfo.InvariantCulture
+                                            )"
+                                            data-stock="@product.Quantity">
+
+                                        @product.ProductName
+                                        — ₱@product.Price.ToString("N2")
+                                        (@product.Quantity in stock)
+
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                        <small class="transaction-help">
+                            Select a product and it will be added automatically.
+                        </small>
+
+                    </div>
+
+                    <!-- SELECTED PRODUCTS -->
+
+                    <div class="transaction-section">
+
+                        <div class="transaction-section-header">
+
+                            <label class="transaction-label mb-0">
+                                Selected Products
+                            </label>
+
+                        </div>
+
+                        <div class="transaction-products">
+
+                            <div class="product-table-head">
+
+                                <div>Product</div>
+                                <div>Quantity</div>
+                                <div>Subtotal</div>
+                                <div></div>
+
+                            </div>
+
+                            <div id="saleProductsContainer">
+
+                                <div id="emptyProductMessage"
+                                     class="empty-products text-center text-muted">
+
+                                    <i class="bi bi-cart3"></i>
+
+                                    <span>
+                                        No products added yet.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- PAYMENT -->
+
+                    <div class="transaction-section">
+
+                        <div class="transaction-payment">
+
+                            <div class="payment-summary">
+
+                                <!-- TOTAL -->
+
+                                <div class="payment-total">
+
+                                    <span>
+                                        Total Amount
+                                    </span>
+
+                                    <strong id="saleTotal">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+                                <!-- AMOUNT PAID -->
+
+                                <div class="payment-input-group">
+
+                                    <label for="amountPaid">
+                                        Amount Paid
+                                    </label>
+
+                                    <div class="money-input">
+
+                                        <span>₱</span>
+
+                                        <input type="number"
+                                               id="amountPaid"
+                                               name="AmountPaid"
+                                               min="0"
+                                               step="0.01"
+                                               value="0" />
+
+                                    </div>
+
+                                </div>
+
+                                <!-- CHANGE / BALANCE -->
+
+                                <div class="payment-result">
+
+                                    <span id="paymentResultLabel">
+                                        Change
+                                    </span>
+
+                                    <strong id="paymentResult">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                            <!-- UTANG INFORMATION -->
+
+                            <div id="utangPaymentInfo"
+                                 class="transaction-note"
+                                 style="display: none;">
+
+                                <i class="bi bi-info-circle"></i>
+
+                                <div>
+                                    The remaining amount will be recorded
+                                    as the customer's utang balance.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer transaction-footer">
+
+                    <button type="button"
+                            class="btn transaction-cancel-btn"
+                            data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn transaction-submit-btn">
+
+                        <i class="bi bi-check-lg me-1"></i>
+
+                        Complete Sale
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

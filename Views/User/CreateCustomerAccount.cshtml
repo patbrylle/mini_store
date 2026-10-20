@@ -1,0 +1,124 @@
+
+@model mini_store.ViewModels.Account.CreateCustomerAccountViewModel
+
+@{
+    ViewData["Title"] = "Create Customer Account";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+
+            <div class="mb-4">
+                <a asp-controller="User"
+                   asp-action="Index"
+                   class="text-decoration-none">
+                    <i class="bi bi-arrow-left"></i> Back to Users
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                            <i class="bi bi-person-plus fs-3"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-1">Create Customer Account</h3>
+                            <p class="text-muted mb-0">
+                                Give an existing customer access to their transactions.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        The login email will be taken from the selected customer's
+                        existing record.
+                    </div>
+
+                    <form asp-controller="User"
+                          asp-action="CreateCustomerAccount"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="CustomerId" class="form-label fw-semibold">
+                                Select Customer
+                            </label>
+
+                            <select asp-for="CustomerId"
+                                    asp-items="ViewBag.Customers"
+                                    class="form-select form-select-lg"
+                                    required>
+                                <option value="">Choose a customer</option>
+                            </select>
+
+                            <span asp-validation-for="CustomerId"
+                                  class="text-danger"></span>
+
+                            <small class="text-muted">
+                                Only customers with an email address and no linked account appear here.
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold">
+                                Temporary Password
+                            </label>
+
+                            <input asp-for="Password"
+                                   class="form-control form-control-lg"
+                                   placeholder="Enter a strong password"
+                                   autocomplete="new-password" />
+
+                            <span asp-validation-for="Password"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label fw-semibold">
+                                Confirm Password
+                            </label>
+
+                            <input asp-for="ConfirmPassword"
+                                   class="form-control form-control-lg"
+                                   placeholder="Enter the password again"
+                                   autocomplete="new-password" />
+
+                            <span asp-validation-for="ConfirmPassword"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <a asp-controller="User"
+                               asp-action="Index"
+                               class="btn btn-light btn-lg flex-fill">
+                                Cancel
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg flex-fill">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Create Account
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

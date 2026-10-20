@@ -18,5 +18,8 @@ namespace mini_store.Models
 
         [StringLength(200)]
         public string? Address { get; set; }
+
+                public string? UserId { get; set; }
+
     }
 }

@@ -6,7 +6,7 @@ using mini_store.ViewModels.Notification;
 
 namespace mini_store.Controllers
 {
-    [Authorize]
+[Authorize(Roles = "Admin,Staff")]
     public class NotificationController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -6,7 +6,7 @@ using mini_store.Models;
 
 namespace mini_store.Controllers
 {
-    [Authorize]
+[Authorize(Roles = "Admin,Staff")]
     public class SalesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -923,6 +923,8 @@ namespace mini_store.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Delete(int id)
         {
             var sale = await _context.Sales

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using mini_store.Data;
 using mini_store.Models;
 using mini_store.ViewModels.Account;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace mini_store.Controllers
 {
@@ -98,6 +100,139 @@ namespace mini_store.Controllers
 
             return View(model);
         }
+
+        // =========================================================
+        // CREATE CUSTOMER ACCOUNT
+        // =========================================================
+
+        [HttpGet]
+        public async Task<IActionResult> CreateCustomerAccount()
+        {
+            await LoadAvailableCustomersAsync();
+
+            return View(new CreateCustomerAccountViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCustomerAccount(
+            CreateCustomerAccountViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadAvailableCustomersAsync();
+                return View(model);
+            }
+
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == model.CustomerId);
+
+            if (customer == null)
+            {
+                ModelState.AddModelError("", "Customer not found.");
+                await LoadAvailableCustomersAsync();
+                return View(model);
+            }
+
+            if (string.IsNullOrWhiteSpace(customer.Email))
+            {
+                ModelState.AddModelError(
+                    "",
+                    "This customer needs an email address before an account can be created.");
+
+                await LoadAvailableCustomersAsync();
+                return View(model);
+            }
+
+            if (!string.IsNullOrEmpty(customer.UserId))
+            {
+                ModelState.AddModelError(
+                    "",
+                    "This customer already has a linked account.");
+
+                await LoadAvailableCustomersAsync();
+                return View(model);
+            }
+
+            var existingUser =
+                await _userManager.FindByEmailAsync(customer.Email);
+
+            if (existingUser != null)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "An account already uses this email address. Check the existing account before continuing.");
+
+                await LoadAvailableCustomersAsync();
+                return View(model);
+            }
+
+            var user = new IdentityUser
+            {
+                UserName = customer.Email,
+                Email = customer.Email
+            };
+
+            var createResult =
+                await _userManager.CreateAsync(user, model.Password);
+
+            if (!createResult.Succeeded)
+            {
+                foreach (var error in createResult.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                await LoadAvailableCustomersAsync();
+                return View(model);
+            }
+
+            var roleResult =
+                await _userManager.AddToRoleAsync(user, "Customer");
+
+            if (!roleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(user);
+
+                foreach (var error in roleResult.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                await LoadAvailableCustomersAsync();
+                return View(model);
+            }
+
+            customer.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            await Notify(
+                "Customer Account Created",
+                $"A login account was created for {customer.CustomerName}.",
+                "info");
+
+            TempData["SuccessMessage"] =
+                "Customer login account created and linked successfully.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task LoadAvailableCustomersAsync()
+        {
+            var customers = await _context.Customers
+                .Where(c =>
+                    c.UserId == null &&
+                    c.Email != null &&
+                    c.Email.Trim() != "")
+                .OrderBy(c => c.CustomerName)
+                .ToListAsync();
+
+            ViewBag.Customers = new SelectList(
+                customers,
+                "CustomerId",
+                "CustomerName");
+        }
+
 
         // =========================================================
         // EDIT USER

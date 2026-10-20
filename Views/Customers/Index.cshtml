@@ -221,30 +221,39 @@
                                     }
                                 </td>
 
-                                <!-- ACTIONS -->
-                                <td>
-                                    <div class="customer-actions">
+                               
+<!-- ACTIONS -->
+<td>
+    <div class="customer-actions">
 
-                                        <button type="button"
-                                                class="btn customer-action-btn customer-edit-btn"
-                                                title="Edit customer"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editCustomerModal-@customer.CustomerId">
-                                            <i class="bi bi-pencil"></i>
-                                            <span>Edit</span>
-                                        </button>
+        @if (User.IsInRole("Admin"))
+        {
+            <button type="button"
+                    class="btn customer-action-btn customer-edit-btn"
+                    title="Edit customer"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editCustomerModal-@customer.CustomerId">
+                <i class="bi bi-pencil"></i>
+                <span>Edit</span>
+            </button>
 
-                                        <button type="button"
-                                                class="btn customer-action-btn customer-delete-btn"
-                                                title="Delete customer"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteCustomerModal-@customer.CustomerId">
-                                            <i class="bi bi-trash"></i>
-                                            <span>Delete</span>
-                                        </button>
+            <button type="button"
+                    class="btn customer-action-btn customer-delete-btn"
+                    title="Delete customer"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteCustomerModal-@customer.CustomerId">
+                <i class="bi bi-trash"></i>
+                <span>Delete</span>
+            </button>
+        }
+        else
+        {
+            <span class="text-muted small">View only</span>
+        }
 
-                                    </div>
-                                </td>
+    </div>
+</td>
+
 
                             </tr>
                         }
@@ -304,10 +313,12 @@
 <!-- ============================================================
      EDIT + DELETE MODALS
      ============================================================ -->
-
+@if (User.IsInRole("Admin"))
+{
 @foreach (var customer in customers)
 {
     <!-- EDIT CUSTOMER MODAL -->
+    
     <div class="modal fade"
          id="editCustomerModal-@customer.CustomerId"
          tabindex="-1"
@@ -504,7 +515,7 @@
 
     </div>
 }
-
+}
 
 @section Scripts {
 

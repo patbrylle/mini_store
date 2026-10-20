@@ -1,1554 +1,773 @@
+
 @model IEnumerable<mini_store.Models.Sale>
 
 @{
-ViewData["Title"] = "Sales";
+    ViewData["Title"] = "Sales";
 
-var sales = Model?.ToList() ?? new List<mini_store.Models.Sale>();
+    var sales = Model?.ToList() ?? new List<mini_store.Models.Sale>();
 
-var utangsBySaleId = ViewBag.UtangsBySaleId as Dictionary<int, mini_store.Models.Utang>
-    ?? new Dictionary<int, mini_store.Models.Utang>();
+    var utangsBySaleId =
+        ViewBag.UtangsBySaleId as Dictionary<int, mini_store.Models.Utang>
+        ?? new Dictionary<int, mini_store.Models.Utang>();
 
-string StatusKey(mini_store.Models.Sale s) =>
-    s.Status?.ToLower() switch
-    {
-        "paid" => "paid",
-        "partial" => "partial",
-        _ => "unpaid"
-    };
+    string StatusKey(mini_store.Models.Sale s) =>
+        s.Status?.ToLower() switch
+        {
+            "paid" => "paid",
+            "partial" => "partial",
+            _ => "unpaid"
+        };
 
-decimal totalSales = sales.Sum(s => s.TotalAmount);
-int totalTransactions = sales.Count;
+    decimal totalSales = sales.Sum(s => s.TotalAmount);
+    int totalTransactions = sales.Count;
 
-// Cap paid amount at the sale total so change does not count as sales income.
-decimal paidSales = sales.Sum(s => Math.Min(s.AmountPaid, s.TotalAmount));
+    // Do not count change as sales income.
+    decimal paidSales = sales.Sum(
+        s => Math.Min(s.AmountPaid, s.TotalAmount));
 
-decimal outstanding = sales.Sum(
-    s => Math.Max(0, s.TotalAmount - s.AmountPaid)
-);
+    decimal outstanding = sales.Sum(
+        s => Math.Max(0, s.TotalAmount - s.AmountPaid));
 
-int paidCount = sales.Count(s => StatusKey(s) == "paid");
-int partialCount = sales.Count(s => StatusKey(s) == "partial");
-int unpaidCount = sales.Count(s => StatusKey(s) == "unpaid");
+    int paidCount = sales.Count(s => StatusKey(s) == "paid");
+    int partialCount = sales.Count(s => StatusKey(s) == "partial");
+    int unpaidCount = sales.Count(s => StatusKey(s) == "unpaid");
 
-var transactionType = Context.Request.Query["transactionType"].ToString();
+    var transactionType = Context.Request.Query["transactionType"].ToString();
 
-bool openUtang = string.Equals(
-    transactionType,
-    "Utang",
-    StringComparison.OrdinalIgnoreCase
-);
-
+    bool openUtang = string.Equals(
+        transactionType,
+        "Utang",
+        StringComparison.OrdinalIgnoreCase);
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/sales.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/utang.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/sales-modern.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/transaction-modal.css" asp-append-version="true" />  @* must be LAST *@
+    <link rel="stylesheet" href="~/css/transaction-modal.css" asp-append-version="true" />
 }
 
 <div class="sales-page">
 
-<!-- =========================================================
-     HEADER
-========================================================== -->
-
-<div class="sales-header">
-
-    <div class="sales-title-area">
-
-        <div class="sales-page-icon">
-            <i class="bi bi-receipt"></i>
-        </div>
-
-        <div>
-            <h1>Sales</h1>
-            <p>Manage your store sales and transactions.</p>
-        </div>
-
-    </div>
-
-    <button type="button"
-            class="btn sales-new-btn"
-            data-bs-toggle="modal"
-            data-bs-target="#newSaleModal">
-
-        <i class="bi bi-plus-lg me-1"></i>
-        New Transaction
-
-    </button>
-
-</div>
-
-
-<!-- =========================================================
-     SUMMARY CARDS
-========================================================== -->
-
-<div class="row g-3 mb-4">
-
-    <!-- Total Sales -->
-    <div class="col-xl-3 col-md-6">
-
-        <div class="sales-summary-card is-primary"
-             style="--i:0">
-
-            <div class="sales-summary-icon">
-                <i class="bi bi-cash-stack"></i>
+    <!-- HEADER -->
+    <div class="sales-header">
+        <div class="sales-title-area">
+            <div class="sales-page-icon">
+                <i class="bi bi-receipt"></i>
             </div>
 
             <div>
-                <span>Total Sales</span>
-
-                <h3>
-                    ₱@totalSales.ToString("N2")
-                </h3>
+                <h1>Sales</h1>
+                <p>Manage your store sales and transactions.</p>
             </div>
+        </div>
 
+        <button type="button"
+                class="btn sales-new-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#newSaleModal">
+            <i class="bi bi-plus-lg me-1"></i>
+            New Transaction
+        </button>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="sales-summary-card is-primary" style="--i:0">
+                <div class="sales-summary-icon">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div>
+                    <span>Total Sales</span>
+                    <h3>₱@totalSales.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="sales-summary-card is-gold" style="--i:1">
+                <div class="sales-summary-icon">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </div>
+                <div>
+                    <span>Transactions</span>
+                    <h3>@totalTransactions</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="sales-summary-card is-success" style="--i:2">
+                <div class="sales-summary-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <span>Paid Sales</span>
+                    <h3>₱@paidSales.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="sales-summary-card is-danger" style="--i:3">
+                <div class="sales-summary-icon">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div>
+                    <span>Outstanding</span>
+                    <h3>₱@outstanding.ToString("N2")</h3>
+                </div>
+            </div>
         </div>
 
     </div>
 
+    <!-- SALES TABLE -->
+    <div class="sales-table-card">
 
-    <!-- Transactions -->
-    <div class="col-xl-3 col-md-6">
-
-        <div class="sales-summary-card is-gold"
-             style="--i:1">
-
-            <div class="sales-summary-icon">
-                <i class="bi bi-receipt-cutoff"></i>
-            </div>
-
+        <div class="sales-table-header">
             <div>
-                <span>Transactions</span>
-
-                <h3>
-                    @totalTransactions
-                </h3>
+                <h5>Sales Transactions</h5>
+                <p>View and manage your completed transactions.</p>
             </div>
 
-        </div>
-
-    </div>
-
-
-    <!-- Paid Sales -->
-    <div class="col-xl-3 col-md-6">
-
-        <div class="sales-summary-card is-success"
-             style="--i:2">
-
-            <div class="sales-summary-icon">
-                <i class="bi bi-check-circle"></i>
+            <div class="sales-search">
+                <i class="bi bi-search"></i>
+                <input type="text"
+                       id="salesSearch"
+                       placeholder="Search sales..."
+                       aria-label="Search sales"
+                       autocomplete="off" />
             </div>
-
-            <div>
-                <span>Paid Sales</span>
-
-                <h3>
-                    ₱@paidSales.ToString("N2")
-                </h3>
-            </div>
-
         </div>
 
-    </div>
+        <!-- STATUS FILTERS -->
+        <div class="sales-filters"
+             id="statusFilters"
+             role="group"
+             aria-label="Filter by status">
 
+            <button type="button"
+                    class="filter-chip active"
+                    data-filter="all"
+                    aria-pressed="true">
+                All
+                <span>@totalTransactions</span>
+            </button>
 
-    <!-- Outstanding -->
-    <div class="col-xl-3 col-md-6">
+            <button type="button"
+                    class="filter-chip"
+                    data-filter="paid"
+                    aria-pressed="false">
+                Paid
+                <span>@paidCount</span>
+            </button>
 
-        <div class="sales-summary-card is-danger"
-             style="--i:3">
+            <button type="button"
+                    class="filter-chip"
+                    data-filter="partial"
+                    aria-pressed="false">
+                Partial
+                <span>@partialCount</span>
+            </button>
 
-            <div class="sales-summary-icon">
-                <i class="bi bi-wallet2"></i>
-            </div>
-
-            <div>
-                <span>Outstanding</span>
-
-                <h3>
-                    ₱@outstanding.ToString("N2")
-                </h3>
-            </div>
-
+            <button type="button"
+                    class="filter-chip"
+                    data-filter="unpaid"
+                    aria-pressed="false">
+                Unpaid
+                <span>@unpaidCount</span>
+            </button>
         </div>
 
-    </div>
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table sales-table" id="salesTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-</div>
-
-
-<!-- =========================================================
-     SALES TABLE
-========================================================== -->
-
-<div class="sales-table-card">
-
-    <div class="sales-table-header">
-
-        <div>
-            <h5>Sales Transactions</h5>
-            <p>View and manage your completed transactions.</p>
-        </div>
-
-        <div class="sales-search">
-
-            <i class="bi bi-search"></i>
-
-            <input type="text"
-                   id="salesSearch"
-                   placeholder="Search sales..."
-                   aria-label="Search sales"
-                   autocomplete="off" />
-
-        </div>
-
-    </div>
-
-
-    <!-- STATUS FILTERS -->
-
-    <div class="sales-filters"
-         id="statusFilters"
-         role="group"
-         aria-label="Filter by status">
-
-        <button type="button"
-                class="filter-chip active"
-                data-filter="all"
-                aria-pressed="true">
-
-            All
-            <span>@totalTransactions</span>
-
-        </button>
-
-        <button type="button"
-                class="filter-chip"
-                data-filter="paid"
-                aria-pressed="false">
-
-            Paid
-            <span>@paidCount</span>
-
-        </button>
-
-        <button type="button"
-                class="filter-chip"
-                data-filter="partial"
-                aria-pressed="false">
-
-            Partial
-            <span>@partialCount</span>
-
-        </button>
-
-        <button type="button"
-                class="filter-chip"
-                data-filter="unpaid"
-                aria-pressed="false">
-
-            Unpaid
-            <span>@unpaidCount</span>
-
-        </button>
-
-    </div>
-
-
-    <!-- TABLE -->
-
-    <div class="table-responsive">
-
-        <table class="table sales-table"
-               id="salesTable">
-
-            <thead>
-
-                <tr>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Paid</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                @if (sales.Any())
-                {
-                    foreach (var sale in sales)
+                <tbody>
+                    @if (sales.Any())
                     {
-                        string statusClass = StatusKey(sale);
+                        foreach (var sale in sales)
+                        {
+                            string statusClass = StatusKey(sale);
 
-                        int itemCount =
-                            sale.SaleItems?.Sum(i => i.Quantity) ?? 0;
+                            int itemCount =
+                                sale.SaleItems?.Sum(i => i.Quantity) ?? 0;
 
-                        decimal rowBalance =
-                            Math.Max(
+                            decimal rowBalance = Math.Max(
                                 0,
-                                sale.TotalAmount - sale.AmountPaid
-                            );
+                                sale.TotalAmount - sale.AmountPaid);
 
-                        bool isWalkIn =
-                            sale.Customer == null;
+                            bool isWalkIn = sale.Customer == null;
 
-                        string customerName =
-                            sale.Customer?.CustomerName
-                            ?? "Walk-in Customer";
+                            string customerName =
+                                sale.Customer?.CustomerName ?? "Walk-in Customer";
 
-                        string initial =
-                            !isWalkIn && customerName.Length > 0
-                                ? customerName.Substring(0, 1).ToUpper()
-                                : "";
+                            string initial =
+                                !isWalkIn && customerName.Length > 0
+                                    ? customerName.Substring(0, 1).ToUpper()
+                                    : "";
 
-                        <tr data-status="@statusClass">
+                            <tr data-status="@statusClass">
 
-                            <!-- DATE -->
+                                <!-- DATE -->
+                                <td>
+                                    <strong>
+                                        @sale.SaleDate.ToString("MMM dd, yyyy")
+                                    </strong>
+                                    <small>
+                                        @sale.SaleDate.ToString("hh:mm tt")
+                                    </small>
+                                </td>
 
-                            <td>
+                                <!-- CUSTOMER -->
+                                <td>
+                                    <div class="sales-customer">
+                                        <div class="sales-customer-icon @(isWalkIn ? "walkin" : "")">
+                                            @if (isWalkIn)
+                                            {
+                                                <i class="bi bi-person"></i>
+                                            }
+                                            else
+                                            {
+                                                <span>@initial</span>
+                                            }
+                                        </div>
 
-                                <strong>
-                                    @sale.SaleDate.ToString("MMM dd, yyyy")
-                                </strong>
+                                        <div>
+                                            <strong>@customerName</strong>
+                                        </div>
+                                    </div>
+                                </td>
 
-                                <small>
-                                    @sale.SaleDate.ToString("hh:mm tt")
-                                </small>
+                                <!-- ITEMS -->
+                                <td>
+                                    <span class="items-count">
+                                        @itemCount item@(itemCount != 1 ? "s" : "")
+                                    </span>
+                                </td>
 
-                            </td>
+                                <!-- TOTAL -->
+                                <td>
+                                    <strong>₱@sale.TotalAmount.ToString("N2")</strong>
+                                </td>
 
+                                <!-- PAID -->
+                                <td>
+                                    <strong>₱@sale.AmountPaid.ToString("N2")</strong>
 
-                            <!-- CUSTOMER -->
+                                    @if (rowBalance > 0)
+                                    {
+                                        <small class="balance-hint">
+                                            ₱@rowBalance.ToString("N2") due
+                                        </small>
+                                    }
+                                </td>
 
-                            <td>
+                                <!-- STATUS -->
+                                <td>
+                                    <span class="sale-status @statusClass">
+                                        <span></span>
+                                        @(string.IsNullOrWhiteSpace(sale.Status)
+                                            ? "Unpaid"
+                                            : sale.Status)
+                                    </span>
+                                </td>
 
-                                <div class="sales-customer">
+                                <!-- ACTIONS -->
+                                <td>
+                                    <div class="sales-actions">
 
-                                    <div class="sales-customer-icon @(isWalkIn ? "walkin" : "")">
-
-                                        @if (isWalkIn)
+                                        @if (
+                                            sale.Status?.Equals(
+                                                "Unpaid",
+                                                StringComparison.OrdinalIgnoreCase
+                                            ) == true
+                                            &&
+                                            utangsBySaleId.TryGetValue(
+                                                sale.SaleId,
+                                                out var matchingUtang
+                                            )
+                                        )
                                         {
-                                            <i class="bi bi-person"></i>
+                                            <button type="button"
+                                                    class="btn view-utang-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#utangDetailsModal-@matchingUtang.UtangId">
+                                                <i class="bi bi-eye me-1"></i>
+                                                View
+                                            </button>
                                         }
                                         else
                                         {
-                                            <span>@initial</span>
+                                            <button type="button"
+                                                    class="btn sales-view-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#saleDetailsModal-@sale.SaleId">
+                                                <i class="bi bi-eye me-1"></i>
+                                                View
+                                            </button>
                                         }
 
+                                      
+@if (User.IsInRole("Admin") && statusClass == "paid")
+{
+    <button type="button"
+            class="btn sales-delete-btn"
+            title="Delete sale"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteSaleModal-@sale.SaleId">
+        <i class="bi bi-trash"></i>
+    </button>
+}
+
                                     </div>
-
-                                    <div>
-                                        <strong>
-                                            @customerName
-                                        </strong>
-                                    </div>
-
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7">
+                                <div class="sales-empty">
+                                    <i class="bi bi-receipt"></i>
+                                    <strong>No sales transactions yet.</strong>
+                                    <span>Completed sales will show up here.</span>
                                 </div>
-
                             </td>
-
-
-                            <!-- ITEMS -->
-
-                            <td>
-
-                                <span class="items-count">
-
-                                    @itemCount
-                                    item@(itemCount != 1 ? "s" : "")
-
-                                </span>
-
-                            </td>
-
-
-                            <!-- TOTAL -->
-
-                            <td>
-
-                                <strong>
-                                    ₱@sale.TotalAmount.ToString("N2")
-                                </strong>
-
-                            </td>
-
-
-                            <!-- PAID -->
-
-                            <td>
-
-                                <strong>
-                                    ₱@sale.AmountPaid.ToString("N2")
-                                </strong>
-
-                                @if (rowBalance > 0)
-                                {
-                                    <small class="balance-hint">
-                                        ₱@rowBalance.ToString("N2") due
-                                    </small>
-                                }
-
-                            </td>
-
-
-                            <!-- STATUS -->
-
-                            <td>
-
-                                <span class="sale-status @statusClass">
-
-                                    <span></span>
-
-                                    @(string.IsNullOrWhiteSpace(sale.Status)
-                                        ? "Unpaid"
-                                        : sale.Status)
-
-                                </span>
-
-                            </td>
-
-
-                            <!-- ACTIONS -->
-
-                            <td>
-
-                                <div class="sales-actions">
-
-                                    @if (
-                                        sale.Status?.Equals(
-                                            "Unpaid",
-                                            StringComparison.OrdinalIgnoreCase
-                                        ) == true
-                                        &&
-                                        utangsBySaleId.TryGetValue(
-                                            sale.SaleId,
-                                            out var matchingUtang
-                                        )
-                                    )
-                                    {
-                                        <button type="button"
-                                                class="btn view-utang-btn"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#utangDetailsModal-@matchingUtang.UtangId">
-
-                                            <i class="bi bi-eye me-1"></i>
-                                            View
-
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button"
-                                                class="btn sales-view-btn"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#saleDetailsModal-@sale.SaleId">
-
-                                            <i class="bi bi-eye me-1"></i>
-                                            View
-
-                                        </button>
-                                    }
-
-
-                                    @if (statusClass == "paid")
-                                    {
-                                        <button type="button"
-                                                class="btn sales-delete-btn"
-                                                title="Delete sale"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteSaleModal-@sale.SaleId">
-
-                                            <i class="bi bi-trash"></i>
-
-                                        </button>
-                                    }
-
-                                </div>
-
-                            </td>
-
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
+                </tbody>
+            </table>
+        </div>
 
-                        <td colspan="7">
-
-                            <div class="sales-empty">
-
-                                <i class="bi bi-receipt"></i>
-
-                                <strong>
-                                    No sales transactions yet.
-                                </strong>
-
-                                <span>
-                                    Completed sales will show up here.
-                                </span>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-                }
-
-            </tbody>
-
-        </table>
+        <!-- NO SEARCH/FILTER RESULTS -->
+        <div class="sales-empty" id="noResults" hidden>
+            <i class="bi bi-search"></i>
+            <strong>No matching sales.</strong>
+            <span>Try a different search or filter.</span>
+        </div>
 
     </div>
-
-
-    <!-- NO SEARCH/FILTER RESULTS -->
-
-    <div class="sales-empty"
-         id="noResults"
-         hidden>
-
-        <i class="bi bi-search"></i>
-
-        <strong>
-            No matching sales.
-        </strong>
-
-        <span>
-            Try a different search or filter.
-        </span>
-
-    </div>
-
-</div>
-
 </div>
 
 <!-- =========================================================
-     NEW TRANSACTION MODAL
+     SHARED NEW TRANSACTION MODAL
+     Uses Views/Shared/_TransactionModal.cshtml
 ========================================================== -->
-
-<div class="modal fade"
-     id="newSaleModal"
-     tabindex="-1"
-     aria-labelledby="newSaleModalLabel"
-     aria-hidden="true">
-
-<div class="modal-dialog modal-dialog-centered">
-
-    <div class="modal-content transaction-modal">
-
-        <form asp-controller="Sales"
-              asp-action="Create"
-              method="post"
-              id="saleForm">
-
-            @Html.AntiForgeryToken()
-
-            <input type="hidden"
-                   name="ReturnTo"
-                   value="Sales" />
-
-
-            <!-- HEADER -->
-
-            <div class="modal-header transaction-header">
-
-                <div class="transaction-title">
-
-                    <div class="transaction-icon">
-                        <i class="bi bi-cart-plus"></i>
-                    </div>
-
-                    <div>
-
-                        <h5 id="newSaleModalLabel">
-                            New Transaction
-                        </h5>
-
-                        <p>
-                            Create a sale or record an utang.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                </button>
-
-            </div>
-
-
-            <!-- BODY -->
-
-            <div class="modal-body transaction-body">
-
-
-                <!-- TRANSACTION TYPE -->
-
-                <div class="transaction-section">
-
-                    <label class="transaction-label">
-                        Transaction Type
-                    </label>
-
-
-                    <div class="transaction-type-grid">
-
-                        <!-- CASH -->
-
-                        <label class="transaction-type-option">
-
-                            <input type="radio"
-                                   name="TransactionType"
-                                   value="Cash"
-                                   @(!openUtang ? "checked" : "") />
-
-                            <div class="transaction-type-card">
-
-                                <div class="transaction-type-icon cash">
-                                    <i class="bi bi-cash"></i>
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Cash Sale
-                                    </strong>
-
-                                    <small>
-                                        Customer pays immediately
-                                    </small>
-
-                                </div>
-
-                                <i class="bi bi-check-circle-fill selected-icon"></i>
-
-                            </div>
-
-                        </label>
-
-
-                        <!-- UTANG -->
-
-                        <label class="transaction-type-option">
-
-                            <input type="radio"
-                                   name="TransactionType"
-                                   value="Utang"
-                                   @(openUtang ? "checked" : "") />
-
-                            <div class="transaction-type-card">
-
-                                <div class="transaction-type-icon utang">
-                                    <i class="bi bi-wallet2"></i>
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Utang
-                                    </strong>
-
-                                    <small>
-                                        Record customer balance
-                                    </small>
-
-                                </div>
-
-                                <i class="bi bi-check-circle-fill selected-icon"></i>
-
-                            </div>
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-
-                <!-- CUSTOMER -->
-
-                <div class="transaction-section">
-
-                    <label for="customerSelect"
-                           class="transaction-label">
-
-                        Customer
-
-                    </label>
-
-
-                    <select id="customerSelect"
-                            name="CustomerId"
-                            class="form-select transaction-select">
-
-                        <option value="">
-                            Walk-in Customer
-                        </option>
-
-                        @if (ViewBag.Customers != null)
-                        {
-                            foreach (var customer in ViewBag.Customers)
-                            {
-                                <option value="@customer.CustomerId">
-                                    @customer.CustomerName
-                                </option>
-                            }
-                        }
-
-                    </select>
-
-
-                    <small class="transaction-help">
-                        Customer is required when recording an utang.
-                    </small>
-
-                </div>
-
-
-                <!-- PRODUCT SELECTOR -->
-
-                <div class="transaction-section">
-
-                    <label for="productSelector"
-                           class="transaction-label">
-
-                        Add Product
-
-                    </label>
-
-
-                    <select id="productSelector"
-                            class="form-select transaction-select">
-
-                        <option value="">
-                            Select a product to add...
-                        </option>
-
-                        @if (ViewBag.Products != null)
-                        {
-                            foreach (var product in ViewBag.Products)
-                            {
-                                <option value="@product.ProductId"
-                                        data-price="@product.Price"
-                                        data-stock="@product.Quantity">
-
-                                    @product.ProductName
-                                    — ₱@product.Price.ToString("N2")
-                                    (@product.Quantity in stock)
-
-                                </option>
-                            }
-                        }
-
-                    </select>
-
-
-                    <small class="transaction-help">
-                        Select a product and it will be added automatically.
-                    </small>
-
-                </div>
-
-
-                <!-- SELECTED PRODUCTS -->
-
-                <div class="transaction-section">
-
-                    <div class="transaction-section-header">
-
-                        <label class="transaction-label mb-0">
-                            Selected Products
-                        </label>
-
-                    </div>
-
-
-                    <div class="transaction-products">
-
-                        <div class="product-table-head">
-
-                            <div>Product</div>
-                            <div>Quantity</div>
-                            <div>Subtotal</div>
-                            <div></div>
-
-                        </div>
-
-
-                        <div id="saleProductsContainer">
-
-                            <div id="emptyProductMessage"
-                                 class="empty-products text-center text-muted">
-
-                                <i class="bi bi-cart3"></i>
-
-                                <span>
-                                    No products added yet.
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- PAYMENT -->
-
-                <div class="transaction-section">
-
-                    <div class="transaction-payment">
-
-                        <div class="payment-summary">
-
-
-                            <!-- TOTAL -->
-
-                            <div class="payment-total">
-
-                                <span>
-                                    Total Amount
-                                </span>
-
-                                <strong id="saleTotal">
-                                    ₱0.00
-                                </strong>
-
-                            </div>
-
-
-                            <!-- AMOUNT PAID -->
-
-                            <div class="payment-input-group">
-
-                                <label for="amountPaid">
-                                    Amount Paid
-                                </label>
-
-                                <div class="money-input">
-
-                                    <span>₱</span>
-
-                                    <input type="number"
-                                           id="amountPaid"
-                                           name="AmountPaid"
-                                           min="0"
-                                           step="0.01"
-                                           value="0" />
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- CHANGE / BALANCE -->
-
-                            <div class="payment-result">
-
-                                <span id="paymentResultLabel">
-                                    Change
-                                </span>
-
-                                <strong id="paymentResult">
-                                    ₱0.00
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- UTANG INFO -->
-
-                        <div id="utangPaymentInfo"
-                             class="transaction-note"
-                             style="display: none;">
-
-                            <i class="bi bi-info-circle"></i>
-
-                            <div>
-                                The remaining amount will be recorded
-                                as the customer's utang balance.
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- FOOTER -->
-
-            <div class="modal-footer transaction-footer">
-
-                <button type="button"
-                        class="btn transaction-cancel-btn"
-                        data-bs-dismiss="modal">
-
-                    Cancel
-
-                </button>
-
-
-                <button type="submit"
-                        class="btn transaction-submit-btn">
-
-                    <i class="bi bi-check-lg me-1"></i>
-
-                    Complete Sale
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
-</div>
+@{
+    ViewData["ReturnTo"] = "Sales";
+    ViewData["DefaultTransactionType"] = openUtang ? "Utang" : "Cash";
+}
+
+<partial name="_TransactionModal" />
 
 <!-- =========================================================
      SALE DETAILS MODALS
 ========================================================== -->
-
 @foreach (var sale in sales)
 {
-int itemCount =
-sale.SaleItems?.Sum(i => i.Quantity) ?? 0;
+    int itemCount = sale.SaleItems?.Sum(i => i.Quantity) ?? 0;
 
-decimal balance =
-    Math.Max(
+    decimal balance = Math.Max(
         0,
-        sale.TotalAmount - sale.AmountPaid
-    );
-
-string statusClass =
-    StatusKey(sale);
-
-
-<div class="modal fade"
-     id="saleDetailsModal-@sale.SaleId"
-     tabindex="-1"
-     aria-labelledby="saleDetailsLabel-@sale.SaleId"
-     aria-hidden="true">
-
-    <div class="modal-dialog modal-dialog-centered">
-
-        <div class="modal-content sale-details-modal">
-
-
-            <!-- HEADER -->
-
-            <div class="modal-header sale-details-header">
-
-                <div class="sale-details-title">
-
-                    <div class="sale-details-icon">
-                        <i class="bi bi-receipt"></i>
-                    </div>
-
-                    <div>
-
-                        <h5 id="saleDetailsLabel-@sale.SaleId">
-                            Sale Details
-                        </h5>
-
-                        <p>
-                            Transaction #@sale.SaleId
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                </button>
-
-            </div>
-
-
-            <!-- BODY -->
-
-            <div class="modal-body sale-details-body">
-
-
-                <!-- TRANSACTION INFORMATION -->
-
-                <div class="sale-detail-info-grid">
-
-
-                    <div class="sale-detail-info">
-
-                        <span>
-                            Date
-                        </span>
-
-                        <strong>
-                            @sale.SaleDate.ToString("MMM dd, yyyy")
-                        </strong>
-
-                        <small class="d-block text-muted">
-                            @sale.SaleDate.ToString("hh:mm tt")
-                        </small>
-
-                    </div>
-
-
-                    <div class="sale-detail-info">
-
-                        <span>
-                            Customer
-                        </span>
-
-                        <strong>
-                            @(sale.Customer?.CustomerName
-                                ?? "Walk-in Customer")
-                        </strong>
-
-                    </div>
-
-
-                    <div class="sale-detail-info">
-
-                        <span>
-                            Status
-                        </span>
-
-                        <strong>
-
-                            <span class="sale-status @statusClass">
-
-                                <span></span>
-
-                                @(sale.Status ?? "Unpaid")
-
-                            </span>
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="sale-detail-info">
-
-                        <span>
-                            Payment
-                        </span>
-
-                        <strong>
-                            @(sale.PaymentMethod ?? "Cash")
-                        </strong>
-
-                    </div>
-
-
-                    <div class="sale-detail-info">
-
-                        <span>
-                            Items
-                        </span>
-
-                        <strong>
-                            @itemCount
-                            item@(itemCount != 1 ? "s" : "")
-                        </strong>
-
-                    </div>
-
-
-                    <div class="sale-detail-info">
-
-                        <span>
-                            Transaction ID
-                        </span>
-
-                        <strong>
-                            #@sale.SaleId
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <!-- PURCHASED PRODUCTS -->
-
-                <div class="sale-details-products">
-
-                    <div class="sale-details-section-header">
-
-                        <div>
-
-                            <h6>
-                                Purchased Products
-                            </h6>
-
-                            <p>
-                                Products included in this transaction.
-                            </p>
-
+        sale.TotalAmount - sale.AmountPaid);
+
+    string statusClass = StatusKey(sale);
+
+    <div class="modal fade"
+         id="saleDetailsModal-@sale.SaleId"
+         tabindex="-1"
+         aria-labelledby="saleDetailsLabel-@sale.SaleId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content sale-details-modal">
+
+                <!-- HEADER -->
+                <div class="modal-header sale-details-header">
+                    <div class="sale-details-title">
+                        <div class="sale-details-icon">
+                            <i class="bi bi-receipt"></i>
                         </div>
 
+                        <div>
+                            <h5 id="saleDetailsLabel-@sale.SaleId">
+                                Sale Details
+                            </h5>
+                            <p>Transaction #@sale.SaleId</p>
+                        </div>
+                    </div>
 
-                        <span class="sale-item-count">
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+                </div>
 
-                            @itemCount
-                            item@(itemCount != 1 ? "s" : "")
+                <!-- BODY -->
+                <div class="modal-body sale-details-body">
 
-                        </span>
+                    <!-- TRANSACTION INFORMATION -->
+                    <div class="sale-detail-info-grid">
+
+                        <div class="sale-detail-info">
+                            <span>Date</span>
+                            <strong>
+                                @sale.SaleDate.ToString("MMM dd, yyyy")
+                            </strong>
+                            <small class="d-block text-muted">
+                                @sale.SaleDate.ToString("hh:mm tt")
+                            </small>
+                        </div>
+
+                        <div class="sale-detail-info">
+                            <span>Customer</span>
+                            <strong>
+                                @(sale.Customer?.CustomerName ?? "Walk-in Customer")
+                            </strong>
+                        </div>
+
+                        <div class="sale-detail-info">
+                            <span>Status</span>
+                            <strong>
+                                <span class="sale-status @statusClass">
+                                    <span></span>
+                                    @(sale.Status ?? "Unpaid")
+                                </span>
+                            </strong>
+                        </div>
+
+                        <div class="sale-detail-info">
+                            <span>Payment</span>
+                            <strong>@(sale.PaymentMethod ?? "Cash")</strong>
+                        </div>
+
+                        <div class="sale-detail-info">
+                            <span>Items</span>
+                            <strong>
+                                @itemCount item@(itemCount != 1 ? "s" : "")
+                            </strong>
+                        </div>
+
+                        <div class="sale-detail-info">
+                            <span>Transaction ID</span>
+                            <strong>#@sale.SaleId</strong>
+                        </div>
 
                     </div>
 
+                    <!-- PURCHASED PRODUCTS -->
+                    <div class="sale-details-products">
 
-                    <div class="table-responsive">
+                        <div class="sale-details-section-header">
+                            <div>
+                                <h6>Purchased Products</h6>
+                                <p>Products included in this transaction.</p>
+                            </div>
 
-                        <table class="table sale-details-table">
+                            <span class="sale-item-count">
+                                @itemCount item@(itemCount != 1 ? "s" : "")
+                            </span>
+                        </div>
 
-                            <thead>
+                        <div class="table-responsive">
+                            <table class="table sale-details-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
 
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Price</th>
-                                    <th>Subtotal</th>
-                                </tr>
+                                <tbody>
+                                    @if (sale.SaleItems != null && sale.SaleItems.Any())
+                                    {
+                                        foreach (var item in sale.SaleItems)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="sale-product-name">
+                                                        <div class="sale-product-icon">
+                                                            <i class="bi bi-box"></i>
+                                                        </div>
+                                                        <strong>
+                                                            @(item.Product?.ProductName ?? "Product")
+                                                        </strong>
+                                                    </div>
+                                                </td>
 
-                            </thead>
+                                                <td>@item.Quantity</td>
 
+                                                <td>
+                                                    ₱@item.UnitPrice.ToString("N2")
+                                                </td>
 
-                            <tbody>
-
-                                @if (
-                                    sale.SaleItems != null
-                                    &&
-                                    sale.SaleItems.Any()
-                                )
-                                {
-                                    foreach (var item in sale.SaleItems)
+                                                <td>
+                                                    <strong>
+                                                        ₱@item.Subtotal.ToString("N2")
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
                                     {
                                         <tr>
-
-                                            <td>
-
-                                                <div class="sale-product-name">
-
-                                                    <div class="sale-product-icon">
-                                                        <i class="bi bi-box"></i>
-                                                    </div>
-
-                                                    <strong>
-                                                        @(item.Product?.ProductName
-                                                            ?? "Product")
-                                                    </strong>
-
-                                                </div>
-
+                                            <td colspan="4"
+                                                class="text-center text-muted py-3">
+                                                No product details available.
                                             </td>
-
-
-                                            <td>
-                                                @item.Quantity
-                                            </td>
-
-
-                                            <td>
-                                                ₱@item.UnitPrice.ToString("N2")
-                                            </td>
-
-
-                                            <td>
-
-                                                <strong>
-                                                    ₱@item.Subtotal.ToString("N2")
-                                                </strong>
-
-                                            </td>
-
                                         </tr>
                                     }
-                                }
-                                else
-                                {
-                                    <tr>
-
-                                        <td colspan="4"
-                                            class="text-center text-muted py-3">
-
-                                            No product details available.
-
-                                        </td>
-
-                                    </tr>
-                                }
-
-                            </tbody>
-
-                        </table>
-
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
+                    <!-- PAYMENT SUMMARY -->
+                    <div class="sale-details-payment">
+
+                        <div class="sale-payment-row">
+                            <span>Total Amount</span>
+                            <strong>₱@sale.TotalAmount.ToString("N2")</strong>
+                        </div>
+
+                        <div class="sale-payment-row">
+                            <span>Amount Paid</span>
+                            <strong class="paid-value">
+                                ₱@sale.AmountPaid.ToString("N2")
+                            </strong>
+                        </div>
+
+                        <div class="sale-payment-row sale-balance-row">
+                            <span>Balance</span>
+                            <strong class="balance-value @(balance == 0 ? "settled" : "")">
+                                ₱@balance.ToString("N2")
+                            </strong>
+                        </div>
+
+                    </div>
                 </div>
 
-
-                <!-- PAYMENT SUMMARY -->
-
-                <div class="sale-details-payment">
-
-
-                    <div class="sale-payment-row">
-
-                        <span>
-                            Total Amount
-                        </span>
-
-                        <strong>
-                            ₱@sale.TotalAmount.ToString("N2")
-                        </strong>
-
-                    </div>
-
-
-                    <div class="sale-payment-row">
-
-                        <span>
-                            Amount Paid
-                        </span>
-
-                        <strong class="paid-value">
-                            ₱@sale.AmountPaid.ToString("N2")
-                        </strong>
-
-                    </div>
-
-
-                    <div class="sale-payment-row sale-balance-row">
-
-                        <span>
-                            Balance
-                        </span>
-
-                        <strong class="balance-value @(balance == 0 ? "settled" : "")">
-
-                            ₱@balance.ToString("N2")
-
-                        </strong>
-
-                    </div>
-
+                <!-- FOOTER -->
+                <div class="modal-footer sale-details-footer">
+                    <button type="button"
+                            class="btn transaction-cancel-btn"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
                 </div>
 
             </div>
-
-
-            <!-- FOOTER -->
-
-            <div class="modal-footer sale-details-footer">
-
-                <button type="button"
-                        class="btn transaction-cancel-btn"
-                        data-bs-dismiss="modal">
-
-                    Close
-
-                </button>
-
-            </div>
-
         </div>
-
     </div>
-
-</div>
-
 }
 
 <!-- =========================================================
      DELETE PAID SALE MODALS
-     
-     IMPORTANT:
-     These are OUTSIDE the Sale Details modal loop.
 ========================================================== -->
-
+@if (User.IsInRole("Admin"))
+{
 @foreach (var paidSale in sales.Where(s => StatusKey(s) == "paid"))
-{ <div class="modal fade"
-      id="deleteSaleModal-@paidSale.SaleId"
-      tabindex="-1"
-      aria-labelledby="deleteSaleLabel-@paidSale.SaleId"
-      aria-hidden="true">
+{
+    <div class="modal fade"
+         id="deleteSaleModal-@paidSale.SaleId"
+         tabindex="-1"
+         aria-labelledby="deleteSaleLabel-@paidSale.SaleId"
+         aria-hidden="true">
 
-    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
 
-        <div class="modal-content">
+                <form asp-controller="Sales"
+                      asp-action="Delete"
+                      method="post">
 
+                    @Html.AntiForgeryToken()
 
-            <form asp-controller="Sales"
-                  asp-action="Delete"
-                  method="post">
+                    <input type="hidden"
+                           name="id"
+                           value="@paidSale.SaleId" />
 
-                @Html.AntiForgeryToken()
+                    <!-- BODY -->
+                    <div class="modal-body text-center p-4">
+                        <i class="bi bi-trash fs-1 text-danger"></i>
 
+                        <h5 class="mt-2"
+                            id="deleteSaleLabel-@paidSale.SaleId">
+                            Delete Sale #@paidSale.SaleId?
+                        </h5>
 
-                <input type="hidden"
-                       name="id"
-                       value="@paidSale.SaleId" />
+                        <p class="text-muted mb-0">
+                            This cannot be undone.
+                        </p>
+                    </div>
 
+                    <!-- FOOTER -->
+                    <div class="modal-footer justify-content-center">
+                        <button type="button"
+                                class="btn transaction-cancel-btn"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
 
-                <!-- BODY -->
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>
+                            Delete
+                        </button>
+                    </div>
 
-                <div class="modal-body text-center p-4">
-
-                    <i class="bi bi-trash fs-1 text-danger"></i>
-
-
-                    <h5 class="mt-2"
-                        id="deleteSaleLabel-@paidSale.SaleId">
-
-                        Delete Sale #@paidSale.SaleId?
-
-                    </h5>
-
-
-                    <p class="text-muted mb-0">
-
-                        This cannot be undone.
-
-                    </p>
-
-                </div>
-
-
-                <!-- FOOTER -->
-
-                <div class="modal-footer justify-content-center">
-
-                    <button type="button"
-                            class="btn transaction-cancel-btn"
-                            data-bs-dismiss="modal">
-
-                        Cancel
-
-                    </button>
-
-
-                    <button type="submit"
-                            class="btn btn-danger">
-
-                        <i class="bi bi-trash me-1"></i>
-
-                        Delete
-
-                    </button>
-
-                </div>
-
-            </form>
-
+                </form>
+            </div>
         </div>
-
     </div>
-
-</div>
-
 }
-
+}
 <!-- =========================================================
      UTANG DETAILS MODALS
 ========================================================== -->
-
 @foreach (var sale in sales)
 {
-if (
-sale.Status?.Equals(
-"Unpaid",
-StringComparison.OrdinalIgnoreCase
-) == true
-&&
-utangsBySaleId.TryGetValue(
-sale.SaleId,
-out var matchingUtang
-)
-)
-{ <partial name="UtangDetailsModal"
-              model="matchingUtang" />
-}
+    if (
+        sale.Status?.Equals(
+            "Unpaid",
+            StringComparison.OrdinalIgnoreCase
+        ) == true
+        &&
+        utangsBySaleId.TryGetValue(
+            sale.SaleId,
+            out var matchingUtang
+        )
+    )
+    {
+        <partial name="UtangDetailsModal" model="matchingUtang" />
+    }
 }
 
 @section Scripts {
+
+    <!-- OPEN THE MODAL WHEN ?new=true IS PRESENT -->
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var params = new URLSearchParams(window.location.search);
-        if (params.get("new") === "true") {
-            var el = document.getElementById("newSaleModal");
-            if (el) bootstrap.Modal.getOrCreateInstance(el).show();
-            history.replaceState({}, "", window.location.pathname);
-        }
-    });
+        document.addEventListener("DOMContentLoaded", function () {
+            var params = new URLSearchParams(window.location.search);
 
-</script>
-        <script src="~/js/transaction-modal.js" asp-append-version="true"></script>
+            if (params.get("new") === "true") {
+                var modalElement = document.getElementById("newSaleModal");
 
-<script src="~/js/sales.js"
-        asp-append-version="true">
-</script>
+                if (modalElement && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                }
 
+                // Preserve transactionType when cleaning the URL.
+                params.delete("new");
 
-<script>
+                var queryString = params.toString();
+                var newUrl = window.location.pathname;
 
-    // ========================================================
-    // STATUS FILTERS
-    // ========================================================
+                if (queryString) {
+                    newUrl += "?" + queryString;
+                }
 
-    (function () {
+                history.replaceState({}, "", newUrl);
+            }
+        });
+    </script>
 
-        var table =
-            document.getElementById('salesTable');
+    <!-- LOAD ONLY ONE TRANSACTION-MODAL SCRIPT -->
+    <script src="~/js/transaction-modal.js" asp-append-version="true"></script>
 
-        if (!table) {
-            return;
-        }
+    <!-- SALES STATUS FILTERS -->
+    <script>
+        (function () {
+            var table = document.getElementById("salesTable");
 
-
-        var rows =
-            Array.prototype.slice.call(
-                table.querySelectorAll(
-                    'tbody tr[data-status]'
-                )
-            );
-
-        if (!rows.length) {
-            return;
-        }
-
-
-        var chips =
-            document.querySelectorAll(
-                '#statusFilters .filter-chip'
-            );
-
-
-        var noResults =
-            document.getElementById('noResults');
-
-
-        var search =
-            document.getElementById('salesSearch');
-
-
-        function refresh() {
-
-            var visible =
-                rows.filter(function (row) {
-
-                    return window.getComputedStyle(row).display !== 'none';
-
-                }).length;
-
-
-            if (noResults) {
-
-                noResults.hidden =
-                    visible !== 0;
-
+            if (!table) {
+                return;
             }
 
-        }
+            var rows = Array.from(
+                table.querySelectorAll("tbody tr[data-status]")
+            );
 
+            var chips = document.querySelectorAll(
+                "#statusFilters .filter-chip"
+            );
 
-        chips.forEach(function (chip) {
+            var noResults = document.getElementById("noResults");
+            var search = document.getElementById("salesSearch");
 
-            chip.addEventListener(
-                'click',
-                function () {
+            var activeFilter = "all";
+            var searchTerm = "";
 
-                    var filter =
-                        chip.dataset.filter;
+            function refresh() {
+                var visibleCount = 0;
 
+                rows.forEach(function (row) {
+                    var statusMatches =
+                        activeFilter === "all" ||
+                        row.dataset.status === activeFilter;
+
+                    var textMatches =
+                        row.textContent.toLowerCase().includes(searchTerm);
+
+                    var visible = statusMatches && textMatches;
+
+                    row.classList.toggle("is-filtered-out", !visible);
+
+                    if (visible) {
+                        visibleCount++;
+                    }
+                });
+
+                if (noResults) {
+                    noResults.hidden = visibleCount !== 0;
+                }
+            }
+
+            chips.forEach(function (chip) {
+                chip.addEventListener("click", function () {
+                    activeFilter = chip.dataset.filter || "all";
 
                     chips.forEach(function (currentChip) {
+                        var active = currentChip === chip;
 
-                        var active =
-                            currentChip === chip;
-
-
-                        currentChip.classList.toggle(
-                            'active',
-                            active
-                        );
-
-
+                        currentChip.classList.toggle("active", active);
                         currentChip.setAttribute(
-                            'aria-pressed',
-                            active ? 'true' : 'false'
+                            "aria-pressed",
+                            active ? "true" : "false"
                         );
-
                     });
-
-
-                    rows.forEach(function (row) {
-
-                        row.classList.toggle(
-                            'is-filtered-out',
-                            filter !== 'all'
-                            &&
-                            row.dataset.status !== filter
-                        );
-
-                    });
-
 
                     refresh();
+                });
+            });
 
-                }
-            );
+            if (search) {
+                search.addEventListener("input", function () {
+                    searchTerm = search.value.trim().toLowerCase();
+                    refresh();
+                });
+            }
 
-        });
-
-
-        if (search) {
-
-            search.addEventListener(
-                'input',
-                function () {
-
-                    setTimeout(
-                        refresh,
-                        0
-                    );
-
-                }
-            );
-
-        }
-
-    })();
-
-</script>
-
+            refresh();
+        })();
+    </script>
 }

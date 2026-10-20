@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace mini_store.Controllers
 {
-    [Authorize]
+[Authorize(Roles = "Admin,Staff")]
     public class SettingsController : Controller
     {
         public IActionResult Index() => View();

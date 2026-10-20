@@ -23,17 +23,27 @@ namespace mini_store.Controllers
         // LOGIN (public)
         // =========================================================
 
-        [AllowAnonymous]
-        [HttpGet]
-        public IActionResult Login()
+      [AllowAnonymous]
+[HttpGet]
+public IActionResult Login()
+{
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        if (User.IsInRole("Admin") || User.IsInRole("Staff"))
         {
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
-
-            return View();
+            return RedirectToAction("Index", "Dashboard");
         }
+
+        if (User.IsInRole("Customer"))
+        {
+            return RedirectToAction("Index", "CustomerPortal");
+        }
+
+        return RedirectToAction("AccessDenied", "Account");
+    }
+
+    return View();
+}
 
         [AllowAnonymous]
         [HttpPost]
@@ -72,11 +82,27 @@ namespace mini_store.Controllers
                 lockoutOnFailure: true   // enforces the 5-attempt rule
             );
 
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
+           if (result.Succeeded)
+{
+    var loggedInUser = await _userManager.FindByEmailAsync(model.Email);
 
+    if (loggedInUser != null)
+    {
+        if (await _userManager.IsInRoleAsync(loggedInUser, "Admin") ||
+            await _userManager.IsInRoleAsync(loggedInUser, "Staff"))
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        if (await _userManager.IsInRoleAsync(loggedInUser, "Customer"))
+        {
+            return RedirectToAction("Index", "CustomerPortal");
+        }
+    }
+
+    await _signInManager.SignOutAsync();
+    return RedirectToAction("AccessDenied", "Account");
+}
             if (result.IsLockedOut)
             {
                 ModelState.AddModelError(

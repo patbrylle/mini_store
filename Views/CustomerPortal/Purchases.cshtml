@@ -1,0 +1,215 @@
+
+@model mini_store.ViewModels.CustomerPortal.CustomerPortalViewModel
+
+@{
+    ViewData["Title"] = "My Purchases";
+    Layout = "_Layout";
+}
+
+<style>
+    .purchase-page { padding: 24px 0; color: #172b4d; }
+    .purchase-header {
+        padding: 26px;
+        border-radius: 18px;
+        color: white;
+        background: linear-gradient(120deg, #17345d, #2876b9);
+        margin-bottom: 22px;
+    }
+    .purchase-panel {
+        background: white;
+        border: 1px solid #e5eaf1;
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: 0 5px 18px rgba(15,23,42,.04);
+    }
+    .purchase-summary {
+        border: 1px solid #e5eaf1;
+        border-radius: 14px;
+        padding: 18px;
+        height: 100%;
+    }
+    .purchase-summary small { color: #718096; }
+    .purchase-summary h3 {
+        font-weight: 750;
+        margin: 8px 0 0;
+        overflow-wrap: anywhere;
+    }
+    .purchase-table th {
+        background: #f5f7fb;
+        color: #64748b;
+        font-size: .78rem;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .purchase-table td { vertical-align: middle; }
+    .purchase-table { white-space: nowrap; }
+    .purchase-empty {
+        padding: 36px 12px;
+        text-align: center;
+        color: #718096;
+    }
+    @@media(max-width:576px) {
+        .purchase-header, .purchase-panel { padding: 17px; }
+    }
+</style>
+
+<div class="container-fluid purchase-page">
+    <div class="purchase-header">
+        <div class="small text-white-50 mb-2">
+            CUSTOMER PORTAL / MY PURCHASES
+        </div>
+        <h2 class="fw-bold">My Purchases</h2>
+        <p class="mb-0">
+            Hello, @Model.CustomerName. Review your recorded purchases and transaction details.
+        </p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="purchase-summary">
+                <small><i class="bi bi-receipt me-2"></i>Total Purchase Value</small>
+                <h3>₱@Model.TotalPurchases.ToString("N2")</h3>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="purchase-summary">
+                <small><i class="bi bi-bag-check me-2"></i>Recorded Transactions</small>
+                <h3>@Model.Transactions.Count</h3>
+            </div>
+        </div>
+    </div>
+
+    <section class="purchase-panel">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h4 class="fw-bold mb-1">Purchase History</h4>
+                <p class="text-muted small mb-0">Your latest transactions appear first.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <input id="purchaseSearch"
+                       class="form-control"
+                       style="max-width:280px"
+                       type="search"
+                       placeholder="Search transaction or product..."
+                       aria-label="Search purchases" />
+                <a asp-controller="CustomerPortal"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </a>
+            </div>
+        </div>
+
+        @if (Model.Transactions.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover purchase-table">
+                    <thead>
+                        <tr>
+                            <th>Transaction</th>
+                            <th>Date</th>
+                            <th>Products</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Amount Paid</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                   
+<tbody id="purchaseRows">
+    @foreach (var sale in Model.Transactions)
+    {
+        <tr>
+            <td class="fw-bold text-primary">#@sale.SaleId</td>
+
+            <td>
+                @sale.SaleDate.ToString("MMM dd, yyyy")
+                <div class="small text-muted">
+                    @sale.SaleDate.ToString("hh:mm tt")
+                </div>
+            </td>
+
+            <td>
+                @if (sale.SaleItems.Any())
+                {
+                    @foreach (var item in sale.SaleItems)
+                    {
+                        <div>@(item.Product?.ProductName ?? "Unknown product")</div>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">No item details</span>
+                }
+            </td>
+
+            <td>
+                @if (sale.SaleItems.Any())
+                {
+                    @foreach (var item in sale.SaleItems)
+                    {
+                        <div>@item.Quantity</div>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
+            </td>
+
+            <td class="fw-semibold">
+                ₱@sale.TotalAmount.ToString("N2")
+            </td>
+
+            <td>₱@sale.AmountPaid.ToString("N2")</td>
+
+            <td>@sale.PaymentMethod</td>
+
+            <td>
+                <span class="badge @(string.Equals(sale.Status, "Paid", StringComparison.OrdinalIgnoreCase) ? "bg-success" : "bg-warning text-dark")">
+                    @(sale.Status ?? "Recorded")
+                </span>
+            </td>
+        </tr>
+    }
+</tbody>
+
+                </table>
+            </div>
+            <p id="noPurchaseMatch" class="text-muted text-center py-3 d-none">
+                No purchases match your search.
+            </p>
+        }
+        else
+        {
+            <div class="purchase-empty">
+                <i class="bi bi-bag-x fs-1"></i>
+                <h5 class="mt-3 fw-bold">No purchases yet</h5>
+                <p class="mb-0">Your recorded store purchases will appear here.</p>
+            </div>
+        }
+    </section>
+</div>
+
+<script>
+    const purchaseSearch = document.getElementById("purchaseSearch");
+    if (purchaseSearch) {
+        purchaseSearch.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll("#purchaseRows tr");
+            let visible = 0;
+
+            rows.forEach(row => {
+                const matches = row.textContent.toLowerCase().includes(query);
+                row.hidden = !matches;
+                if (matches) visible++;
+            });
+
+            const noMatch = document.getElementById("noPurchaseMatch");
+            if (noMatch) {
+                noMatch.classList.toggle("d-none", visible !== 0);
+            }
+        });
+    }
+</script>

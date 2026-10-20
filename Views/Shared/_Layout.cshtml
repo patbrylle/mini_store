@@ -1,13 +1,33 @@
-﻿@{
-    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+﻿
+@{
+    var currentController =
+        ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+
     var isAdmin = User.IsInRole("Admin");
+    var isStaff = User.IsInRole("Staff");
+    var isCustomer = User.IsInRole("Customer");
+    var isStoreUser = isAdmin || isStaff;
+
     var userName = User.Identity?.Name ?? "User";
-    var userRole = isAdmin ? "Administrator" : "Staff";
-    var avatarLetter = string.IsNullOrWhiteSpace(userName) ? "U" : userName.Trim()[0].ToString().ToUpper();
+
+    var userRole = isAdmin
+        ? "Administrator"
+        : isStaff
+            ? "Staff"
+            : isCustomer
+                ? "Customer"
+                : "User";
+
+    var avatarLetter = string.IsNullOrWhiteSpace(userName)
+        ? "U"
+        : userName.Trim()[0].ToString().ToUpper();
 
     string Active(params string[] controllers) =>
-        controllers.Contains(currentController, StringComparer.OrdinalIgnoreCase) ? "active" : "";
+        controllers.Contains(
+            currentController,
+            StringComparer.OrdinalIgnoreCase) ? "active" : "";
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,19 +91,66 @@
         <!-- ================= SIDEBAR ================= -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
 
-            <a asp-controller="Dashboard" asp-action="Index" class="sidebar-brand">
-                <div class="brand-icon">
-                    <i class="bi bi-shop"></i>
-                </div>
-                <div class="brand-text">
-                    <h5>Mini Store</h5>
-                    <small>Management System</small>
-                </div>
-            </a>
+<a asp-controller="@(isCustomer ? "CustomerPortal" : "Dashboard")"
+   asp-action="Index"
+   class="sidebar-brand">
+    <div class="brand-icon">
+        <i class="bi bi-shop"></i>
+    </div>
+    <div class="brand-text">
+        <h5>Mini Store</h5>
+        <small>@(isCustomer ? "Customer Portal" : "Management System")</small>
+    </div>
+</a>
 
-            <nav class="sidebar-nav">
+<nav class="sidebar-nav">
 
-                <div class="nav-section">Main</div>
+ 
+@if (isCustomer)
+{
+    <div class="nav-section">My Account</div>
+
+    <a asp-controller="CustomerPortal"
+       asp-action="Index"
+       class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CustomerPortal" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+        <span class="nav-icon">
+            <i class="bi bi-house-door-fill"></i>
+        </span>
+        <span class="nav-label">Home</span>
+    </a>
+
+    <a asp-controller="CustomerPortal"
+       asp-action="Products"
+       class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CustomerPortal" && ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
+        <span class="nav-icon">
+            <i class="bi bi-box-seam-fill"></i>
+        </span>
+        <span class="nav-label">Products</span>
+    </a>
+
+    <a asp-controller="CustomerPortal"
+       asp-action="Purchases"
+       class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CustomerPortal" && ViewContext.RouteData.Values["action"]?.ToString() == "Purchases" ? "active" : "")">
+        <span class="nav-icon">
+            <i class="bi bi-receipt"></i>
+        </span>
+        <span class="nav-label">My Purchases</span>
+    </a>
+
+    <a asp-controller="CustomerPortal"
+       asp-action="Utang"
+       class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CustomerPortal" && ViewContext.RouteData.Values["action"]?.ToString() == "Utang" ? "active" : "")">
+        <span class="nav-icon">
+            <i class="bi bi-wallet2"></i>
+        </span>
+        <span class="nav-label">My Utang</span>
+    </a>
+}
+else if (isStoreUser)
+{
+
+
+          <div class="nav-section">Main</div>
 
                 <a asp-controller="Dashboard" asp-action="Index"
                    class="sidebar-link @(Active("Dashboard"))">
@@ -147,6 +214,7 @@
                         <span class="nav-label">User Management</span>
                     </a>
                 }
+                }
 
             </nav>
 
@@ -200,12 +268,15 @@
                         <span>@DateTime.Now.ToString("ddd, MMM d, yyyy")</span>
                     </div>
 
-                    @await Component.InvokeAsync("NotificationBell")
-
-                   <a asp-controller="Settings" asp-action="Index" class="topbar-icon" title="Settings" aria-label="Settings">
+@if (isStoreUser)
+{
+    @await Component.InvokeAsync("NotificationBell")
+}
+                  @if (isStoreUser){
+ <a asp-controller="Settings" asp-action="Index" class="topbar-icon" title="Settings" aria-label="Settings">
     <i class="bi bi-gear-fill"></i>
 </a>
-
+}
                     <div class="topbar-divider"></div>
 
                     <!-- Profile dropdown -->
@@ -298,10 +369,15 @@
 
             </div>
 
-            <footer class="app-footer">
-                <span>&copy; @DateTime.Now.Year Mini Store</span>
-                <span>Management System</span>
-            </footer>
+@if (!isCustomer)
+{
+    <footer class="app-footer">
+        <span>&copy; @DateTime.Now.Year Mini Store</span>
+        <span>Management System</span>
+    </footer>
+}
+
+
 
         </main>
 

@@ -1,7 +1,10 @@
+
 @model IEnumerable<mini_store.Models.Utang>
 
 @{
     ViewData["Title"] = "Utang Records";
+    ViewData["ReturnTo"] = "Utang";
+    ViewData["DefaultTransactionType"] = "Utang";
 
     var records = Model?.ToList() ?? new List<mini_store.Models.Utang>();
 
@@ -11,7 +14,7 @@
         u.Balance > 0;
 
     string StatusKey(mini_store.Models.Utang u) =>
-        u.Status?.ToLower() switch
+        u.Status?.ToLowerInvariant() switch
         {
             "paid" => "paid",
             "partial" => "partial",
@@ -31,24 +34,34 @@
     int overdueRecords = overdueList.Count;
     var overdueBalance = overdueList.Sum(u => u.Balance);
 
-    var successMsg = (TempData["UtangSuccess"] ?? TempData["SuccessMessage"]) as string;
-    var errorMsg = (TempData["UtangError"] ?? TempData["ErrorMessage"] ?? TempData["TransactionError"]) as string;
+    var successMsg =
+        (TempData["UtangSuccess"] ?? TempData["SuccessMessage"]) as string;
+
+    var errorMsg =
+        (TempData["UtangError"]
+        ?? TempData["ErrorMessage"]
+        ?? TempData["TransactionError"]) as string;
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/utang.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/sales.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/css/transaction-modal.css" asp-append-version="true" />
+    <link rel="stylesheet"
+          href="~/css/utang.css"
+          asp-append-version="true" />
 
+    <link rel="stylesheet"
+          href="~/css/sales.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/transaction-modal.css"
+          asp-append-version="true" />
 }
 
 <div class="ut-page">
 
     <!-- PAGE HEADER -->
     <div class="ut-header">
-
         <div class="ut-title-area">
-
             <div class="ut-page-icon">
                 <i class="bi bi-wallet2"></i>
             </div>
@@ -57,7 +70,6 @@
                 <h1>Utang Records</h1>
                 <p>Manage customer credit and outstanding balances.</p>
             </div>
-
         </div>
 
         <button type="button"
@@ -67,9 +79,7 @@
             <i class="bi bi-plus-lg"></i>
             Record Utang
         </button>
-
     </div>
-
 
     <!-- ALERTS -->
     @if (!string.IsNullOrWhiteSpace(successMsg))
@@ -77,7 +87,11 @@
         <div class="alert fade show ut-alert is-success" role="alert">
             <i class="bi bi-check-circle-fill"></i>
             <span>@successMsg</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
         </div>
     }
 
@@ -86,17 +100,23 @@
         <div class="alert fade show ut-alert is-danger" role="alert">
             <i class="bi bi-exclamation-triangle-fill"></i>
             <span>@errorMsg</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
         </div>
     }
-
 
     <!-- SUMMARY CARDS -->
     <div class="row g-3 mb-4">
 
         <div class="col-xl-3 col-md-6">
             <div class="ut-kpi is-primary" style="--i:0">
-                <div class="ut-kpi-icon"><i class="bi bi-wallet2"></i></div>
+                <div class="ut-kpi-icon">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+
                 <div class="ut-kpi-body">
                     <span>Total Utang</span>
                     <h3>₱@totalUtang.ToString("N2")</h3>
@@ -107,7 +127,10 @@
 
         <div class="col-xl-3 col-md-6">
             <div class="ut-kpi is-success" style="--i:1">
-                <div class="ut-kpi-icon"><i class="bi bi-check-circle"></i></div>
+                <div class="ut-kpi-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+
                 <div class="ut-kpi-body">
                     <span>Total Paid</span>
                     <h3>₱@totalPaid.ToString("N2")</h3>
@@ -118,7 +141,10 @@
 
         <div class="col-xl-3 col-md-6">
             <div class="ut-kpi is-gold" style="--i:2">
-                <div class="ut-kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+                <div class="ut-kpi-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
                 <div class="ut-kpi-body">
                     <span>Remaining Balance</span>
                     <h3>₱@totalBalance.ToString("N2")</h3>
@@ -129,7 +155,10 @@
 
         <div class="col-xl-3 col-md-6">
             <div class="ut-kpi is-danger" style="--i:3">
-                <div class="ut-kpi-icon"><i class="bi bi-exclamation-circle"></i></div>
+                <div class="ut-kpi-icon">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+
                 <div class="ut-kpi-body">
                     <span>Overdue</span>
                     <h3>₱@overdueBalance.ToString("N2")</h3>
@@ -140,14 +169,12 @@
 
     </div>
 
-
-    <!-- UTANG TABLE -->
+    <!-- UTANG TABLE CARD -->
     <div class="ut-card">
 
         <div class="ut-card-header">
 
             <div class="ut-section-title">
-
                 <div class="ut-section-icon">
                     <i class="bi bi-people"></i>
                 </div>
@@ -156,15 +183,17 @@
                     <h5>Customer Utang</h5>
                     <p>Customers with credit records and outstanding balances.</p>
                 </div>
-
             </div>
 
             <div class="ut-tools">
 
-                <span class="ut-count" id="utangShown">Showing @totalRecords of @totalRecords</span>
+                <span class="ut-count" id="utangShown">
+                    Showing @totalRecords of @totalRecords
+                </span>
 
                 <div class="ut-search">
                     <i class="bi bi-search"></i>
+
                     <input type="text"
                            id="utangSearch"
                            placeholder="Search customer..."
@@ -173,36 +202,51 @@
                 </div>
 
             </div>
-
         </div>
 
-
         <!-- STATUS FILTERS -->
-        <div class="ut-filters" id="utangFilters" role="group" aria-label="Filter by status">
+        <div class="ut-filters"
+             id="utangFilters"
+             role="group"
+             aria-label="Filter by status">
 
-            <button type="button" class="ut-chip active" data-filter="all" aria-pressed="true">
+            <button type="button"
+                    class="ut-chip active"
+                    data-filter="all"
+                    aria-pressed="true">
                 All <span>@totalRecords</span>
             </button>
 
-            <button type="button" class="ut-chip" data-filter="unpaid" aria-pressed="false">
+            <button type="button"
+                    class="ut-chip"
+                    data-filter="unpaid"
+                    aria-pressed="false">
                 Unpaid <span>@unpaidRecords</span>
             </button>
 
-            <button type="button" class="ut-chip" data-filter="partial" aria-pressed="false">
+            <button type="button"
+                    class="ut-chip"
+                    data-filter="partial"
+                    aria-pressed="false">
                 Partial <span>@partialRecords</span>
             </button>
 
-            <button type="button" class="ut-chip" data-filter="paid" aria-pressed="false">
+            <button type="button"
+                    class="ut-chip"
+                    data-filter="paid"
+                    aria-pressed="false">
                 Paid <span>@paidRecords</span>
             </button>
 
-            <button type="button" class="ut-chip is-overdue" data-filter="overdue" aria-pressed="false">
+            <button type="button"
+                    class="ut-chip is-overdue"
+                    data-filter="overdue"
+                    aria-pressed="false">
                 <i class="bi bi-exclamation-circle-fill"></i>
                 Overdue <span>@overdueRecords</span>
             </button>
 
         </div>
-
 
         <!-- TABLE -->
         <div class="table-responsive">
@@ -222,7 +266,7 @@
                     </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="utangTableBody">
 
                     @if (records.Any())
                     {
@@ -230,32 +274,57 @@
                         {
                             bool overdue = IsOverdue(utang);
                             string statusKey = StatusKey(utang);
-                            string statusText = string.IsNullOrWhiteSpace(utang.Status) ? "Unpaid" : utang.Status;
 
-                            string customerName = utang.Customer?.CustomerName ?? "Unknown Customer";
-                            string initial = customerName.Length > 0 ? customerName.Substring(0, 1).ToUpper() : "?";
+                            string statusText =
+                                string.IsNullOrWhiteSpace(utang.Status)
+                                    ? "Unpaid"
+                                    : utang.Status;
 
-                            string dateText = utang.Sale?.SaleDate.ToString("MMM dd, yyyy")
-                                ?? utang.DateCreated.ToString("MMM dd, yyyy");
-                            string timeText = utang.Sale?.SaleDate.ToString("hh:mm tt")
-                                ?? utang.DateCreated.ToString("hh:mm tt");
+                            string customerName =
+                                utang.Customer?.CustomerName ?? "Unknown Customer";
+
+                            string initial = customerName.Length > 0
+                                ? customerName.Substring(0, 1).ToUpperInvariant()
+                                : "?";
+
+                            string dateText = utang.Sale != null
+                                ? utang.Sale.SaleDate.ToString("MMM dd, yyyy")
+                                : utang.DateCreated.ToString("MMM dd, yyyy");
+
+                            string timeText = utang.Sale != null
+                                ? utang.Sale.SaleDate.ToString("hh:mm tt")
+                                : utang.DateCreated.ToString("hh:mm tt");
 
                             string dueText = utang.DueDate.HasValue
                                 ? utang.DueDate.Value.ToString("MMM dd, yyyy")
                                 : "";
-                            bool dueToday = utang.DueDate.HasValue
-                                && utang.DueDate.Value.Date == DateTime.Today
-                                && utang.Balance > 0;
+
+                            bool dueToday =
+                                utang.DueDate.HasValue &&
+                                utang.DueDate.Value.Date == DateTime.Today &&
+                                utang.Balance > 0;
 
                             int paidPct = utang.Amount > 0
-                                ? (int)Math.Round(Math.Min(100m, utang.AmountPaid / utang.Amount * 100m))
+                                ? (int)Math.Round(
+                                    Math.Min(
+                                        100m,
+                                        utang.AmountPaid / utang.Amount * 100m))
                                 : 0;
 
-                            bool canDelete = utang.Status == "Paid" && utang.Balance <= 0;
+                            bool canDelete =
+                                string.Equals(
+                                    utang.Status,
+                                    "Paid",
+                                    StringComparison.OrdinalIgnoreCase)
+                                && utang.Balance <= 0;
 
-                            string searchKey = (customerName + " " + statusText + " "
-                                + (overdue ? "overdue" : "") + " "
-                                + dateText + " " + dueText + " #" + utang.UtangId).ToLower();
+                            string searchKey =
+                                (customerName + " " +
+                                 statusText + " " +
+                                 (overdue ? "overdue" : "") + " " +
+                                 dateText + " " +
+                                 dueText + " #" +
+                                 utang.UtangId).ToLowerInvariant();
 
                             <tr data-status="@statusKey"
                                 data-overdue="@(overdue ? "true" : "false")"
@@ -265,7 +334,9 @@
                                 <td>
                                     <div class="ut-customer">
                                         <div class="ut-avatar">@initial</div>
-                                        <strong class="ut-customer-name">@customerName</strong>
+                                        <strong class="ut-customer-name">
+                                            @customerName
+                                        </strong>
                                     </div>
                                 </td>
 
@@ -286,11 +357,15 @@
 
                                             @if (overdue)
                                             {
-                                                <small class="ut-flag is-overdue">Overdue</small>
+                                                <small class="ut-flag is-overdue">
+                                                    Overdue
+                                                </small>
                                             }
                                             else if (dueToday)
                                             {
-                                                <small class="ut-flag is-today">Due today</small>
+                                                <small class="ut-flag is-today">
+                                                    Due today
+                                                </small>
                                             }
                                         </div>
                                     }
@@ -302,14 +377,19 @@
 
                                 <!-- TOTAL -->
                                 <td>
-                                    <span class="ut-amount">₱@utang.Amount.ToString("N2")</span>
+                                    <span class="ut-amount">
+                                        ₱@utang.Amount.ToString("N2")
+                                    </span>
                                 </td>
 
                                 <!-- PAID -->
                                 <td>
-                                    <span class="ut-paid">₱@utang.AmountPaid.ToString("N2")</span>
+                                    <span class="ut-paid">
+                                        ₱@utang.AmountPaid.ToString("N2")
+                                    </span>
 
-                                    <div class="ut-progress" title="@paidPct% paid">
+                                    <div class="ut-progress"
+                                         title="@paidPct% paid">
                                         <span style="width:@(paidPct)%"></span>
                                     </div>
                                 </td>
@@ -332,7 +412,9 @@
                                                 Overdue
                                             </span>
 
-                                            <small class="ut-status-sub">@statusText</small>
+                                            <small class="ut-status-sub">
+                                                @statusText
+                                            </small>
                                         }
                                         else
                                         {
@@ -357,20 +439,22 @@
                                             <span>View</span>
                                         </button>
 
-                                        @if (canDelete)
-                                        {
-                                            <button type="button"
-                                                    class="btn ut-btn ut-btn-delete"
-                                                    title="Delete paid record"
-                                                    aria-label="Delete paid utang of @customerName"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#deleteUtangModal"
-                                                    data-id="@utang.UtangId"
-                                                    data-name="@customerName"
-                                                    data-amount="₱@utang.Amount.ToString("N2")">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        }
+                                     
+@if (User.IsInRole("Admin") && canDelete)
+{
+    <button type="button"
+            class="btn ut-btn ut-btn-delete"
+            title="Delete paid record"
+            aria-label="Delete paid utang of @customerName"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteUtangModal"
+            data-id="@utang.UtangId"
+            data-name="@customerName"
+            data-amount="₱@utang.Amount.ToString("N2")">
+        <i class="bi bi-trash"></i>
+    </button>
+}
+
 
                                     </div>
                                 </td>
@@ -380,11 +464,10 @@
                     }
                     else
                     {
-                        <tr>
+                        <tr id="utangEmptyRow">
                             <td colspan="8">
 
                                 <div class="ut-empty">
-
                                     <div class="ut-empty-icon">
                                         <i class="bi bi-wallet2"></i>
                                     </div>
@@ -399,7 +482,6 @@
                                         <i class="bi bi-plus-lg"></i>
                                         Record Utang
                                     </button>
-
                                 </div>
 
                             </td>
@@ -407,13 +489,10 @@
                     }
 
                 </tbody>
-
             </table>
-
         </div>
 
-
-        <!-- shown when the search / filter matches nothing -->
+        <!-- NO SEARCH RESULTS -->
         <div class="ut-empty" id="utangNoResults" hidden>
 
             <div class="ut-empty-icon">
@@ -423,7 +502,9 @@
             <h5>No matching records</h5>
             <p>Try a different search or filter.</p>
 
-            <button type="button" class="ut-btn ut-btn-ghost" id="utangClear">
+            <button type="button"
+                    class="ut-btn ut-btn-ghost"
+                    id="utangClear">
                 <i class="bi bi-x-circle"></i>
                 Clear filters
             </button>
@@ -431,14 +512,11 @@
         </div>
 
     </div>
-
 </div>
 
-
-<!-- =========================================================
-     DELETE PAID UTANG MODAL (one modal, filled by utang.js)
-========================================================= -->
-
+<!-- DELETE PAID UTANG MODAL -->
+@if (User.IsInRole("Admin"))
+{
 <div class="modal fade ut-modal"
      id="deleteUtangModal"
      tabindex="-1"
@@ -449,7 +527,9 @@
 
         <div class="modal-content">
 
-            <form asp-controller="Utang" asp-action="Delete" method="post">
+            <form asp-controller="Utang"
+                  asp-action="Delete"
+                  method="post">
 
                 <input type="hidden" name="id" id="deleteUtangId" />
 
@@ -467,7 +547,8 @@
                     </p>
 
                     <small>
-                        The linked sale and its items are removed too.
+                        The linked sale and its items may also be removed,
+                        depending on your controller implementation.
                         This cannot be undone.
                     </small>
 
@@ -475,11 +556,14 @@
 
                 <div class="modal-footer ut-modal-footer">
 
-                    <button type="button" class="ut-btn ut-btn-ghost" data-bs-dismiss="modal">
+                    <button type="button"
+                            class="ut-btn ut-btn-ghost"
+                            data-bs-dismiss="modal">
                         Cancel
                     </button>
 
-                    <button type="submit" class="ut-btn ut-btn-danger-solid">
+                    <button type="submit"
+                            class="ut-btn ut-btn-danger-solid">
                         <i class="bi bi-trash"></i>
                         Delete
                     </button>
@@ -489,15 +573,11 @@
             </form>
 
         </div>
-
     </div>
-
 </div>
-
-
-<!-- NEW UTANG / TRANSACTION MODAL -->
-<partial name="_UtangTransactionModal" />
-
+}
+<!-- SHARED TRANSACTION MODAL -->
+<partial name="_TransactionModal" />
 
 <!-- UTANG DETAILS MODALS -->
 @if (records.Any())
@@ -508,15 +588,13 @@
     }
 }
 
-
 @section Scripts {
 
+    <!-- Utang page filtering and delete confirmation -->
     <script src="~/js/utang.js"
             asp-append-version="true"></script>
 
-    <script src="~/js/sales.js"
+    <!-- Shared transaction form and product selection -->
+    <script src="~/js/transaction-modal.js"
             asp-append-version="true"></script>
-                <script src="~/js/transaction-modal.js" asp-append-version="true"></script>
-
-
 }

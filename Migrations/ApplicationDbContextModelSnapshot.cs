@@ -261,6 +261,9 @@ namespace mini_store.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("longtext");
+
                     b.HasKey("CustomerId");
 
                     b.ToTable("Customers");

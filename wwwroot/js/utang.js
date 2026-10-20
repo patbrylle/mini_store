@@ -1,18 +1,24 @@
+
 (function () {
+    "use strict";
 
     function init() {
-
         // =========================================================
         // SEARCH + STATUS FILTER
-        // One function applies both, so they never overwrite each other.
         // =========================================================
 
         var table = document.getElementById("utangTable");
+
         var rows = table
-            ? Array.prototype.slice.call(table.querySelectorAll("tbody tr[data-status]"))
+            ? Array.from(
+                table.querySelectorAll("tbody tr[data-status]")
+            )
             : [];
 
-        var chips = document.querySelectorAll("#utangFilters .ut-chip");
+        var chips = document.querySelectorAll(
+            "#utangFilters .ut-chip"
+        );
+
         var search = document.getElementById("utangSearch");
         var noResults = document.getElementById("utangNoResults");
         var shown = document.getElementById("utangShown");
@@ -21,38 +27,69 @@
         var activeFilter = "all";
 
         function matchesFilter(row) {
-            if (activeFilter === "all") return true;
-            if (activeFilter === "overdue") return row.dataset.overdue === "true";
+            if (activeFilter === "all") {
+                return true;
+            }
+
+            if (activeFilter === "overdue") {
+                return row.dataset.overdue === "true";
+            }
+
             return row.dataset.status === activeFilter;
         }
 
-        function apply() {
-            var query = search ? search.value.toLowerCase().trim() : "";
+        function applyFilters() {
+            var query = search
+                ? search.value.toLowerCase().trim()
+                : "";
+
             var visible = 0;
 
             rows.forEach(function (row) {
-                var show =
-                    matchesFilter(row) &&
-                    (!query || (row.dataset.search || "").indexOf(query) !== -1);
+                var searchText = (
+                    row.dataset.search || row.textContent || ""
+                ).toLowerCase();
 
-                row.hidden = !show;
-                if (show) visible++;
+                var matchesSearch =
+                    query === "" || searchText.includes(query);
+
+                var shouldShow =
+                    matchesFilter(row) && matchesSearch;
+
+                row.hidden = !shouldShow;
+
+                if (shouldShow) {
+                    visible++;
+                }
             });
 
-            if (noResults) noResults.hidden = rows.length === 0 || visible !== 0;
-            if (shown) shown.textContent = "Showing " + visible + " of " + rows.length;
+            if (shown) {
+                shown.textContent =
+                    "Showing " + visible + " of " + rows.length;
+            }
+
+            if (noResults) {
+                noResults.hidden =
+                    rows.length === 0 || visible > 0;
+            }
         }
 
         function setFilter(filter) {
-            activeFilter = filter;
+            activeFilter = filter || "all";
 
             chips.forEach(function (chip) {
-                var on = chip.dataset.filter === filter;
-                chip.classList.toggle("active", on);
-                chip.setAttribute("aria-pressed", on ? "true" : "false");
+                var isActive =
+                    chip.dataset.filter === activeFilter;
+
+                chip.classList.toggle("active", isActive);
+
+                chip.setAttribute(
+                    "aria-pressed",
+                    isActive ? "true" : "false"
+                );
             });
 
-            apply();
+            applyFilters();
         }
 
         chips.forEach(function (chip) {
@@ -62,34 +99,72 @@
         });
 
         if (search) {
-            search.addEventListener("input", apply);
-            search.addEventListener("search", apply);
+            search.addEventListener("input", applyFilters);
+            search.addEventListener("search", applyFilters);
         }
 
         if (clearBtn) {
             clearBtn.addEventListener("click", function () {
-                if (search) search.value = "";
+                if (search) {
+                    search.value = "";
+                }
+
                 setFilter("all");
+
+                if (search) {
+                    search.focus();
+                }
             });
         }
 
-
         // =========================================================
-        // DELETE MODAL: fill it with the clicked record
+        // DELETE MODAL
         // =========================================================
 
-        var deleteModal = document.getElementById("deleteUtangModal");
+        var deleteModal =
+            document.getElementById("deleteUtangModal");
 
         if (deleteModal) {
-            deleteModal.addEventListener("show.bs.modal", function (event) {
-                var btn = event.relatedTarget;
-                if (!btn) return;
+            deleteModal.addEventListener(
+                "show.bs.modal",
+                function (event) {
+                    var button = event.relatedTarget;
 
-                document.getElementById("deleteUtangId").value = btn.getAttribute("data-id");
-                document.getElementById("deleteUtangName").textContent = btn.getAttribute("data-name") + "'s";
-                document.getElementById("deleteUtangAmount").textContent = btn.getAttribute("data-amount");
-            });
+                    if (!button) {
+                        return;
+                    }
+
+                    var idInput =
+                        document.getElementById("deleteUtangId");
+
+                    var nameElement =
+                        document.getElementById("deleteUtangName");
+
+                    var amountElement =
+                        document.getElementById("deleteUtangAmount");
+
+                    if (idInput) {
+                        idInput.value =
+                            button.getAttribute("data-id") || "";
+                    }
+
+                    if (nameElement) {
+                        var name =
+                            button.getAttribute("data-name") || "Customer";
+
+                        nameElement.textContent = name + "'s";
+                    }
+
+                    if (amountElement) {
+                        amountElement.textContent =
+                            button.getAttribute("data-amount") || "";
+                    }
+                }
+            );
         }
+
+        // Initial display
+        applyFilters();
     }
 
     if (document.readyState === "loading") {
@@ -97,5 +172,4 @@
     } else {
         init();
     }
-
 })();

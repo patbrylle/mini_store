@@ -14,7 +14,8 @@ namespace mini_store.Data
             string[] roles =
             {
                 "Admin",
-                "Staff"
+                "Staff",
+                "Customer"
             };
 
             foreach (var role in roles)

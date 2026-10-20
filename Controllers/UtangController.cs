@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace mini_store.Controllers
 {
-    [Authorize]
+[Authorize(Roles = "Admin,Staff")]
     public class UtangController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -242,6 +242,8 @@ TempData["UtangSuccess"] =
         // =========================================================
 // POST: /Utang/Delete/5
 // =========================================================
+[Authorize(Roles = "Admin")]
+
 [HttpPost]
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> Delete(int id)

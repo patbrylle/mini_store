@@ -30,6 +30,26 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2F0ZWdvcmllcy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/CustomerPortal/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJQb3J0YWwvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/CustomerPortal/NotLinked.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJQb3J0YWwvTm90TGlua2VkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/CustomerPortal/Products.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJQb3J0YWwvUHJvZHVjdHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/CustomerPortal/Purchases.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJQb3J0YWwvUHVyY2hhc2VzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/CustomerPortal/Utang.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJQb3J0YWwvVXRhbmcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/Customers/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ3VzdG9tZXJzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -94,12 +114,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Shared/_UtangTransactionModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19VdGFuZ1RyYW5zYWN0aW9uTW9kYWwuY3NodG1s
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/Shared/_TransactionModal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19UcmFuc2FjdGlvbk1vZGFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/brylle/Projects/Csharp_Projects/mini_store/Views/User/CreateCustomerAccount.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlci9DcmVhdGVDdXN0b21lckFjY291bnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/brylle/Projects/Csharp_Projects/mini_store/Views/User/CreateStaff.cshtml]
