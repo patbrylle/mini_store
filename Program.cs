@@ -8,6 +8,8 @@ using mini_store.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 // NEW: antiforgery check on every POST/PUT/DELETE automatically
 builder.Services.AddControllersWithViews(options =>
 {
@@ -21,6 +23,7 @@ builder.Services.AddScoped<IAppEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordRecoveryService, PasswordRecoveryService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // NEW: everything requires login unless marked [AllowAnonymous]
 builder.Services.AddAuthorization(options =>

@@ -1,96 +1,78 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
-using Microsoft.AspNetCore.Authorization;
-
+using mini_store.Services;
 
 namespace mini_store.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class ReportsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private const string StoreName = "Mini Store";
 
-        public ReportsController(ApplicationDbContext context)
+        private readonly IReportService _reports;
+        private readonly ApplicationDbContext _db;
+
+        public ReportsController(IReportService reports, ApplicationDbContext db)
         {
-            _context = context;
+            _reports = reports;
+            _db = db;
         }
 
-        // GET: Reports
-        public async Task<IActionResult> Index()
+        // GET: Reports?type=sales&range=month&status=Paid ...
+        [HttpGet]
+        public async Task<IActionResult> Index(ReportFilter f)
         {
-            // SALES
-            var totalSales = await _context.Sales
-                .SumAsync(s => s.TotalAmount);
+            var info = ReportCatalog.Normalize(f);
+            var vm = new ReportsPageVm { Filter = f, Info = info };
 
-            var totalTransactions = await _context.Sales
-                .CountAsync();
+            if (info.Key == "overview") vm.Overview = await _reports.OverviewAsync();
+            else vm.Table = await _reports.BuildAsync(f);
 
-            var totalPaid = await _context.Sales
-                .SumAsync(s => s.AmountPaid);
+            if (info.HasCategory)
+            {
+                vm.Categories = (await _db.Categories.AsNoTracking()
+                        .OrderBy(c => c.CategoryName)
+                        .Select(c => new { c.CategoryId, c.CategoryName })
+                        .ToListAsync())
+                    .Select(c => (Id: c.CategoryId, Name: c.CategoryName))
+                    .ToList();
+            }
 
-            var outstandingSales = await _context.Sales
-                .SumAsync(s => s.TotalAmount - s.AmountPaid);
+            if (info.HasCustomer)
+            {
+                vm.Customers = (await _db.Customers.AsNoTracking()
+                        .OrderBy(c => c.CustomerName)
+                        .Select(c => new { c.CustomerId, c.CustomerName })
+                        .ToListAsync())
+                    .Select(c => (Id: c.CustomerId, Name: c.CustomerName))
+                    .ToList();
+            }
 
-            // INVENTORY
-            var totalProducts = await _context.Products
-                .CountAsync();
+            return View(vm);
+        }
 
-            var totalStock = await _context.Products
-                .SumAsync(p => p.Quantity);
+        // GET: Reports/Export?type=sales&range=month&format=pdf|excel
+        [HttpGet]
+        public async Task<IActionResult> Export(ReportFilter f, string format = "excel")
+        {
+            var info = ReportCatalog.Normalize(f);
+            if (info.Key == "overview") return RedirectToAction(nameof(Index));
 
-            var lowStock = await _context.Products
-                .CountAsync(p => p.Quantity > 0 && p.Quantity <= 10);
+            var table = await _reports.BuildAsync(f);
+            var by = User.Identity?.Name ?? "";
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmm");
 
-            var outOfStock = await _context.Products
-                .CountAsync(p => p.Quantity == 0);
+            if (string.Equals(format, "pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return File(ReportExporter.Pdf(table, StoreName, by),
+                    "application/pdf", $"{info.Key}-report-{stamp}.pdf");
+            }
 
-            // UTANG
-            var totalUtang = await _context.Utangs
-                .SumAsync(u => u.Amount);
-
-            var utangPaid = await _context.Utangs
-                .SumAsync(u => u.AmountPaid);
-
-            var utangBalance = await _context.Utangs
-                .SumAsync(u => u.Balance);
-
-            // VIEWBAG
-            ViewBag.TotalSales = totalSales;
-            ViewBag.TotalTransactions = totalTransactions;
-            ViewBag.TotalPaid = totalPaid;
-            ViewBag.OutstandingSales = outstandingSales;
-
-            ViewBag.TotalProducts = totalProducts;
-            ViewBag.TotalStock = totalStock;
-            ViewBag.LowStock = lowStock;
-            ViewBag.OutOfStock = outOfStock;
-
-            ViewBag.TotalUtang = totalUtang;
-            ViewBag.UtangPaid = utangPaid;
-            ViewBag.UtangBalance = utangBalance;
-
-            // BEST SELLING PRODUCTS
-            var bestSellingProducts = await _context.SaleItems
-                .Include(si => si.Product)
-                .GroupBy(si => new
-                {
-                    si.ProductId,
-                    si.Product!.ProductName
-                })
-                .Select(g => new
-                {
-                    ProductName = g.Key.ProductName,
-                    QuantitySold = g.Sum(x => x.Quantity),
-                    Revenue = g.Sum(x => x.Subtotal)
-                })
-                .OrderByDescending(x => x.QuantitySold)
-                .Take(10)
-                .ToListAsync();
-
-            ViewBag.BestSellingProducts = bestSellingProducts;
-
-            return View();
+            return File(ReportExporter.Excel(table, StoreName, by),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"{info.Key}-report-{stamp}.xlsx");
         }
     }
 }

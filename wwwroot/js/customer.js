@@ -1,13 +1,16 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     // ==============================
-    // CUSTOMER SEARCH
+    // SEARCH + FILTER CHIPS
     // ==============================
 
     const searchInput = document.getElementById("customerSearch");
     const table = document.getElementById("customerTable");
+    const chips = Array.from(document.querySelectorAll(".customer-chip"));
+    const noResults = document.getElementById("customerNoResults");
+    const countEl = document.getElementById("customerCount");
 
-    if (searchInput && table) {
+    if (table) {
 
         // Real customer rows only (skip the "No Customers" empty-state row)
         const customerRows = Array.from(
@@ -16,20 +19,64 @@ document.addEventListener("DOMContentLoaded", function () {
             return !row.querySelector("td[colspan]");
         });
 
-        function filterCustomers() {
-            const searchValue = searchInput.value.toLowerCase().trim();
+        let activeFilter = "all";
+
+        function matchesFilter(row) {
+            switch (activeFilter) {
+                case "login":   return row.dataset.login === "1";
+                case "nologin": return row.dataset.login !== "1";
+                case "owes":    return row.dataset.owes === "1";
+                default:        return true;
+            }
+        }
+
+        function applyFilters() {
+            const searchValue = searchInput
+                ? searchInput.value.toLowerCase().trim()
+                : "";
+
+            let shown = 0;
 
             customerRows.forEach(function (row) {
-                const customerText = row.textContent.toLowerCase();
+                const visible =
+                    matchesFilter(row) &&
+                    row.textContent.toLowerCase().includes(searchValue);
 
-                row.style.display = customerText.includes(searchValue)
-                    ? ""
-                    : "none";
+                row.style.display = visible ? "" : "none";
+                if (visible) shown++;
+            });
+
+            const total = customerRows.length;
+
+            if (noResults) {
+                noResults.hidden = shown > 0 || total === 0;
+            }
+
+            if (countEl) {
+                countEl.textContent = shown === total
+                    ? total + " total"
+                    : shown + " of " + total;
+            }
+        }
+
+        if (searchInput) {
+            ["input", "keyup", "search"].forEach(function (evt) {
+                searchInput.addEventListener(evt, applyFilters);
             });
         }
 
-        ["input", "keyup", "search"].forEach(function (evt) {
-            searchInput.addEventListener(evt, filterCustomers);
+        chips.forEach(function (chip) {
+            chip.addEventListener("click", function () {
+                activeFilter = chip.dataset.filter || "all";
+
+                chips.forEach(function (c) {
+                    const on = c === chip;
+                    c.classList.toggle("is-active", on);
+                    c.setAttribute("aria-pressed", on ? "true" : "false");
+                });
+
+                applyFilters();
+            });
         });
     }
 
@@ -50,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-});
+
     // ==============================
     // CUSTOMER HISTORY MODAL
     // ==============================
@@ -103,3 +150,5 @@ document.addEventListener("DOMContentLoaded", function () {
             bootstrap.Modal.getInstance(historyEl).hide();
         });
     }
+
+});

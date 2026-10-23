@@ -1,375 +1,450 @@
-@using System.Globalization
-@using System.Linq
+@using System.Text.Json
+@using mini_store.Services
+@model ReportsPageVm
+
 @{
     ViewData["Title"] = "Reports";
 
-    // ---- Chart data, built from the ViewBag values already used on this page ----
+    var f = Model.Filter;
+    var info = Model.Info;
+    var t = Model.Table;
+    var ov = Model.Overview;
 
-    var totalPaidVal    = Convert.ToDecimal(ViewBag.TotalPaid ?? 0).ToString("F2", CultureInfo.InvariantCulture);
-    var outstandingVal  = Convert.ToDecimal(ViewBag.OutstandingSales ?? 0).ToString("F2", CultureInfo.InvariantCulture);
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var by = User.Identity?.Name ?? "";
+    var nowText = DateTime.Now.ToString("MMM d, yyyy h:mm tt", inv);
+    var printTitle = t?.Title ?? "Reports Overview";
+    var printSub = t?.Subtitle ?? ("As of " + DateTime.Now.ToString("MMM d, yyyy", inv));
 
-    int totalProducts = Convert.ToInt32(ViewBag.TotalProducts ?? 0);
-    int lowStockCount = Convert.ToInt32(ViewBag.LowStock ?? 0);
-    int outOfStockCount = Convert.ToInt32(ViewBag.OutOfStock ?? 0);
-    int healthyStockCount = Math.Max(totalProducts - lowStockCount - outOfStockCount, 0);
-
-    // ---- Collection rate (paid / total sales) ----
-    decimal totalSalesDec = Convert.ToDecimal(ViewBag.TotalSales ?? 0);
-    decimal totalPaidDec  = Convert.ToDecimal(ViewBag.TotalPaid ?? 0);
-    int collectionRate = totalSalesDec > 0
-        ? (int)Math.Round(totalPaidDec / totalSalesDec * 100)
-        : 0;
-
-    var topProducts = new List<dynamic>();
-    int maxQty = 1;
-
-    if (ViewBag.BestSellingProducts != null)
+    var ranges = new[]
     {
-        int c = 0;
-        foreach (var p in ViewBag.BestSellingProducts)
-        {
-            maxQty = Math.Max(maxQty, Convert.ToInt32(p.QuantitySold));
+        ("today", "Today"), ("week", "This Week"), ("month", "This Month"),
+        ("lastmonth", "Last Month"), ("year", "This Year"), ("all", "All Time"), ("custom", "Custom")
+    };
 
-            if (c < 6)
-            {
-                topProducts.Add(p);
-                c++;
-            }
-        }
+    // keeps the current filters when a chip or an export link is clicked
+    string Link(string action, string? range = null, string? format = null)
+    {
+        var r = range ?? f.Range;
+        var custom = r == "custom";
+        return Url.Action(action, "Reports", new
+        {
+            type = f.Type,
+            range = r,
+            @from = custom ? f.From?.ToString("yyyy-MM-dd") : null,
+            to = custom ? f.To?.ToString("yyyy-MM-dd") : null,
+            status = f.Status,
+            categoryId = f.CategoryId,
+            customerId = f.CustomerId,
+            format
+        })!;
     }
 
-    var bestLabelsJs = string.Join(",", topProducts.Select(p =>
-        "\"" + ((string)p.ProductName.ToString()).Replace("\"", "\\\"") + "\""));
+    string Tone(string? s) => (s ?? "").ToLowerInvariant() switch
+    {
+        "paid" or "in stock" => "success",
+        "partial" or "low stock" => "warn",
+        "unpaid" or "out of stock" or "overdue" => "danger",
+        _ => "muted"
+    };
 
-    var bestDataJs = string.Join(",", topProducts.Select(p =>
-        Convert.ToInt32(p.QuantitySold).ToString(CultureInfo.InvariantCulture)));
+    var maxQty = ov != null && ov.Best.Count > 0 ? Math.Max(ov.Best.Max(b => b.Qty), 1) : 1;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/reports.css" asp-append-version="true" />
 }
 
-<div class="reports-page">
+<div class="rp-page">
 
     <!-- PAGE HEADER -->
-    <div class="reports-header">
-        <div class="reports-title-area">
-            <div class="reports-page-icon">
-                <i class="bi bi-graph-up-arrow"></i>
-            </div>
+    <div class="rp-header rp-no-print">
+        <div class="rp-title-area">
+            <div class="rp-page-icon"><i class="bi bi-graph-up-arrow"></i></div>
             <div>
-                <h1 class="reports-title">Reports</h1>
-                <p class="reports-subtitle">Track sales, inventory health, and utang at a glance.</p>
+                <h1>Reports</h1>
+                <p>Sales, inventory, customers and credit records. Print or export any report.</p>
             </div>
         </div>
-
-        <div class="reports-pill">
-            <i class="bi bi-piggy-bank"></i>
-            @collectionRate% <span>collected</span>
-        </div>
+        <span class="rp-asof"><i class="bi bi-clock-history"></i> @nowText</span>
     </div>
 
+    <div class="rp-layout">
 
-    <!-- SALES SUMMARY -->
-    <div class="kpi-row">
+        <!-- REPORT MENU -->
+        <aside class="rp-menu rp-no-print" aria-label="Reports">
+            @foreach (var g in ReportCatalog.All.GroupBy(r => r.Group))
+            {
+                <div class="rp-menu-group">@g.Key</div>
+                @foreach (var r in g)
+                {
+                    <a class="rp-menu-link @(r.Key == info.Key ? "active" : "")"
+                       href="@Url.Action("Index", "Reports", new { type = r.Key })">
+                        <i class="bi @r.Icon"></i><span>@r.Title</span>
+                    </a>
+                }
+            }
+        </aside>
 
-        <h5 class="report-section-title">
-            <i class="bi bi-cart-check"></i>
-            Sales Summary
-        </h5>
+        <section class="rp-main @(t != null && t.Columns.Count > 6 ? "rp-wide" : "")">
 
-        <div class="row g-3">
+            <!-- shown only when printing -->
+            <div class="rp-print-head">
+                <div class="rp-print-store">Mini Store</div>
+                <h2>@printTitle</h2>
+                <p>@printSub</p>
+                <p class="rp-print-meta">Generated @nowText by @by</p>
+            </div>
 
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-primary">
-                    <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Total Sales</h6>
-                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.TotalSales).ToString("N2")</h4>
+            @if (ov != null)
+            {
+                <!-- ================= OVERVIEW ================= -->
+                <div class="rp-toolbar rp-no-print">
+                    <div>
+                        <h2>Overview</h2>
+                        <p>@info.Blurb</p>
+                    </div>
+                    <div class="rp-actions">
+                        <button type="button" class="rp-btn" data-rp-print><i class="bi bi-printer"></i> Print</button>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-gold">
-                    <div class="kpi-icon"><i class="bi bi-receipt"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Transactions</h6>
-                        <h4 class="kpi-value">@ViewBag.TotalTransactions</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-success">
-                    <div class="kpi-icon"><i class="bi bi-check-circle"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Total Paid</h6>
-                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.TotalPaid).ToString("N2")</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-danger">
-                    <div class="kpi-icon"><i class="bi bi-exclamation-circle"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Outstanding</h6>
-                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.OutstandingSales).ToString("N2")</h4>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
-    <!-- INVENTORY SUMMARY -->
-    <div class="kpi-row">
-
-        <h5 class="report-section-title">
-            <i class="bi bi-box-seam"></i>
-            Inventory Summary
-        </h5>
-
-        <div class="row g-3">
-
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-primary">
-                    <div class="kpi-icon"><i class="bi bi-boxes"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Total Products</h6>
-                        <h4 class="kpi-value">@ViewBag.TotalProducts</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-gold">
-                    <div class="kpi-icon"><i class="bi bi-box-seam-fill"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Total Stock</h6>
-                        <h4 class="kpi-value">@ViewBag.TotalStock</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-gold">
-                    <div class="kpi-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Low Stock</h6>
-                        <h4 class="kpi-value">@ViewBag.LowStock</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-xl-3">
-                <div class="kpi-card is-danger">
-                    <div class="kpi-icon"><i class="bi bi-x-circle-fill"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Out of Stock</h6>
-                        <h4 class="kpi-value">@ViewBag.OutOfStock</h4>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
-    <!-- UTANG SUMMARY -->
-    <div class="kpi-row">
-
-        <h5 class="report-section-title">
-            <i class="bi bi-wallet2"></i>
-            Utang Summary
-        </h5>
-
-        <div class="row g-3">
-
-            <div class="col-md-4">
-                <div class="kpi-card is-primary">
-                    <div class="kpi-icon"><i class="bi bi-wallet2"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Total Utang</h6>
-                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.TotalUtang).ToString("N2")</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="kpi-card is-success">
-                    <div class="kpi-icon"><i class="bi bi-check-circle"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Total Paid</h6>
-                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.UtangPaid).ToString("N2")</h4>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="kpi-card is-danger">
-                    <div class="kpi-icon"><i class="bi bi-exclamation-circle"></i></div>
-                    <div class="kpi-body">
-                        <h6 class="kpi-label">Remaining Balance</h6>
-                        <h4 class="kpi-value">₱@Convert.ToDecimal(ViewBag.UtangBalance).ToString("N2")</h4>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
-    <!-- CHARTS -->
-    <div class="row g-4 mb-4">
-
-        <div class="col-lg-6">
-            <div class="panel">
-                <div class="panel-header">
-                    <h5><i class="bi bi-pie-chart-fill"></i> Payment Status</h5>
-                </div>
-                <div class="donut-chart-container">
-                    <canvas id="paymentStatusChart"></canvas>
-                </div>
-                <div class="donut-legend">
-                    <span><i style="background:#3c9461"></i> Paid <b>₱@Convert.ToDecimal(ViewBag.TotalPaid).ToString("N2")</b></span>
-                    <span><i style="background:#c0392b"></i> Outstanding <b>₱@Convert.ToDecimal(ViewBag.OutstandingSales).ToString("N2")</b></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="panel">
-                <div class="panel-header">
-                    <h5><i class="bi bi-pie-chart-fill"></i> Inventory Status</h5>
-                </div>
-                <div class="donut-chart-container">
-                    <canvas id="inventoryStatusChart"></canvas>
-                </div>
-                <div class="donut-legend">
-                    <span><i style="background:#3c9461"></i> Healthy <b>@healthyStockCount</b></span>
-                    <span><i style="background:#d49a21"></i> Low Stock <b>@lowStockCount</b></span>
-                    <span><i style="background:#c0392b"></i> Out of Stock <b>@outOfStockCount</b></span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- BEST SELLING PRODUCTS -->
-    <div class="panel mb-4">
-
-        <div class="panel-header">
-            <h5><i class="bi bi-bar-chart-line-fill"></i> Best-Selling Products</h5>
-        </div>
-
-        @if (topProducts.Count > 0)
-        {
-            <div class="bar-chart-container">
-                <canvas id="bestSellingChart"></canvas>
-            </div>
-        }
-
-        <div class="table-responsive">
-
-            <table class="table report-table align-middle mb-0">
-
-                <thead>
-                    <tr>
-                        <th style="width:70px">Rank</th>
-                        <th>Product</th>
-                        <th>Quantity Sold</th>
-                        <th>Revenue</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    @{
-                        int rank = 1;
-                    }
-
-                    @if (ViewBag.BestSellingProducts != null &&
-                         ViewBag.BestSellingProducts.Count > 0)
-                    {
-                        foreach (var product in ViewBag.BestSellingProducts)
+                @foreach (var sec in ov.Sections)
+                {
+                    <div class="rp-section-title"><i class="bi @sec.Icon"></i> @sec.Title</div>
+                    <div class="rp-stats">
+                        @foreach (var s in sec.Stats)
                         {
-                            int qty = Convert.ToInt32(product.QuantitySold);
-                            int barPct = (int)Math.Round((double)qty / maxQty * 100);
-
-                            <tr>
-                                <td>
-                                    <span class="rank-badge @(rank <= 3 ? "rank-" + rank : "")">@rank</span>
-                                </td>
-
-                                <td>
-                                    <span class="report-product">@product.ProductName</span>
-                                </td>
-
-                                <td>
-                                    <div class="qty-cell">
-                                        <strong>@qty</strong>
-                                        <div class="qty-bar"><span style="width:@barPct%"></span></div>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <span class="revenue-value">
-                                        ₱@Convert.ToDecimal(product.Revenue).ToString("N2")
-                                    </span>
-                                </td>
-                            </tr>
-
-                            rank++;
+                            <div class="rp-stat is-@s.Tone">
+                                <span class="rp-stat-label">@s.Label</span>
+                                <strong class="rp-stat-value">@s.Value</strong>
+                                @if (!string.IsNullOrEmpty(s.Sub))
+                                {
+                                    <small class="rp-stat-sub">@s.Sub</small>
+                                }
+                            </div>
                         }
+                    </div>
+                }
+
+                <div class="rp-section-title rp-no-print"><i class="bi bi-lightning-charge"></i> Quick reports</div>
+                <div class="rp-quick rp-no-print">
+                    <a href="@Url.Action("Index", "Reports", new { type = "sales", range = "today" })">
+                        <i class="bi bi-receipt"></i>
+                        <span><strong>Today's sales</strong><small>Every transaction today</small></span>
+                    </a>
+                    <a href="@Url.Action("Index", "Reports", new { type = "daily", range = "week" })">
+                        <i class="bi bi-calendar-week"></i>
+                        <span><strong>Weekly sales</strong><small>Day by day, this week</small></span>
+                    </a>
+                    <a href="@Url.Action("Index", "Reports", new { type = "daily", range = "month" })">
+                        <i class="bi bi-calendar-month"></i>
+                        <span><strong>Monthly sales</strong><small>Day by day, this month</small></span>
+                    </a>
+                    <a href="@Url.Action("Index", "Reports", new { type = "lowstock" })">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span><strong>Low &amp; out of stock</strong><small>Items to restock</small></span>
+                    </a>
+                    <a href="@Url.Action("Index", "Reports", new { type = "utang", status = "Overdue" })">
+                        <i class="bi bi-alarm"></i>
+                        <span><strong>Overdue credit</strong><small>Unpaid past due date</small></span>
+                    </a>
+                </div>
+
+                <div class="rp-grid">
+                    <div class="rp-panel">
+                        <div class="rp-panel-head"><h5><i class="bi bi-bar-chart-line-fill"></i> Sales, last 7 days</h5></div>
+                        <div class="rp-chart"><canvas id="rpSalesChart"></canvas></div>
+                    </div>
+
+                    <div class="rp-panel">
+                        <div class="rp-panel-head"><h5><i class="bi bi-pie-chart-fill"></i> Payment status</h5></div>
+                        <div class="rp-chart is-donut"><canvas id="rpPaymentChart"></canvas></div>
+                        <div class="rp-legend">
+                            <span><i style="background:var(--color-success)"></i> Paid <b>@ReportFormat.Money(ov.Paid)</b></span>
+                            <span><i style="background:var(--color-danger)"></i> Outstanding <b>@ReportFormat.Money(ov.Outstanding)</b></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rp-grid">
+                    <div class="rp-panel">
+                        <div class="rp-panel-head">
+                            <h5><i class="bi bi-trophy-fill"></i> Top 5 best sellers</h5>
+                            <a class="rp-link rp-no-print" href="@Url.Action("Index", "Reports", new { type = "bestsellers", range = "all" })">View full report</a>
+                        </div>
+
+                        @if (ov.Best.Count == 0)
+                        {
+                            <div class="rp-empty"><i class="bi bi-bar-chart"></i><p>No sales data yet.</p></div>
+                        }
+                        else
+                        {
+                            <div class="rp-table-wrap">
+                                <table class="rp-table">
+                                    <thead>
+                                        <tr><th style="width:60px">Rank</th><th>Product</th><th>Units sold</th><th class="is-num">Revenue</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        @{ var rank = 1; }
+                                        @foreach (var b in ov.Best)
+                                        {
+                                            var pct = (int)Math.Round((double)b.Qty / maxQty * 100);
+                                            <tr>
+                                                <td><span class="rp-rank @(rank <= 3 ? "r" + rank : "")">@rank</span></td>
+                                                <td><strong>@b.Name</strong></td>
+                                                <td>
+                                                    <div class="rp-qty"><b>@b.Qty</b><div><span style="width:@(pct)%"></span></div></div>
+                                                </td>
+                                                <td class="is-num">@ReportFormat.Money(b.Revenue)</td>
+                                            </tr>
+                                            rank++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="rp-panel">
+                        <div class="rp-panel-head"><h5><i class="bi bi-pie-chart-fill"></i> Inventory status</h5></div>
+                        <div class="rp-chart is-donut"><canvas id="rpInventoryChart"></canvas></div>
+                        <div class="rp-legend">
+                            <span><i style="background:var(--color-success)"></i> Healthy <b>@ov.Healthy</b></span>
+                            <span><i style="background:var(--color-gold)"></i> Low <b>@ov.LowStock</b></span>
+                            <span><i style="background:var(--color-danger)"></i> Out <b>@ov.OutOfStock</b></span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (t != null)
+            {
+                <!-- ================= REPORT ================= -->
+                <div class="rp-toolbar rp-no-print">
+                    <div>
+                        <h2>@t.Title</h2>
+                        <p>@info.Blurb</p>
+                    </div>
+                    <div class="rp-actions">
+                        <button type="button" class="rp-btn" data-rp-print><i class="bi bi-printer"></i> Print</button>
+                        <a class="rp-btn is-pdf" href="@Link("Export", null, "pdf")"><i class="bi bi-file-earmark-pdf"></i> Save as PDF</a>
+                        <a class="rp-btn is-xls" href="@Link("Export", null, "excel")"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
+                    </div>
+                </div>
+
+                @if (info.HasRange || info.HasStatus || info.HasCategory || info.HasCustomer)
+                {
+                    <div class="rp-filters rp-no-print">
+
+                        @if (info.HasRange)
+                        {
+                            <div class="rp-chips" role="group" aria-label="Period">
+                                @foreach (var (key, label) in ranges)
+                                {
+                                    if (key == "custom")
+                                    {
+                                        <button type="button" id="rpCustomToggle"
+                                                class="rp-chip @(f.Range == "custom" ? "active" : "")">Custom</button>
+                                    }
+                                    else
+                                    {
+                                        <a class="rp-chip @(f.Range == key ? "active" : "")" href="@Link("Index", key)">@label</a>
+                                    }
+                                }
+                            </div>
+                        }
+
+                        <form method="get" action="@Url.Action("Index", "Reports")" class="rp-selects">
+                            <input type="hidden" name="type" value="@f.Type" />
+
+                            @if (info.HasRange)
+                            {
+                                <input type="hidden" name="range" value="@f.Range" />
+                                @if (f.Range == "custom")
+                                {
+                                    <input type="hidden" name="from" value="@(f.From?.ToString("yyyy-MM-dd"))" />
+                                    <input type="hidden" name="to" value="@(f.To?.ToString("yyyy-MM-dd"))" />
+                                }
+                            }
+
+                            @if (info.HasStatus)
+                            {
+                                <label class="rp-field">
+                                    <span>Status</span>
+                                    <select name="status" onchange="this.form.submit()">
+                                        <option value="">All</option>
+                                        @foreach (var s in info.Statuses!)
+                                        {
+                                            <option value="@s" selected="@(s == f.Status)">@s</option>
+                                        }
+                                    </select>
+                                </label>
+                            }
+
+                            @if (info.HasCategory)
+                            {
+                                <label class="rp-field">
+                                    <span>Category</span>
+                                    <select name="categoryId" onchange="this.form.submit()">
+                                        <option value="">All categories</option>
+                                        @foreach (var c in Model.Categories)
+                                        {
+                                            <option value="@c.Id" selected="@(c.Id == f.CategoryId)">@c.Name</option>
+                                        }
+                                    </select>
+                                </label>
+                            }
+
+                            @if (info.HasCustomer)
+                            {
+                                <label class="rp-field">
+                                    <span>Customer</span>
+                                    <select name="customerId" onchange="this.form.submit()">
+                                        <option value="">All customers</option>
+                                        @foreach (var c in Model.Customers)
+                                        {
+                                            <option value="@c.Id" selected="@(c.Id == f.CustomerId)">@c.Name</option>
+                                        }
+                                    </select>
+                                </label>
+                            }
+                        </form>
+
+                        @if (info.HasRange)
+                        {
+                            <form method="get" action="@Url.Action("Index", "Reports")" id="rpCustom" class="rp-custom"
+                                  hidden="@(f.Range == "custom" ? null : "hidden")">
+                                <input type="hidden" name="type" value="@f.Type" />
+                                <input type="hidden" name="range" value="custom" />
+                                <input type="hidden" name="status" value="@f.Status" />
+                                <input type="hidden" name="categoryId" value="@f.CategoryId" />
+                                <input type="hidden" name="customerId" value="@f.CustomerId" />
+
+                                <label class="rp-field">
+                                    <span>From</span>
+                                    <input type="date" name="from" value="@(f.From?.ToString("yyyy-MM-dd"))" required />
+                                </label>
+                                <label class="rp-field">
+                                    <span>To</span>
+                                    <input type="date" name="to" value="@(f.To?.ToString("yyyy-MM-dd"))" required />
+                                </label>
+                                <button type="submit" class="rp-btn rp-btn-primary"><i class="bi bi-check-lg"></i> Apply</button>
+                            </form>
+                        }
+                    </div>
+                }
+
+                @if (t.Stats.Count > 0)
+                {
+                    <div class="rp-stats">
+                        @foreach (var s in t.Stats)
+                        {
+                            <div class="rp-stat is-@s.Tone">
+                                <span class="rp-stat-label">@s.Label</span>
+                                <strong class="rp-stat-value">@s.Value</strong>
+                                @if (!string.IsNullOrEmpty(s.Sub))
+                                {
+                                    <small class="rp-stat-sub">@s.Sub</small>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="rp-table-card">
+
+                    <div class="rp-table-top rp-no-print">
+                        <div class="rp-count" id="rpCount">@ReportFormat.Int(t.Rows.Count) records</div>
+                        <div class="rp-search">
+                            <i class="bi bi-search"></i>
+                            <input id="rpSearch" type="search" placeholder="Search in this report..."
+                                   aria-label="Search in this report" autocomplete="off" />
+                        </div>
+                    </div>
+
+                    @if (t.Rows.Count == 0)
+                    {
+                        <div class="rp-empty">
+                            <i class="bi bi-inbox"></i>
+                            <h5>No records found</h5>
+                            <p>Try a different period or filter.</p>
+                        </div>
                     }
                     else
                     {
-                        <tr>
-                            <td colspan="4">
-                                <div class="empty-state">
-                                    <i class="bi bi-bar-chart"></i>
-                                    <p>No sales data available yet.</p>
-                                </div>
-                            </td>
-                        </tr>
+                        <div class="rp-table-wrap">
+                            <table class="rp-table" id="rpTable">
+                                <thead>
+                                    <tr>
+                                        @foreach (var col in t.Columns)
+                                        {
+                                            <th class="@(col.Right ? "is-num" : "")">@col.Header</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var row in t.Rows)
+                                    {
+                                        <tr>
+                                            @for (var c = 0; c < t.Columns.Count; c++)
+                                            {
+                                                var col = t.Columns[c];
+                                                var text = ReportFormat.Cell(row[c], col.Kind);
+
+                                                if (col.Kind == CellKind.Status)
+                                                {
+                                                    <td><span class="rp-badge is-@Tone(text)">@text</span></td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="@(col.Right ? "is-num" : "")">@text</td>
+                                                }
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+
+                                @if (t.Totals != null)
+                                {
+                                    <tfoot>
+                                        <tr>
+                                            @for (var c = 0; c < t.Columns.Count; c++)
+                                            {
+                                                var col = t.Columns[c];
+                                                <td class="@(col.Right ? "is-num" : "")">@ReportFormat.Cell(t.Totals[c], col.Kind)</td>
+                                            }
+                                        </tr>
+                                    </tfoot>
+                                }
+                            </table>
+                        </div>
+
+                        <div class="rp-empty" id="rpNoResults" hidden>
+                            <i class="bi bi-search"></i>
+                            <h5>No matching records</h5>
+                            <p>Try a different search.</p>
+                        </div>
                     }
+                </div>
+            }
 
-                </tbody>
-
-            </table>
-
-        </div>
-
+        </section>
     </div>
-
 </div>
 
 @section Scripts {
+    @if (ov != null)
+    {
+        <script src="~/lib/chartjs/chart.umd.min.js"></script>
+        <script>window.Chart || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"><\/script>');</script>
 
-    <!-- Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-
-    <script>
-        window.reportsChartData = {
-            payment: {
-                paid: @Html.Raw(totalPaidVal),
-                outstanding: @Html.Raw(outstandingVal)
-            },
-            inventory: {
-                healthy: @healthyStockCount,
-                lowStock: @lowStockCount,
-                outOfStock: @outOfStockCount
-            },
-            bestSelling: {
-                labels: [@Html.Raw(bestLabelsJs)],
-                data: [@Html.Raw(bestDataJs)]
-            }
-        };
-    </script>
+        <script id="rpData" type="application/json">@Html.Raw(JsonSerializer.Serialize(new
+        {
+            last7 = new { labels = ov.Last7Labels, values = ov.Last7Values },
+            payment = new { paid = ov.Paid, outstanding = ov.Outstanding },
+            inventory = new { healthy = ov.Healthy, low = ov.LowStock, outOfStock = ov.OutOfStock }
+        }))</script>
+    }
 
     <script src="~/js/reports.js" asp-append-version="true"></script>
 }

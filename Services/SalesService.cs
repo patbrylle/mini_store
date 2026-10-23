@@ -18,8 +18,7 @@ Task<Dictionary<int, decimal>> GetUtangBalancesAsync();
 
     public class SalesService : ISalesService
     {
-        private const int LowStock = 10;
-
+private const int LowStock = StockRules.LowStock;
           private readonly ApplicationDbContext _db;
     private readonly ILogger<SalesService> _log;
     private readonly INotificationService _notify;

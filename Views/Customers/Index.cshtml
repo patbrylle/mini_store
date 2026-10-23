@@ -72,7 +72,7 @@
             <div class="customer-stat-card is-success" style="--i:1">
                 <div class="customer-stat-icon"><i class="bi bi-person-check"></i></div>
                 <div class="customer-stat-body">
-                    <span class="customer-stat-label">With Login</span>
+                    <span class="customer-stat-label">With Account</span>
                     <h3>@withLogin</h3>
                     <small>Can use the customer portal</small>
                 </div>
@@ -82,7 +82,7 @@
             <div class="customer-stat-card is-gold" style="--i:2">
                 <div class="customer-stat-icon"><i class="bi bi-journal-text"></i></div>
                 <div class="customer-stat-body">
-                    <span class="customer-stat-label">Customers with Utang</span>
+                    <span class="customer-stat-label">Customers with Credit</span>
                     <h3>@withUtang</h3>
                     <small>Have an unpaid balance</small>
                 </div>
@@ -92,7 +92,7 @@
             <div class="customer-stat-card is-danger" style="--i:3">
                 <div class="customer-stat-icon"><i class="bi bi-wallet2"></i></div>
                 <div class="customer-stat-body">
-                    <span class="customer-stat-label">Outstanding Utang</span>
+                    <span class="customer-stat-label">Outstanding Credit</span>
                     <h3>₱@outstanding.ToString("N2")</h3>
                     <small>Total still to collect</small>
                 </div>
@@ -120,7 +120,7 @@
 
             <div class="customer-tools">
 
-                <span class="customer-count">@totalCustomers total</span>
+<span class="customer-count" id="customerCount">@totalCustomers total</span>
 
                 <div class="customer-search">
                     <i class="bi bi-search"></i>
@@ -134,6 +134,23 @@
             </div>
 
         </div>
+                @if (customers.Any())
+        {
+            <div class="customer-filters" id="customerFilters" role="group" aria-label="Filter customers">
+                <button type="button" class="customer-chip is-active" data-filter="all" aria-pressed="true">
+                    <i class="bi bi-people"></i> All <span>@totalCustomers</span>
+                </button>
+                <button type="button" class="customer-chip" data-filter="login" aria-pressed="false">
+                    <i class="bi bi-person-check"></i> With Account <span>@withLogin</span>
+                </button>
+                <button type="button" class="customer-chip" data-filter="nologin" aria-pressed="false">
+                    <i class="bi bi-person-dash"></i> No Account <span>@(totalCustomers - withLogin)</span>
+                </button>
+                <button type="button" class="customer-chip" data-filter="owes" aria-pressed="false">
+                    <i class="bi bi-wallet2"></i> Owes Credit <span>@withUtang</span>
+                </button>
+            </div>
+        }
 
         <div class="table-responsive">
 
@@ -156,9 +173,11 @@
                         foreach (var customer in customers)
                         {
                             string name = customer.CustomerName ?? "";
-                            string initial = name.Length > 0 ? name.Substring(0, 1).ToUpper() : "?";
+                                                    string initial = name.Length > 0 ? name.Substring(0, 1).ToUpper() : "?";
+                            bool rowLogin = !string.IsNullOrEmpty(customer.UserId);
+                            bool rowOwes = balances.ContainsKey(customer.CustomerId);
 
-                            <tr>
+                            <tr data-login="@(rowLogin ? "1" : "0")" data-owes="@(rowOwes ? "1" : "0")">
 
                                 <!-- CUSTOMER -->
                                 <td>
@@ -170,7 +189,7 @@
                                         {
                                             <span class="customer-login-badge"
                                                   title="This customer can log in to the customer portal">
-                                                <i class="bi bi-person-check-fill"></i> Login
+                                                <i class="bi bi-person-check-fill"></i> Account
                                             </span>
                                         }
 

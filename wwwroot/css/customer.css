@@ -954,3 +954,86 @@
     color: #fff;
     background: var(--color-primary);
 }
+/* =========================================================
+   FILTER CHIPS
+   ========================================================= */
+
+.customer-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 22px 18px;
+}
+
+.customer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform var(--speed) var(--ease), color var(--speed) var(--ease),
+                background-color var(--speed) var(--ease), border-color var(--speed) var(--ease),
+                box-shadow var(--speed) var(--ease);
+}
+
+.customer-chip i {
+    font-size: 14px;
+}
+
+.customer-chip span {
+    min-width: 22px;
+    padding: 1px 7px;
+    font-size: .7rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border-radius: 999px;
+    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease);
+}
+
+.customer-chip:hover {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: var(--color-primary-light);
+    transform: translateY(-1px);
+}
+
+.customer-chip:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.customer-chip.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border-color: transparent;
+    box-shadow: 0 6px 14px rgba(228, 119, 46, .3);
+}
+
+.customer-chip.is-active span {
+    color: var(--color-primary-dark);
+    background: #fff;
+}
+
+/* phones: one scrollable row instead of wrapping */
+@media (max-width: 768px) {
+    .customer-filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 16px 16px;
+        scrollbar-width: none;
+    }
+
+    .customer-filters::-webkit-scrollbar {
+        display: none;
+    }
+}
