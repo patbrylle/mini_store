@@ -1,0 +1,208 @@
+@model mini_store.ViewModels.Profile.ProfilePageViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+
+    var loginEmail = User.Identity?.Name ?? "";
+
+    var initial = string.IsNullOrWhiteSpace(Model.DisplayName)
+        ? "U"
+        : Model.DisplayName.Trim()[0].ToString().ToUpper();
+
+    // Customer login with no Customers row can only edit the email
+    var showCustomerFields = Model.IsCustomer && Model.HasCustomerRecord;
+    var showPhone = !Model.IsCustomer || Model.HasCustomerRecord;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+}
+
+<div class="page-header">
+    <div class="page-header-icon"><i class="bi bi-person-circle"></i></div>
+    <div>
+        <h2>My Profile</h2>
+        <p>Update your details and keep your account secure.</p>
+    </div>
+</div>
+
+<div class="pf-grid">
+
+    <!-- ============ SUMMARY ============ -->
+    <aside class="form-card pf-summary">
+        <div class="pf-avatar">@initial</div>
+        <h3 class="pf-name">@Model.DisplayName</h3>
+        <span class="pf-role pf-role-@Model.RoleLabel.ToLower()">@Model.RoleLabel</span>
+
+        <ul class="pf-meta">
+            <li><i class="bi bi-envelope"></i><span>@loginEmail</span></li>
+            <li><i class="bi bi-shield-check"></i><span>Your email is also your login</span></li>
+        </ul>
+    </aside>
+
+    <div class="pf-main">
+
+        <!-- ============ PERSONAL INFO ============ -->
+        <section class="form-card">
+            <div class="pf-section-head">
+                <span class="pf-section-icon"><i class="bi bi-person-lines-fill"></i></span>
+                <div>
+                    <h5>Personal information</h5>
+                    <p>Changing your email also changes the email you log in with.</p>
+                </div>
+            </div>
+
+            <form asp-controller="Profile" asp-action="UpdateProfile" method="post">
+
+                <div class="pf-row">
+                                       @if (showCustomerFields)
+                    {
+                        <div class="field">
+                            <label class="field-label">Full name</label>
+                            <div class="field-wrap">
+                                <i class="bi bi-person field-icon"></i>
+                                <input class="field-input" value="@Model.DisplayName" readonly />
+                            </div>
+                            <small class="pf-hint">
+                                <i class="bi bi-lock"></i>
+                                Your name appears on the store's sales and utang records.
+                                To change it, please ask the store.
+                            </small>
+                        </div>
+                    }
+
+                    <div class="field">
+                        <label asp-for="Info.Email" class="field-label">Email</label>
+                        <div class="field-wrap">
+                            <i class="bi bi-envelope field-icon"></i>
+                            <input asp-for="Info.Email" class="field-input" autocomplete="email" />
+                        </div>
+                        <span asp-validation-for="Info.Email" class="field-error"></span>
+                    </div>
+                </div>
+
+                @if (showPhone)
+                {
+                    <div class="pf-row">
+                        <div class="field">
+                            <label asp-for="Info.PhoneNumber" class="field-label">Contact number</label>
+                            <div class="field-wrap">
+                                <i class="bi bi-telephone field-icon"></i>
+                                <input asp-for="Info.PhoneNumber" class="field-input" autocomplete="tel" />
+                            </div>
+                            <span asp-validation-for="Info.PhoneNumber" class="field-error"></span>
+                        </div>
+
+                        @if (showCustomerFields)
+                        {
+                            <div class="field">
+                                <label asp-for="Info.Address" class="field-label">Address</label>
+                                <div class="field-wrap">
+                                    <i class="bi bi-geo-alt field-icon"></i>
+                                    <input asp-for="Info.Address" class="field-input" autocomplete="street-address" />
+                                </div>
+                                <span asp-validation-for="Info.Address" class="field-error"></span>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (Model.IsCustomer && !Model.HasCustomerRecord)
+                {
+                    <p class="pf-note">
+                        <i class="bi bi-info-circle"></i>
+                        Your login isn't linked to a customer record yet, so only your email can be edited.
+                        Please ask the store to link it.
+                    </p>
+                }
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-brand">
+                        <i class="bi bi-check2-circle"></i> Save changes
+                    </button>
+                    <a asp-action="Index" class="btn-soft">Reset</a>
+                </div>
+            </form>
+        </section>
+
+        <!-- ============ CHANGE PASSWORD ============ -->
+        <section class="form-card">
+            <div class="pf-section-head">
+                <span class="pf-section-icon"><i class="bi bi-key-fill"></i></span>
+                <div>
+                    <h5>Change password</h5>
+                    <p>Use a strong password you don't use anywhere else.</p>
+                </div>
+            </div>
+
+            <form asp-controller="Profile" asp-action="ChangePassword" method="post">
+
+                <div class="field">
+                    <label asp-for="Password.CurrentPassword" class="field-label">Current password</label>
+                    <div class="field-wrap">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input asp-for="Password.CurrentPassword" type="password" class="field-input" autocomplete="current-password" />
+                        <button type="button" class="field-toggle" data-toggle-password aria-label="Show password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password.CurrentPassword" class="field-error"></span>
+                </div>
+
+                <hr class="field-divider" />
+
+                <div class="field">
+                    <label asp-for="Password.NewPassword" class="field-label">New password</label>
+                    <div class="field-wrap">
+                        <i class="bi bi-shield-lock field-icon"></i>
+                        <input asp-for="Password.NewPassword" type="password" class="field-input" data-pw-new autocomplete="new-password" />
+                        <button type="button" class="field-toggle" data-toggle-password aria-label="Show password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password.NewPassword" class="field-error"></span>
+
+                    <div class="pw-meter" id="pwMeter" data-level="0">
+                        <div class="pw-meter-bars"><span></span><span></span><span></span><span></span></div>
+                        <span class="pw-meter-text" id="pwMeterText">Enter a password</span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Password.ConfirmPassword" class="field-label">Confirm new password</label>
+                    <div class="field-wrap">
+                        <i class="bi bi-shield-check field-icon"></i>
+                        <input asp-for="Password.ConfirmPassword" type="password" class="field-input" data-pw-confirm autocomplete="new-password" />
+                        <button type="button" class="field-toggle" data-toggle-password aria-label="Show password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password.ConfirmPassword" class="field-error"></span>
+                    <span class="match-text" id="pwMatch"></span>
+                </div>
+
+                <div class="tips-card pf-rules">
+                    <h6><i class="bi bi-lightbulb-fill"></i> Password must have</h6>
+                    <ul class="pw-rules" id="pwRules">
+                        <li data-rule="length"><i class="bi bi-circle"></i> At least 8 characters</li>
+                        <li data-rule="upper"><i class="bi bi-circle"></i> One uppercase letter</li>
+                        <li data-rule="lower"><i class="bi bi-circle"></i> One lowercase letter</li>
+                        <li data-rule="digit"><i class="bi bi-circle"></i> One number</li>
+                        <li data-rule="symbol"><i class="bi bi-circle"></i> One symbol (e.g. ! @@ # $)</li>
+                    </ul>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-brand">
+                        <i class="bi bi-key"></i> Update password
+                    </button>
+                </div>
+            </form>
+        </section>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/profile.js" asp-append-version="true"></script>
+}

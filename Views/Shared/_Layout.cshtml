@@ -43,9 +43,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
-    @await RenderSectionAsync("Styles", required: false)
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+      @await RenderSectionAsync("Styles", required: false)
 <script>
     (function () {
         var KEY = 'ms-theme';
@@ -143,7 +141,16 @@
         <span class="nav-icon">
             <i class="bi bi-wallet2"></i>
         </span>
-        <span class="nav-label">My Utang</span>
+               <span class="nav-label">My Credit</span>
+    </a>
+
+    <a asp-controller="Profile"
+       asp-action="Index"
+       class="sidebar-link @Active("Profile")">
+        <span class="nav-icon">
+            <i class="bi bi-person-circle"></i>
+        </span>
+        <span class="nav-label">My Profile</span>
     </a>
 }
 else if (isStoreUser)
@@ -175,7 +182,7 @@ else if (isStoreUser)
                 <a asp-controller="Utang" asp-action="Index"
                    class="sidebar-link @(Active("Utang"))">
                     <span class="nav-icon"><i class="bi bi-cash-coin"></i></span>
-                    <span class="nav-label">Utang Records</span>
+                    <span class="nav-label">Credit Records</span>
                 </a>
 
                 @if (isAdmin)
@@ -308,18 +315,18 @@ else if (isStoreUser)
         </div>
     </div>
 
-    <a asp-controller="Settings" asp-action="Index"
+          <a asp-controller="Profile" asp-action="Index"
        class="profile-menu-item" role="menuitem">
-        <i class="bi bi-gear-fill"></i>
-        <span>Settings</span>
+        <i class="bi bi-person-circle"></i>
+        <span>My Profile</span>
     </a>
 
-    @if (isAdmin)
+    @if (isStoreUser)
     {
-        <a asp-controller="Account" asp-action="ChangePassword"
+        <a asp-controller="Settings" asp-action="Index"
            class="profile-menu-item" role="menuitem">
-            <i class="bi bi-key-fill"></i>
-            <span>Change Password</span>
+            <i class="bi bi-gear-fill"></i>
+            <span>Settings</span>
         </a>
     }
 

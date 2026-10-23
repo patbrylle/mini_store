@@ -1,0 +1,8 @@
+@using mini_store.Models
+@model (string? Status, bool Overdue)
+@{
+    var key = Model.Overdue ? "overdue" : TxStatus.Key(Model.Status);
+    var text = Model.Overdue ? "Overdue"
+             : string.IsNullOrWhiteSpace(Model.Status) ? "Unpaid" : Model.Status;
+}
+<span class="pt-pill is-@key"><span class="pt-dot"></span>@text</span>

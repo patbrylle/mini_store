@@ -1,0 +1,56 @@
+@using mini_store.Models
+@model (string Id, Customer? C, bool EmailRequired)
+@{
+    var c = Model.C;
+    var id = Model.Id;
+}
+
+<div class="customer-form-group">
+    <label for="@(id)-name">Customer Name</label>
+    <div class="customer-input">
+        <i class="bi bi-person"></i>
+        <input type="text" id="@(id)-name" name="CustomerName" class="form-control"
+               value="@c?.CustomerName" placeholder="e.g. Maria Santos"
+               required minlength="2" maxlength="100" autocomplete="off" />
+    </div>
+</div>
+
+<div class="customer-form-group">
+    <label for="@(id)-email">Email</label>
+    <div class="customer-input">
+        <i class="bi bi-envelope"></i>
+        <input type="email" id="@(id)-email" name="Email" class="form-control"
+               value="@c?.Email" placeholder="name@example.com"
+               maxlength="100" pattern="@InputRules.EmailHtmlPattern"
+               title="Enter a valid email, e.g. name@example.com"
+               required="@Model.EmailRequired" autocomplete="off" />
+    </div>
+    @if (Model.EmailRequired)
+    {
+        <small class="customer-hint">
+            <i class="bi bi-info-circle"></i>
+            This customer has a login. Changing the email also changes the email they log in with.
+        </small>
+    }
+</div>
+
+<div class="customer-form-group">
+    <label for="@(id)-contact">Contact Number</label>
+    <div class="customer-input">
+        <i class="bi bi-telephone"></i>
+        <input type="tel" inputmode="tel" id="@(id)-contact" name="ContactNumber" class="form-control"
+               value="@c?.ContactNumber" placeholder="0917 123 4567"
+               maxlength="20" pattern="@InputRules.PhoneHtmlPattern"
+               title="Philippine mobile or landline, e.g. 0917 123 4567 or +63 917 123 4567" />
+    </div>
+</div>
+
+<div class="customer-form-group">
+    <label for="@(id)-address">Address</label>
+    <div class="customer-input customer-textarea">
+        <i class="bi bi-geo-alt"></i>
+        <textarea id="@(id)-address" name="Address" class="form-control" rows="3"
+                  minlength="5" maxlength="200"
+                  placeholder="House/Unit, Street, Barangay, City">@c?.Address</textarea>
+    </div>
+</div>

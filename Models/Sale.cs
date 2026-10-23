@@ -8,7 +8,6 @@ namespace mini_store.Models
         public int SaleId { get; set; }
 
         public int? CustomerId { get; set; }
-
         public Customer? Customer { get; set; }
 
         public DateTime SaleDate { get; set; } = DateTime.Now;
@@ -20,11 +19,21 @@ namespace mini_store.Models
         public decimal AmountPaid { get; set; }
 
         [StringLength(20)]
-        public string PaymentMethod { get; set; } = "Cash";
+        public string PaymentMethod { get; set; } = "Cash";   // "Cash" or "Utang" (sale type)
 
         [StringLength(20)]
         public string Status { get; set; } = "Paid";
 
+        [StringLength(40)]
+        public string? IdempotencyKey { get; set; }
+
+        [StringLength(256)]
+        public string? CreatedBy { get; set; }
+
+        [NotMapped]
+        public string TransactionNo => $"TXN-{SaleDate:yyyyMMdd}-{SaleId:D5}";
+
         public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

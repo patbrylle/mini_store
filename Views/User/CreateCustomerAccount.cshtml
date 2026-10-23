@@ -1,120 +1,105 @@
-
 @model mini_store.ViewModels.Account.CreateCustomerAccountViewModel
 
 @{
     ViewData["Title"] = "Create Customer Account";
-    Layout = "_Layout";
 }
 
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-7 col-md-9">
+@section Styles {
+    <link rel="stylesheet" href="~/css/users.css" asp-append-version="true" />
+}
 
-            <div class="mb-4">
-                <a asp-controller="User"
-                   asp-action="Index"
-                   class="text-decoration-none">
-                    <i class="bi bi-arrow-left"></i> Back to Users
-                </a>
+<div class="um-page um-form-page">
+
+    <a asp-action="Index" class="um-back">
+        <i class="bi bi-arrow-left"></i> Back to User Management
+    </a>
+
+    <div class="um-header">
+        <div class="um-title-area">
+            <div class="um-page-icon"><i class="bi bi-person-badge"></i></div>
+            <div>
+                <h1>Create Customer Account</h1>
+                <p>Give an existing customer access to the customer portal.</p>
             </div>
+        </div>
+    </div>
 
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4 p-md-5">
-
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
-                            <i class="bi bi-person-plus fs-3"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-1">Create Customer Account</h3>
-                            <p class="text-muted mb-0">
-                                Give an existing customer access to their transactions.
-                            </p>
-                        </div>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="um-card um-form-card">
+                <div class="um-form-head">
+                    <div class="um-form-head-icon"><i class="bi bi-person-vcard"></i></div>
+                    <div>
+                        <h5>Account Information</h5>
+                        <p>The login email is taken from the customer's record.</p>
                     </div>
-
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        The login email will be taken from the selected customer's
-                        existing record.
-                    </div>
-
-                    <form asp-controller="User"
-                          asp-action="CreateCustomerAccount"
-                          method="post">
-
-                        @Html.AntiForgeryToken()
-
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3"></div>
-
-                        <div class="mb-4">
-                            <label asp-for="CustomerId" class="form-label fw-semibold">
-                                Select Customer
-                            </label>
-
-                            <select asp-for="CustomerId"
-                                    asp-items="ViewBag.Customers"
-                                    class="form-select form-select-lg"
-                                    required>
-                                <option value="">Choose a customer</option>
-                            </select>
-
-                            <span asp-validation-for="CustomerId"
-                                  class="text-danger"></span>
-
-                            <small class="text-muted">
-                                Only customers with an email address and no linked account appear here.
-                            </small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label fw-semibold">
-                                Temporary Password
-                            </label>
-
-                            <input asp-for="Password"
-                                   class="form-control form-control-lg"
-                                   placeholder="Enter a strong password"
-                                   autocomplete="new-password" />
-
-                            <span asp-validation-for="Password"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-4">
-                            <label asp-for="ConfirmPassword" class="form-label fw-semibold">
-                                Confirm Password
-                            </label>
-
-                            <input asp-for="ConfirmPassword"
-                                   class="form-control form-control-lg"
-                                   placeholder="Enter the password again"
-                                   autocomplete="new-password" />
-
-                            <span asp-validation-for="ConfirmPassword"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="d-flex flex-column flex-sm-row gap-2">
-                            <a asp-controller="User"
-                               asp-action="Index"
-                               class="btn btn-light btn-lg flex-fill">
-                                Cancel
-                            </a>
-
-                            <button type="submit"
-                                    class="btn btn-primary btn-lg flex-fill">
-                                <i class="bi bi-check-circle me-2"></i>
-                                Create Account
-                            </button>
-                        </div>
-
-                    </form>
-
                 </div>
-            </div>
 
+                <form asp-action="CreateCustomerAccount" method="post">
+                    <div class="um-form-body">
+
+                        <div asp-validation-summary="ModelOnly" class="um-alert"></div>
+
+                        <div class="um-field">
+                            <label asp-for="CustomerId" class="um-label">Select Customer</label>
+                            <div class="um-input-wrap">
+                                <i class="bi bi-person"></i>
+                                <select asp-for="CustomerId" asp-items="ViewBag.Customers" class="um-input" required>
+                                    <option value="">Choose a customer</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="CustomerId" class="um-field-error"></span>
+                            <small class="um-hint">Only customers with an email and no linked account appear here.</small>
+                        </div>
+
+                        <div class="um-field">
+                            <label asp-for="Password" class="um-label">Temporary Password</label>
+                            <div class="um-input-wrap">
+                                <i class="bi bi-lock"></i>
+                                <input asp-for="Password" class="um-input" type="password"
+                                       placeholder="Enter a strong password" autocomplete="new-password" />
+                            </div>
+                            <span asp-validation-for="Password" class="um-field-error"></span>
+                        </div>
+
+                        <div class="um-field mb-0">
+                            <label asp-for="ConfirmPassword" class="um-label">Confirm Password</label>
+                            <div class="um-input-wrap">
+                                <i class="bi bi-shield-lock"></i>
+                                <input asp-for="ConfirmPassword" class="um-input" type="password"
+                                       placeholder="Enter the password again" autocomplete="new-password" />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="um-field-error"></span>
+                        </div>
+
+                    </div>
+
+                    <div class="um-form-actions">
+                        <a asp-action="Index" class="um-btn um-btn-ghost">Cancel</a>
+                        <button type="submit" class="btn um-add-btn">
+                            <i class="bi bi-check-circle"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="um-side-card">
+                <h6>Good to know</h6>
+                <ul class="um-tips">
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-key"></i></span>
+                        <div><strong>Temporary password</strong>
+                            Share it privately. The customer can change it on My Profile, or use "Forgot password" on the login page.</div>
+                    </li>
+                    <li>
+                        <span class="um-tip-icon"><i class="bi bi-envelope-check"></i></span>
+                        <div><strong>Email must be unique</strong>
+                            It becomes the login. Fix duplicates on the Customers page first.</div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

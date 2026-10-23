@@ -1,0 +1,10 @@
+@model (string Tone, string Icon, string Label, string Value, string Note)
+
+<div class="pt-kpi is-@Model.Tone">
+    <div class="pt-kpi-icon"><i class="bi @Model.Icon"></i></div>
+    <div class="pt-kpi-body">
+        <span class="pt-kpi-label">@Model.Label</span>
+        <h3 class="pt-kpi-value">@Model.Value</h3>
+        <small class="pt-kpi-note">@Model.Note</small>
+    </div>
+</div>

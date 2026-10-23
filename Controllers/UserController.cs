@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using mini_store.Data;
-using mini_store.Models;
-using mini_store.ViewModels.Account;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using mini_store.Data;
+using mini_store.Services;
+using mini_store.Validation;
+using mini_store.ViewModels.Account;
 
 namespace mini_store.Controllers
 {
@@ -14,41 +15,58 @@ namespace mini_store.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly IAccountService _accounts;
+        private readonly INotificationService _notify;
 
         public UserController(
             UserManager<IdentityUser> userManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IAccountService accounts,
+            INotificationService notify)
         {
             _userManager = userManager;
             _context = context;
+            _accounts = accounts;
+            _notify = notify;
         }
 
+        private string UsersLink => Url.Action("Index", "User") ?? "/User";
+
         // =========================================================
-        // USER LIST
+        // LIST (3 queries in total, not one per user)
         // =========================================================
 
         public async Task<IActionResult> Index()
         {
-            var users = _userManager.Users.ToList();
-            var model = new List<UserListViewModel>();
+            var users = await _userManager.Users.AsNoTracking().OrderBy(u => u.Email).ToListAsync();
 
-            foreach (var user in users)
+            var roleByUser = (await (
+                    from ur in _context.UserRoles
+                    join r in _context.Roles on ur.RoleId equals r.Id
+                    select new { ur.UserId, r.Name }).ToListAsync())
+                .GroupBy(x => x.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.Name!).OrderBy(n => n).First()); // Admin sorts first
+
+            var customerNames = await _context.Customers.AsNoTracking()
+                .Where(c => c.UserId != null)
+                .ToDictionaryAsync(c => c.UserId!, c => c.CustomerName);
+
+            var model = users.Select(u =>
             {
-                var roles = await _userManager.GetRolesAsync(user);
-                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
-
-                var isActive =
-                    !lockoutEnd.HasValue ||
-                    lockoutEnd.Value <= DateTimeOffset.UtcNow;
-
-                model.Add(new UserListViewModel
+                var email = u.Email ?? u.UserName ?? "";
+                return new UserListViewModel
                 {
-                    Id = user.Id,
-                    Email = user.Email ?? user.UserName ?? "",
-                    Role = roles.FirstOrDefault() ?? "No Role",
-                    IsActive = isActive
-                });
-            }
+                    Id = u.Id,
+                    Email = email,
+                    DisplayName = customerNames.TryGetValue(u.Id, out var n) ? n : email,
+                    Role = roleByUser.TryGetValue(u.Id, out var role) ? role : "No Role",
+                    Status = AccountStatus.IsDisabled(u.LockoutEnd) ? "disabled"
+                           : AccountStatus.IsLocked(u.LockoutEnd) ? "locked" : "active"
+                };
+            })
+            .OrderBy(u => u.Role == "Admin" ? 0 : u.Role == "Staff" ? 1 : 2)
+            .ThenBy(u => u.DisplayName)
+            .ToList();
 
             return View(model);
         }
@@ -58,47 +76,27 @@ namespace mini_store.Controllers
         // =========================================================
 
         [HttpGet]
-        public IActionResult CreateStaff()
-        {
-            return View();
-        }
+        public IActionResult CreateStaff() => View();
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateStaff(CreateStaffViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var email = InputRules.NormalizeEmail(model.Email);
+            var result = await _accounts.CreateLoginAsync(email, model.Password, "Staff");
+
+            if (!result.Succeeded)
             {
+                foreach (var e in result.Errors) ModelState.AddModelError("", e.Description);
                 return View(model);
             }
 
-            var user = new IdentityUser
-            {
-                UserName = model.Email,
-                Email = model.Email
-            };
+            _notify.Add("New Staff Account", $"Staff account {email} was created successfully.", "info", UsersLink);
+            await _context.SaveChangesAsync();
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "Staff");
-
-                await Notify(
-                    "New Staff Account",
-                    $"Staff account {user.Email} was created successfully.",
-                    "info");
-
-                TempData["SuccessMessage"] = "Staff account created successfully.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-
-            return View(model);
+            TempData["Success"] = "Staff account created successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         // =========================================================
@@ -109,453 +107,141 @@ namespace mini_store.Controllers
         public async Task<IActionResult> CreateCustomerAccount()
         {
             await LoadAvailableCustomersAsync();
-
             return View(new CreateCustomerAccountViewModel());
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateCustomerAccount(
-            CreateCustomerAccountViewModel model)
+        public async Task<IActionResult> CreateCustomerAccount(CreateCustomerAccountViewModel model)
         {
-            if (!ModelState.IsValid)
+            async Task<IActionResult> Back(string? error = null)
             {
+                if (error != null) ModelState.AddModelError("", error);
                 await LoadAvailableCustomersAsync();
                 return View(model);
             }
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.CustomerId == model.CustomerId);
+            if (!ModelState.IsValid) return await Back();
 
-            if (customer == null)
-            {
-                ModelState.AddModelError("", "Customer not found.");
-                await LoadAvailableCustomersAsync();
-                return View(model);
-            }
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.CustomerId == model.CustomerId);
 
+            if (customer == null) return await Back("Customer not found.");
             if (string.IsNullOrWhiteSpace(customer.Email))
-            {
-                ModelState.AddModelError(
-                    "",
-                    "This customer needs an email address before an account can be created.");
-
-                await LoadAvailableCustomersAsync();
-                return View(model);
-            }
-
+                return await Back("This customer needs an email address before an account can be created.");
             if (!string.IsNullOrEmpty(customer.UserId))
-            {
-                ModelState.AddModelError(
-                    "",
-                    "This customer already has a linked account.");
+                return await Back("This customer already has a linked account.");
+            if (await _userManager.FindByEmailAsync(customer.Email) != null)
+                return await Back("An account already uses this email address. Check the existing account before continuing.");
 
-                await LoadAvailableCustomersAsync();
-                return View(model);
+            var result = await _accounts.CreateLoginAsync(customer.Email, model.Password, "Customer", customer);
+
+            if (!result.Succeeded)
+            {
+                foreach (var e in result.Errors) ModelState.AddModelError("", e.Description);
+                return await Back();
             }
 
-            var existingUser =
-                await _userManager.FindByEmailAsync(customer.Email);
-
-            if (existingUser != null)
-            {
-                ModelState.AddModelError(
-                    "",
-                    "An account already uses this email address. Check the existing account before continuing.");
-
-                await LoadAvailableCustomersAsync();
-                return View(model);
-            }
-
-            var user = new IdentityUser
-            {
-                UserName = customer.Email,
-                Email = customer.Email
-            };
-
-            var createResult =
-                await _userManager.CreateAsync(user, model.Password);
-
-            if (!createResult.Succeeded)
-            {
-                foreach (var error in createResult.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                await LoadAvailableCustomersAsync();
-                return View(model);
-            }
-
-            var roleResult =
-                await _userManager.AddToRoleAsync(user, "Customer");
-
-            if (!roleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(user);
-
-                foreach (var error in roleResult.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                await LoadAvailableCustomersAsync();
-                return View(model);
-            }
-
-            customer.UserId = user.Id;
+            _notify.Add("Customer Account Created", $"A login account was created for {customer.CustomerName}.", "info", UsersLink);
             await _context.SaveChangesAsync();
 
-            await Notify(
-                "Customer Account Created",
-                $"A login account was created for {customer.CustomerName}.",
-                "info");
-
-            TempData["SuccessMessage"] =
-                "Customer login account created and linked successfully.";
-
+            TempData["Success"] = "Customer login account created and linked successfully.";
             return RedirectToAction(nameof(Index));
         }
 
         private async Task LoadAvailableCustomersAsync()
         {
             var customers = await _context.Customers
-                .Where(c =>
-                    c.UserId == null &&
-                    c.Email != null &&
-                    c.Email.Trim() != "")
+                .Where(c => c.UserId == null && c.Email != null && c.Email.Trim() != "")
                 .OrderBy(c => c.CustomerName)
                 .ToListAsync();
 
-            ViewBag.Customers = new SelectList(
-                customers,
-                "CustomerId",
-                "CustomerName");
-        }
-
-
-        // =========================================================
-        // EDIT USER
-        // =========================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            return View(new EditUserViewModel
-            {
-                Id = user.Id,
-                Email = user.Email ?? user.UserName ?? "",
-                Role = roles.FirstOrDefault() ?? "Staff"
-            });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(EditUserViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = await _userManager.FindByIdAsync(model.Id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            if (model.Role != "Staff" && model.Role != "Admin")
-            {
-                ModelState.AddModelError("Role", "Invalid role selected.");
-                return View(model);
-            }
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            bool roleChanged = !currentRoles.Contains(model.Role) || currentRoles.Count != 1;
-
-            // An admin cannot change their own role (prevents locking everyone out)
-            var me = await _userManager.GetUserAsync(User);
-
-            if (roleChanged && me != null && me.Id == user.Id)
-            {
-                ModelState.AddModelError("Role", "You cannot change your own role.");
-                return View(model);
-            }
-
-            // Update email / username
-            user.Email = model.Email;
-            user.UserName = model.Email;
-
-            var updateResult = await _userManager.UpdateAsync(user);
-
-            if (!updateResult.Succeeded)
-            {
-                foreach (var error in updateResult.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                return View(model);
-            }
-
-            // Update role
-            if (roleChanged)
-            {
-                if (currentRoles.Any())
-                {
-                    var removeResult =
-                        await _userManager.RemoveFromRolesAsync(user, currentRoles);
-
-                    if (!removeResult.Succeeded)
-                    {
-                        ModelState.AddModelError("", "Could not update the user's role.");
-                        return View(model);
-                    }
-                }
-
-                var addResult = await _userManager.AddToRoleAsync(user, model.Role);
-
-                if (!addResult.Succeeded)
-                {
-                    // put the old roles back so the user is never left without one
-                    if (currentRoles.Any())
-                    {
-                        await _userManager.AddToRolesAsync(user, currentRoles);
-                    }
-
-                    ModelState.AddModelError("", "Could not update the user's role.");
-                    return View(model);
-                }
-
-                // Force the user to sign in again so the new role applies now
-                await _userManager.UpdateSecurityStampAsync(user);
-            }
-
-            TempData["SuccessMessage"] = "User account updated successfully.";
-            return RedirectToAction(nameof(Index));
+            ViewBag.Customers = new SelectList(customers, "CustomerId", "CustomerName");
         }
 
         // =========================================================
-        // RESET PASSWORD (admin resets a Staff password)
-        // =========================================================
-
-        [HttpGet]
-        public async Task<IActionResult> ResetPassword(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (!roles.Contains("Staff"))
-            {
-                TempData["ErrorMessage"] = "Only Staff passwords can be reset here.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(new ResetUserPasswordViewModel
-            {
-                Id = user.Id,
-                Email = user.Email ?? user.UserName ?? ""
-            });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ResetUserPasswordViewModel model)
-        {
-            var user = await _userManager.FindByIdAsync(model.Id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (!roles.Contains("Staff"))
-            {
-                TempData["ErrorMessage"] = "Only Staff passwords can be reset here.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            model.Email = user.Email ?? user.UserName ?? "";
-
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                return View(model);
-            }
-
-            // Sign the user out everywhere and clear any lockout from failed attempts
-            await _userManager.UpdateSecurityStampAsync(user);
-            await _userManager.ResetAccessFailedCountAsync(user);
-
-            await Notify(
-                "Staff Password Reset",
-                $"The password for {user.Email} was reset by an administrator.",
-                "info");
-
-            TempData["SuccessMessage"] = "Password reset successfully.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        // =========================================================
-        // ENABLE / DISABLE USER
+        // DISABLE / ENABLE / UNLOCK  (Staff and Customer logins)
         // =========================================================
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleStatus(string id)
+        public async Task<IActionResult> SetStatus(string id, bool enable)
         {
             var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
 
-            if (user == null)
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                return NotFound();
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (!roles.Contains("Staff"))
-            {
-                TempData["ErrorMessage"] =
-                    "Only Staff accounts can be disabled or enabled.";
+                TempData["Error"] = "Admin accounts are protected.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+            var who = user.Email ?? user.UserName;
 
-            var isCurrentlyActive =
-                !lockoutEnd.HasValue ||
-                lockoutEnd.Value <= DateTimeOffset.UtcNow;
-
-            if (isCurrentlyActive)
-            {
-                await _userManager.SetLockoutEnabledAsync(user, true);
-                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
-
-                // Kick out any session that is already logged in
-                await _userManager.UpdateSecurityStampAsync(user);
-
-                await Notify(
-                    "Staff Account Disabled",
-                    $"Staff account {user.Email} has been disabled.",
-                    "danger");
-
-                TempData["SuccessMessage"] = "Staff account disabled successfully.";
-            }
-            else
+            if (enable)
             {
                 await _userManager.SetLockoutEndDateAsync(user, null);
                 await _userManager.ResetAccessFailedCountAsync(user);
 
-                await Notify(
-                    "Staff Account Enabled",
-                    $"Staff account {user.Email} has been enabled.",
-                    "success");
-
-                TempData["SuccessMessage"] = "Staff account enabled successfully.";
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // =========================================================
-        // DELETE STAFF
-        // =========================================================
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (!roles.Contains("Staff"))
-            {
-                TempData["ErrorMessage"] =
-                    "Admin accounts are protected and cannot be deleted here.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser != null && currentUser.Id == user.Id)
-            {
-                TempData["ErrorMessage"] = "You cannot delete your own account.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var result = await _userManager.DeleteAsync(user);
-
-            if (result.Succeeded)
-            {
-                await Notify(
-                    "Staff Account Deleted",
-                    $"Staff account {user.Email} was deleted.",
-                    "danger");
-
-                TempData["SuccessMessage"] = "Staff account deleted successfully.";
+                _notify.Add("Account Enabled", $"Account {who} has been enabled.", "success", UsersLink);
+                TempData["Success"] = "Account enabled successfully.";
             }
             else
             {
-                TempData["ErrorMessage"] =
-                    string.Join(" ", result.Errors.Select(e => e.Description));
+                await _userManager.SetLockoutEnabledAsync(user, true);
+                await _userManager.SetLockoutEndDateAsync(user, AccountStatus.DisabledUntil);
+                await _userManager.UpdateSecurityStampAsync(user);   // kicks out the live session
+
+                _notify.Add("Account Disabled", $"Account {who} has been disabled.", "danger", UsersLink);
+                TempData["Success"] = "Account disabled successfully.";
             }
 
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         // =========================================================
-        // HELPER
+        // DELETE (Staff and Customer logins)
         // =========================================================
 
-        private async Task Notify(string title, string message, string type)
+        [HttpPost]
+        public async Task<IActionResult> Delete(string id)
         {
-            _context.Notifications.Add(new Notification
-            {
-                Title = title,
-                Message = message,
-                Type = type,
-                CreatedAt = DateTime.Now,
-                IsRead = false,
-                Link = Url.Action("Index", "User") ?? "#"
-            });
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
 
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                TempData["Error"] = "Admin accounts are protected and cannot be deleted.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if ((await _userManager.GetUserAsync(User))?.Id == user.Id)
+            {
+                TempData["Error"] = "You cannot delete your own account.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+            var who = isCustomer
+                ? await _context.Customers.Where(c => c.UserId == id).Select(c => c.CustomerName).FirstOrDefaultAsync()
+                : null;
+            who ??= user.Email ?? user.UserName;
+
+            var result = await _accounts.DeleteLoginAsync(id);
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = result.Describe();
+                return RedirectToAction(nameof(Index));
+            }
+
+            _notify.Add(isCustomer ? "Customer Login Deleted" : "Staff Account Deleted",
+                        $"The login for {who} was deleted.", "danger", UsersLink);
             await _context.SaveChangesAsync();
+
+            TempData["Success"] = isCustomer
+                ? "Customer login deleted. Their customer record was kept."
+                : "Staff account deleted successfully.";
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

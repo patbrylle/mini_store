@@ -7,25 +7,20 @@ namespace mini_store.Models
     {
         public int UtangId { get; set; }
 
-        // Customer who owes the money
         public int CustomerId { get; set; }
-
         public Customer? Customer { get; set; }
 
-        // Sale connected to this utang
         public int SaleId { get; set; }
-
         public Sale? Sale { get; set; }
 
-        // Original amount of the sale
         [Column(TypeName = "decimal(10,2)")]
         public decimal Amount { get; set; }
 
-        // Amount already paid
+        // Concurrency token: two simultaneous payments can't both succeed.
+        [ConcurrencyCheck]
         [Column(TypeName = "decimal(10,2)")]
         public decimal AmountPaid { get; set; }
 
-        // Remaining balance
         [Column(TypeName = "decimal(10,2)")]
         public decimal Balance { get; set; }
 
@@ -35,5 +30,12 @@ namespace mini_store.Models
 
         [StringLength(20)]
         public string Status { get; set; } = "Unpaid";
+
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+        // single source of truth for "overdue"
+[NotMapped]
+public bool IsOverdue =>
+    Balance > 0 && DueDate.HasValue && DueDate.Value.Date < DateTime.Today;
     }
 }

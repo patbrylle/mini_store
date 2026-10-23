@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using mini_store.Data;
+using mini_store.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,14 @@ builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
+builder.Services.AddScoped<ISalesService, SalesService>();
+builder.Services.AddHostedService<OverdueNotificationWorker>();
+builder.Services.AddMemoryCache();
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+builder.Services.AddScoped<IAppEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IPasswordRecoveryService, PasswordRecoveryService>();
 
 // NEW: everything requires login unless marked [AllowAnonymous]
 builder.Services.AddAuthorization(options =>
@@ -52,6 +62,13 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
+});
+// NEW: re-check the security stamp every minute (default is 30 minutes).
+// Disabling a staff account, resetting a password or changing a role then
+// logs that user out almost immediately instead of up to 30 minutes later.
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.FromMinutes(1);
 });
 
 var app = builder.Build();

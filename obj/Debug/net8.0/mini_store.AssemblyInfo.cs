@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("2173b6bf-5832-4c6b-be00-dbe2e736133b")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("mini_store")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7e081ef2f0c1a22688da37467cdbc1fcf5d10a7b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+69260cc70db729baf84538e2d7a4cec336b2943b")]
 [assembly: System.Reflection.AssemblyProductAttribute("mini_store")]
 [assembly: System.Reflection.AssemblyTitleAttribute("mini_store")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -888,3 +888,69 @@
         animation: none;
     }
 }
+/* login badge in the directory */
+.customer-login-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-size: .68rem;
+    font-weight: 700;
+    border-radius: 999px;
+    color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+}
+
+/* small helper text under fields / in the delete modal */
+.customer-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 6px 0 0;
+    font-size: .78rem;
+    color: var(--color-text-muted);
+}
+
+.customer-hint i {
+    margin-top: 2px;
+    color: var(--color-gold);
+}
+.customer-stat-card.is-danger { --kpi: var(--color-danger); }
+
+/* History button + "Owes" badge */
+.customer-history-btn {
+    color: var(--color-text);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.customer-history-btn:hover {
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+    border-color: var(--color-primary-light);
+}
+
+.customer-owes-badge {
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-size: .68rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border-radius: 999px;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+}
+
+/* tabs inside the history modal */
+.customer-history-tabs .nav-link {
+    padding: 7px 14px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.customer-history-tabs .nav-link.active {
+    color: #fff;
+    background: var(--color-primary);
+}

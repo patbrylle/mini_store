@@ -19,5 +19,11 @@ namespace mini_store.ViewModels.CustomerPortal
         public List<Sale> Transactions { get; set; } = new();
 
         public List<Utang> Utangs { get; set; } = new();
+        public int OverdueCount => Utangs.Count(u => u.IsOverdue);
+
+public Utang? NextDue => Utangs
+    .Where(u => u.Balance > 0 && u.DueDate.HasValue)
+    .OrderBy(u => u.DueDate)
+    .FirstOrDefault();
     }
 }

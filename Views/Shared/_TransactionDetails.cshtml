@@ -1,0 +1,164 @@
+@model mini_store.Models.TransactionVm
+@using mini_store.Models
+@{
+    var s = Model.Sale;
+    var utang = Model.Utang;
+    var key = TxStatus.Key(s.Status);
+    var balance = Model.Balance;
+    var overdue = Model.IsOverdue;
+    var returnTo = Context.Request.Query["returnTo"].ToString();
+    var itemCount = s.SaleItems.Sum(i => i.Quantity);
+    var pct = s.TotalAmount > 0 ? (int)Math.Round(Math.Min(100m, s.AmountPaid / s.TotalAmount * 100m)) : 0;
+    var canPay = balance > 0 && utang != null;
+    var canDelete = User.IsInRole("Admin") && key == "paid";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+
+<div class="modal-header tx-header">
+    <div class="tx-header-icon"><i class="bi @(s.PaymentMethod == "Credit" ? "bi-wallet2" : "bi-receipt")"></i></div>
+    <div class="me-auto">
+        <h5 class="tx-title">@s.TransactionNo</h5>
+        <p class="tx-sub">@s.SaleDate.ToString("MMM dd, yyyy · hh:mm tt")</p>
+    </div>
+    @if (overdue)
+    {
+        <span class="tx-pill overdue"><i class="bi bi-exclamation-circle-fill"></i> Overdue</span>
+    }
+    else
+    {
+        <span class="tx-pill @key"><span class="tx-dot"></span>@s.Status</span>
+    }
+    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body tx-body">
+
+    <div class="tx-info-grid">
+        <div class="tx-info"><span>Customer</span><strong>@(s.Customer?.CustomerName ?? "Walk-in customer")</strong></div>
+        <div class="tx-info"><span>Type</span><strong>@(s.PaymentMethod == "Credit" ? "Credit sale" : "Cash sale")</strong></div>
+        <div class="tx-info"><span>Cashier</span><strong>@(s.CreatedBy ?? "—")</strong></div>
+        @if (utang?.DueDate != null)
+        {
+            <div class="tx-info @(overdue ? "is-danger" : "")">
+                <span>Due date</span>
+                <strong>@utang.DueDate.Value.ToString("MMM dd, yyyy")</strong>
+            </div>
+        }
+        <div class="tx-info"><span>Items</span><strong>@itemCount item@(itemCount != 1 ? "s" : "")</strong></div>
+    </div>
+
+    <h6 class="tx-h">Items</h6>
+    <div class="table-responsive">
+        <table class="tx-table">
+            <thead><tr><th>Product</th><th class="text-center">Qty</th><th class="text-end">Price</th><th class="text-end">Subtotal</th></tr></thead>
+            <tbody>
+                @foreach (var item in s.SaleItems.OrderBy(i => i.AddedAt))
+                {
+                    <tr>
+                        <td>
+                            <strong>@(item.Product?.ProductName ?? "Product")</strong>
+                            @if (item.AddedAt.Date != s.SaleDate.Date)
+                            {
+                                <small class="d-block text-muted">Added @item.AddedAt.ToString("MMM dd, yyyy")</small>
+                            }
+                        </td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">₱@item.UnitPrice.ToString("N2")</td>
+                        <td class="text-end"><strong>₱@item.Subtotal.ToString("N2")</strong></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tx-summary">
+        <div class="tx-row"><span>Total</span><strong>₱@s.TotalAmount.ToString("N2")</strong></div>
+        <div class="tx-row"><span>Paid</span><strong class="text-success">₱@s.AmountPaid.ToString("N2")</strong></div>
+        <div class="tx-progress" title="@pct% paid"><span style="width:@(pct)%"></span></div>
+        <div class="tx-row tx-row-result"><span>Balance</span><strong class="@(balance > 0 ? "text-danger" : "")">₱@balance.ToString("N2")</strong></div>
+    </div>
+
+    <h6 class="tx-h">Payment history</h6>
+    @if (Model.Payments.Count == 0)
+    {
+        <p class="tx-muted">No payment records yet@(s.AmountPaid > 0 ? " (this transaction was made before payment tracking)" : "").</p>
+    }
+    else
+    {
+        <div class="tx-history">
+            @foreach (var p in Model.Payments)
+            {
+                <div class="tx-hist-row">
+                    <div>
+                        <strong>@p.ReceiptNo</strong>
+                        <small>@p.PaidAt.ToString("MMM dd, yyyy hh:mm tt") · Cash</small>
+                    </div>
+                    <strong class="text-success">₱@p.Amount.ToString("N2")</strong>
+                    <button type="button" class="tx-btn tx-btn-ghost tx-btn-sm"
+                            data-tx-action="receipt" data-sale="@s.SaleId" data-payment="@p.PaymentId">
+                        <i class="bi bi-receipt"></i> Receipt
+                    </button>
+                </div>
+            }
+        </div>
+    }
+
+    @if (canPay)
+    {
+        <div class="tx-paybox">
+            <h6 class="tx-h"><i class="bi bi-cash-coin"></i> Receive a payment</h6>
+
+            <form id="txPayForm" novalidate data-max="@balance.ToString("0.00", inv)">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="utangId" value="@utang!.UtangId" />
+
+                <div id="txPayError" class="tx-alert" role="alert" hidden></div>
+
+                <div id="txPayStep1">
+                    <label class="tx-label" for="txPayAmount">Amount (cash)</label>
+                    <div class="tx-money">
+                        <span>₱</span>
+                        <input type="number" id="txPayAmount" name="amount" min="0.01" max="@balance.ToString("0.00", inv)" step="0.01" inputmode="decimal" placeholder="0.00" />
+                    </div>
+                    <button type="button" class="tx-link" data-tx-action="pay-full">Pay full balance (₱@balance.ToString("N2"))</button>
+                    <button type="button" class="tx-btn tx-btn-primary mt-3" data-tx-action="pay-review">Review payment <i class="bi bi-arrow-right"></i></button>
+                </div>
+
+                <div id="txPayStep2" hidden>
+                    <div class="tx-confirm" id="txPayConfirmText"></div>
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="button" class="tx-btn tx-btn-ghost" data-tx-action="pay-back"><i class="bi bi-arrow-left"></i> Back</button>
+                        <button type="button" class="tx-btn tx-btn-success" data-tx-action="pay-confirm"><i class="bi bi-check2-circle"></i> Confirm payment</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    }
+</div>
+
+<div class="modal-footer tx-footer">
+    @if (canDelete)
+    {
+        <div class="tx-del me-auto">
+            <button type="button" class="tx-btn tx-btn-danger-ghost" data-tx-action="del-start"><i class="bi bi-trash"></i> Delete</button>
+
+            <form method="post" asp-controller="Sales" asp-action="Delete" asp-route-id="@s.SaleId" asp-route-returnTo="@returnTo" class="tx-del-ask" hidden>
+                <div class="tx-del-opts">
+                    <label class="tx-del-opt">
+                        <input type="radio" name="restock" value="true" required />
+                        <span><strong>Delete and restock</strong><small>Items went back on the shelf (mistake or return)</small></span>
+                    </label>
+                    <label class="tx-del-opt">
+                        <input type="radio" name="restock" value="false" required />
+                        <span><strong>Delete, don't restock</strong><small>Items were taken. Stock stays as it is</small></span>
+                    </label>
+                </div>
+                <div class="tx-del-btns">
+                    <button type="submit" class="tx-btn tx-btn-danger tx-btn-sm">Delete</button>
+                    <button type="button" class="tx-btn tx-btn-ghost tx-btn-sm" data-tx-action="del-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    }
+    <button type="button" class="tx-btn tx-btn-ghost" data-bs-dismiss="modal">Close</button>
+</div>

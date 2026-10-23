@@ -1,171 +1,100 @@
-
 @model mini_store.ViewModels.CustomerPortal.CustomerPortalViewModel
 
 @{
-    ViewData["Title"] = "My Utang";
-    Layout = "_Layout";
+    ViewData["Title"] = "My Credit";
+
+    var overdueAmount = Model.Utangs.Where(u => u.IsOverdue).Sum(u => u.Balance);
+
+    var kOwed    = ("gold", "bi-wallet2", "Outstanding Balance", $"₱{Model.TotalUtangBalance:N2}", "Remaining to pay");
+    var kRecords = ("primary", "bi-journal-text", "Credit Records", Model.Utangs.Count.ToString(), "All recorded credit");
+    var kSettled = ("success", "bi-check-circle", "Settled", Model.Utangs.Count(u => u.Balance <= 0).ToString(), "Fully paid");
+    var kOver    = ("danger", "bi-exclamation-circle", "Overdue", $"₱{overdueAmount:N2}", $"{Model.OverdueCount} record(s)");
 }
 
-<style>
-    .utang-page { padding: 24px 0; color: #172b4d; }
-    .utang-header {
-        padding: 26px;
-        border-radius: 18px;
-        color: white;
-        background: linear-gradient(120deg, #17345d, #2876b9);
-        margin-bottom: 22px;
-    }
-    .utang-card {
-        background: white;
-        border: 1px solid #e5eaf1;
-        border-radius: 16px;
-        padding: 22px;
-        height: 100%;
-        box-shadow: 0 5px 18px rgba(15,23,42,.04);
-    }
-    .utang-card small { color: #718096; }
-    .utang-card h3 {
-        font-weight: 750;
-        margin-top: 9px;
-        overflow-wrap: anywhere;
-    }
-    .utang-panel {
-        background: white;
-        border: 1px solid #e5eaf1;
-        border-radius: 16px;
-        padding: 22px;
-    }
-    .utang-table th {
-        background: #f5f7fb;
-        color: #64748b;
-        font-size: .78rem;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-    .utang-table td { vertical-align: middle; }
-    .utang-table { white-space: nowrap; }
-    .utang-empty { text-align: center; padding: 36px 12px; color: #718096; }
-    @@media(max-width:576px) {
-        .utang-header, .utang-panel, .utang-card { padding: 17px; }
-    }
-</style>
+@section Styles {
+    <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/portal.js" asp-append-version="true"></script>
+}
 
-<div class="container-fluid utang-page">
-    <div class="utang-header">
-        <div class="small text-white-50 mb-2">CUSTOMER PORTAL / MY UTANG</div>
-        <h2 class="fw-bold">My Utang</h2>
-        <p class="mb-0">
-            Hello, @Model.CustomerName. Keep track of your outstanding balances and due dates.
-        </p>
+<div class="pt-page">
+
+    <section class="pt-hero pt-hero-sm">
+        <div class="pt-eyebrow">Customer portal</div>
+        <h1>My Credit</h1>
+        <p>Hello, @Model.CustomerName. Track your balances, payments and due dates.</p>
+    </section>
+
+    <div class="row g-3">
+        <div class="col-xl-3 col-sm-6"><partial name="_Kpi" model="kOwed" /></div>
+        <div class="col-xl-3 col-sm-6"><partial name="_Kpi" model="kRecords" /></div>
+        <div class="col-xl-3 col-sm-6"><partial name="_Kpi" model="kSettled" /></div>
+        <div class="col-xl-3 col-sm-6"><partial name="_Kpi" model="kOver" /></div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
-            <div class="utang-card">
-                <small><i class="bi bi-wallet2 me-2"></i>Total Outstanding</small>
-                <h3 class="text-danger">₱@Model.TotalUtangBalance.ToString("N2")</h3>
-                <small>Remaining recorded balance</small>
-            </div>
-        </div>
-        <div class="col-12 col-md-4">
-            <div class="utang-card">
-                <small><i class="bi bi-receipt me-2"></i>Utang Records</small>
-                <h3>@Model.Utangs.Count</h3>
-                <small>All recorded credit transactions</small>
-            </div>
-        </div>
-        <div class="col-12 col-md-4">
-            <div class="utang-card">
-                <small><i class="bi bi-check-circle me-2"></i>Paid Records</small>
-                <h3>@Model.Utangs.Count(u => u.Balance <= 0)</h3>
-                <small>Balances fully settled</small>
-            </div>
-        </div>
-    </div>
-
-    <section class="utang-panel">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <section class="pt-card" data-portal-filter>
+        <div class="pt-card-head">
             <div>
-                <h4 class="fw-bold mb-1">Utang Details</h4>
-                <p class="text-muted small mb-0">
-                    Check the original amount, payments recorded, and remaining balance.
-                </p>
+                <h5>Credit Details</h5>
+                <p>Original amount, payments made and remaining balance</p>
             </div>
-            <a asp-controller="CustomerPortal"
-               asp-action="Index"
-               class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Back to Home
-            </a>
+            <div class="pt-tools">
+                <div class="pt-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" data-filter-q placeholder="Search..." aria-label="Search credit records" autocomplete="off" />
+                </div>
+                <select class="pt-select" data-filter-cat aria-label="Filter by status">
+                    <option value="">All records</option>
+                    <option value="open">Open</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="paid">Paid</option>
+                </select>
+            </div>
         </div>
 
         @if (Model.Utangs.Any())
         {
-            <div class="table-responsive">
-                <table class="table table-hover utang-table">
-                    <thead>
-                        <tr>
-                            <th>Utang No.</th>
-                            <th>Date Recorded</th>
-                            <th>Original Amount</th>
-                            <th>Amount Paid</th>
-                            <th>Balance</th>
-                            <th>Due Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var utang in Model.Utangs)
-                    {
-                        var overdue = utang.Balance > 0
-                            && utang.DueDate.HasValue
-                            && utang.DueDate.Value.Date < DateTime.Today;
+            <table class="pt-table">
+                <thead>
+                    <tr><th>Reference</th><th>Recorded</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Due date</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                @foreach (var u in Model.Utangs)
+                {
+                    var group = u.Balance <= 0 ? "paid" : u.IsOverdue ? "overdue" : "open";
+                    var reference = u.Sale?.TransactionNo ?? $"#{u.UtangId}";
+                    var pct = u.Amount > 0 ? (int)Math.Round(Math.Min(100m, u.AmountPaid / u.Amount * 100m)) : 0;
+                    var search = $"{reference} {u.DateCreated:MMM dd yyyy} {u.DueDate:MMM dd yyyy} {u.Status} {group}".ToLowerInvariant();
 
-                        <tr>
-                            <td class="fw-bold">#@utang.UtangId</td>
-                            <td>@utang.DateCreated.ToString("MMM dd, yyyy")</td>
-                            <td>₱@utang.Amount.ToString("N2")</td>
-                            <td>₱@utang.AmountPaid.ToString("N2")</td>
-                            <td class="fw-bold @(utang.Balance > 0 ? "text-danger" : "text-success")">
-                                ₱@utang.Balance.ToString("N2")
-                            </td>
-                            <td>
-                                @if (utang.DueDate.HasValue)
-                                {
-                                    @utang.DueDate.Value.ToString("MMM dd, yyyy")
-                                }
-                                else
-                                {
-                                    <span class="text-muted">Not set</span>
-                                }
-                            </td>
-                            <td>
-                                @if (utang.Balance <= 0)
-                                {
-                                    <span class="badge bg-success">Paid</span>
-                                }
-                                else if (overdue)
-                                {
-                                    <span class="badge bg-danger">Overdue</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">
-                                        @(utang.Status ?? "Unpaid")
-                                    </span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
+                    <tr data-filter-item data-search="@search" data-category="@group">
+                        <td data-label="Reference"><span class="pt-mono">@reference</span></td>
+                        <td data-label="Recorded">@u.DateCreated.ToString("MMM dd, yyyy")</td>
+                        <td data-label="Amount">₱@u.Amount.ToString("N2")</td>
+                        <td data-label="Paid">
+                            ₱@u.AmountPaid.ToString("N2")
+                            <div class="pt-progress" title="@pct% paid"><span style="width:@(pct)%"></span></div>
+                        </td>
+                        <td data-label="Balance"><strong class="@(u.Balance > 0 ? "text-danger" : "text-success")">₱@u.Balance.ToString("N2")</strong></td>
+                        <td data-label="Due date">@(u.DueDate?.ToString("MMM dd, yyyy") ?? "Not set")</td>
+                        <td data-label="Status"><partial name="_StatusPill" model="(u.Status, u.IsOverdue)" /></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+
+            <div class="pt-empty" data-filter-empty hidden>
+                <i class="bi bi-search"></i>
+                <h5>No matching records</h5>
+                <p>Try a different search or filter.</p>
             </div>
         }
         else
         {
-            <div class="utang-empty">
-                <i class="bi bi-check-circle fs-1"></i>
-                <h5 class="mt-3 fw-bold">You're all caught up!</h5>
-                <p class="mb-0">You have no recorded utang transactions.</p>
+            <div class="pt-empty">
+                <i class="bi bi-check-circle"></i>
+                <h5>You're all caught up!</h5>
+                <p>You have no recorded credit.</p>
             </div>
         }
     </section>

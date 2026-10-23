@@ -1,12 +1,14 @@
 using System.ComponentModel.DataAnnotations;
+using mini_store.Validation;
 
 namespace mini_store.ViewModels.Account
 {
     public class CreateStaffViewModel
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+[StringLength(100)]
+[StrongEmail]
+public string Email { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]

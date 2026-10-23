@@ -307,6 +307,58 @@ namespace mini_store.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("mini_store.Models.Payment", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("AmountTendered")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("ChangeGiven")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ReceivedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("ReferenceNo")
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UtangId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("UtangId");
+
+                    b.HasIndex("SaleId", "Sequence")
+                        .IsUnique();
+
+                    b.ToTable("Payments");
+                });
+
             modelBuilder.Entity("mini_store.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -319,7 +371,7 @@ namespace mini_store.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
@@ -346,8 +398,16 @@ namespace mini_store.Migrations
                     b.Property<decimal>("AmountPaid")
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
@@ -368,6 +428,11 @@ namespace mini_store.Migrations
                     b.HasKey("SaleId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("SaleDate");
 
                     b.ToTable("Sales");
                 });
@@ -419,6 +484,7 @@ namespace mini_store.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("AmountPaid")
+                        .IsConcurrencyToken()
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("Balance")
@@ -501,6 +567,24 @@ namespace mini_store.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("mini_store.Models.Payment", b =>
+                {
+                    b.HasOne("mini_store.Models.Sale", "Sale")
+                        .WithMany("Payments")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("mini_store.Models.Utang", "Utang")
+                        .WithMany("Payments")
+                        .HasForeignKey("UtangId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Sale");
+
+                    b.Navigation("Utang");
+                });
+
             modelBuilder.Entity("mini_store.Models.Product", b =>
                 {
                     b.HasOne("mini_store.Models.Category", "Category")
@@ -566,7 +650,14 @@ namespace mini_store.Migrations
 
             modelBuilder.Entity("mini_store.Models.Sale", b =>
                 {
+                    b.Navigation("Payments");
+
                     b.Navigation("SaleItems");
+                });
+
+            modelBuilder.Entity("mini_store.Models.Utang", b =>
+                {
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

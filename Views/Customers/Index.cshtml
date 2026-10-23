@@ -3,21 +3,18 @@
 @{
     ViewData["Title"] = "Customers";
 
-    var customers = Model?.ToList()
-        ?? new List<mini_store.Models.Customer>();
+    var customers = Model?.ToList() ?? new List<mini_store.Models.Customer>();
+    var balances = ViewBag.Balances as Dictionary<int, decimal> ?? new Dictionary<int, decimal>();
 
     int totalCustomers = customers.Count;
-    int withContact = customers.Count(c => !string.IsNullOrWhiteSpace(c.ContactNumber));
-    int completeProfiles = customers.Count(c =>
-        !string.IsNullOrWhiteSpace(c.Email) &&
-        !string.IsNullOrWhiteSpace(c.ContactNumber) &&
-        !string.IsNullOrWhiteSpace(c.Address));
+    int withLogin = customers.Count(c => !string.IsNullOrEmpty(c.UserId));
+    int withUtang = balances.Count;
+    decimal outstanding = balances.Values.Sum();
 }
 
 @section Styles {
-    <link rel="stylesheet"
-          href="~/css/customer.css"
-          asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/customer.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/transactions.css" asp-append-version="true" />
 }
 
 <div class="customer-page">
@@ -48,31 +45,20 @@
 
     </div>
 
-
-    <!-- ALERTS (outside any loop) -->
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert fade show customer-alert is-success" role="alert">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>@TempData["SuccessMessage"]</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    @if (TempData["DeleteError"] != null)
+    @if (!ViewData.ModelState.IsValid)
     {
         <div class="alert fade show customer-alert is-warning" role="alert">
             <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>@TempData["DeleteError"]</span>
+            <span>@(string.Join(" ", ViewData.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)))</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-
     <!-- SUMMARY CARDS -->
     <div class="row g-3 customer-kpi-row">
-
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <div class="customer-stat-card is-primary" style="--i:0">
                 <div class="customer-stat-icon"><i class="bi bi-people"></i></div>
                 <div class="customer-stat-body">
@@ -82,31 +68,37 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-4 col-md-6">
-            <div class="customer-stat-card is-gold" style="--i:1">
-                <div class="customer-stat-icon"><i class="bi bi-telephone"></i></div>
-                <div class="customer-stat-body">
-                    <span class="customer-stat-label">With Contact Number</span>
-                    <h3>@withContact</h3>
-                    <small>Reachable by phone</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-6">
-            <div class="customer-stat-card is-success" style="--i:2">
+        <div class="col-xl-3 col-md-6">
+            <div class="customer-stat-card is-success" style="--i:1">
                 <div class="customer-stat-icon"><i class="bi bi-person-check"></i></div>
                 <div class="customer-stat-body">
-                    <span class="customer-stat-label">Complete Profiles</span>
-                    <h3>@completeProfiles</h3>
-                    <small>Email, contact and address filled in</small>
+                    <span class="customer-stat-label">With Login</span>
+                    <h3>@withLogin</h3>
+                    <small>Can use the customer portal</small>
                 </div>
             </div>
         </div>
-
+        <div class="col-xl-3 col-md-6">
+            <div class="customer-stat-card is-gold" style="--i:2">
+                <div class="customer-stat-icon"><i class="bi bi-journal-text"></i></div>
+                <div class="customer-stat-body">
+                    <span class="customer-stat-label">Customers with Utang</span>
+                    <h3>@withUtang</h3>
+                    <small>Have an unpaid balance</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="customer-stat-card is-danger" style="--i:3">
+                <div class="customer-stat-icon"><i class="bi bi-wallet2"></i></div>
+                <div class="customer-stat-body">
+                    <span class="customer-stat-label">Outstanding Utang</span>
+                    <h3>₱@outstanding.ToString("N2")</h3>
+                    <small>Total still to collect</small>
+                </div>
+            </div>
+        </div>
     </div>
-
 
     <!-- CUSTOMER DIRECTORY -->
     <div class="customer-table-card">
@@ -143,7 +135,6 @@
 
         </div>
 
-
         <div class="table-responsive">
 
             <table class="table customer-table" id="customerTable">
@@ -174,6 +165,19 @@
                                     <div class="customer-cell">
                                         <div class="customer-avatar">@initial</div>
                                         <span class="customer-name">@customer.CustomerName</span>
+
+                                        @if (!string.IsNullOrEmpty(customer.UserId))
+                                        {
+                                            <span class="customer-login-badge"
+                                                  title="This customer can log in to the customer portal">
+                                                <i class="bi bi-person-check-fill"></i> Login
+                                            </span>
+                                        }
+
+                                        @if (balances.TryGetValue(customer.CustomerId, out var owed))
+                                        {
+                                            <span class="customer-owes-badge" title="Unpaid utang balance">Owes ₱@owed.ToString("N2")</span>
+                                        }
                                     </div>
                                 </td>
 
@@ -221,39 +225,42 @@
                                     }
                                 </td>
 
-                               
-<!-- ACTIONS -->
-<td>
-    <div class="customer-actions">
+                                <!-- ACTIONS -->
+                                <td>
+                                    <div class="customer-actions">
 
-        @if (User.IsInRole("Admin"))
-        {
-            <button type="button"
-                    class="btn customer-action-btn customer-edit-btn"
-                    title="Edit customer"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editCustomerModal-@customer.CustomerId">
-                <i class="bi bi-pencil"></i>
-                <span>Edit</span>
-            </button>
+                                        <button type="button"
+                                                class="btn customer-action-btn customer-history-btn"
+                                                title="Transactions and utang history"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#customerHistoryModal"
+                                                data-url="@Url.Action("History", "Customers", new { id = customer.CustomerId })"
+                                                data-name="@customer.CustomerName">
+                                            <i class="bi bi-clock-history"></i>
+                                            <span>History</span>
+                                        </button>
 
-            <button type="button"
-                    class="btn customer-action-btn customer-delete-btn"
-                    title="Delete customer"
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteCustomerModal-@customer.CustomerId">
-                <i class="bi bi-trash"></i>
-                <span>Delete</span>
-            </button>
-        }
-        else
-        {
-            <span class="text-muted small">View only</span>
-        }
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <button type="button"
+                                                    class="btn customer-action-btn customer-edit-btn"
+                                                    title="Edit customer"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editCustomerModal-@customer.CustomerId">
+                                                <i class="bi bi-pencil"></i><span>Edit</span>
+                                            </button>
 
-    </div>
-</td>
+                                            <button type="button"
+                                                    class="btn customer-action-btn customer-delete-btn"
+                                                    title="Delete customer"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteCustomerModal-@customer.CustomerId">
+                                                <i class="bi bi-trash"></i><span>Delete</span>
+                                            </button>
+                                        }
 
+                                    </div>
+                                </td>
 
                             </tr>
                         }
@@ -305,249 +312,178 @@
 
 </div>
 
-
 <!-- ADD CUSTOMER MODAL -->
-<partial name="CustomerCreateModal" />
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content customer-modal">
 
-
-<!-- ============================================================
-     EDIT + DELETE MODALS
-     ============================================================ -->
-@if (User.IsInRole("Admin"))
-{
-@foreach (var customer in customers)
-{
-    <!-- EDIT CUSTOMER MODAL -->
-    
-    <div class="modal fade"
-         id="editCustomerModal-@customer.CustomerId"
-         tabindex="-1"
-         aria-labelledby="editCustomerModalLabel-@customer.CustomerId"
-         aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered">
-
-            <div class="modal-content customer-modal">
-
-                <form asp-controller="Customers"
-                      asp-action="Edit"
-                      method="post">
-
-                    <!-- Controller expects Edit(int id, Customer customer),
-                         so BOTH id and CustomerId are posted -->
-                    <input type="hidden" name="id" value="@customer.CustomerId" />
-                    <input type="hidden" name="CustomerId" value="@customer.CustomerId" />
-
-                    <div class="modal-header customer-modal-header">
-
-                        <div class="customer-modal-title">
-
-                            <div class="customer-modal-icon">
-                                <i class="bi bi-pencil"></i>
-                            </div>
-
-                            <div>
-                                <h5 id="editCustomerModalLabel-@customer.CustomerId">Edit Customer</h5>
-                                <p>Update customer information.</p>
-                            </div>
-
-                        </div>
-
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-
-                    </div>
-
-                    <div class="modal-body customer-modal-body">
-
-                        <!-- NAME -->
-                        <div class="customer-form-group">
-                            <label for="editName-@customer.CustomerId">Customer Name</label>
-
-                            <div class="customer-input">
-                                <i class="bi bi-person"></i>
-                                <input type="text"
-                                       id="editName-@customer.CustomerId"
-                                       name="CustomerName"
-                                       class="form-control"
-                                       value="@customer.CustomerName"
-                                       required />
-                            </div>
-                        </div>
-
-                        <!-- EMAIL -->
-                        <div class="customer-form-group">
-                            <label for="editEmail-@customer.CustomerId">Email</label>
-
-                            <div class="customer-input">
-                                <i class="bi bi-envelope"></i>
-                                <input type="email"
-                                       id="editEmail-@customer.CustomerId"
-                                       name="Email"
-                                       class="form-control"
-                                       value="@customer.Email" />
-                            </div>
-                        </div>
-
-                        <!-- CONTACT -->
-                        <div class="customer-form-group">
-                            <label for="editContact-@customer.CustomerId">Contact Number</label>
-
-                            <div class="customer-input">
-                                <i class="bi bi-telephone"></i>
-                                <input type="text"
-                                       id="editContact-@customer.CustomerId"
-                                       name="ContactNumber"
-                                       class="form-control"
-                                       value="@customer.ContactNumber" />
-                            </div>
-                        </div>
-
-                        <!-- ADDRESS -->
-                        <div class="customer-form-group">
-                            <label for="editAddress-@customer.CustomerId">Address</label>
-
-                            <div class="customer-input customer-textarea">
-                                <i class="bi bi-geo-alt"></i>
-                                <textarea id="editAddress-@customer.CustomerId"
-                                          name="Address"
-                                          class="form-control"
-                                          rows="3">@customer.Address</textarea>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="modal-footer customer-modal-footer">
-
-                        <button type="button"
-                                class="btn customer-cancel-btn"
-                                data-bs-dismiss="modal">
-                            Cancel
-                        </button>
-
-                        <button type="submit" class="btn customer-save-btn">
-                            <i class="bi bi-check-lg me-1"></i>
-                            Save Changes
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- DELETE CUSTOMER MODAL -->
-    <div class="modal fade"
-         id="deleteCustomerModal-@customer.CustomerId"
-         tabindex="-1"
-         aria-labelledby="deleteCustomerModalLabel-@customer.CustomerId"
-         aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered">
-
-            <div class="modal-content customer-modal">
+            <form asp-controller="Customers" asp-action="Create" method="post">
 
                 <div class="modal-header customer-modal-header">
-
                     <div class="customer-modal-title">
-
-                        <div class="customer-modal-icon is-danger">
-                            <i class="bi bi-trash"></i>
-                        </div>
-
+                        <div class="customer-modal-icon"><i class="bi bi-person-plus"></i></div>
                         <div>
-                            <h5 id="deleteCustomerModalLabel-@customer.CustomerId">Delete Customer</h5>
-                            <p>This action cannot be undone.</p>
+                            <h5 id="addCustomerModalLabel">Add Customer</h5>
+                            <p>Enter the customer's information.</p>
                         </div>
-
                     </div>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body customer-modal-body">
-
-                    <p class="customer-delete-text">
-                        Are you sure you want to delete
-                        <strong>@customer.CustomerName</strong>?
-                    </p>
-
+                    @{ var addFields = ("add", (mini_store.Models.Customer?)null, false); }
+                    <partial name="_CustomerFields" model="addFields" />
                 </div>
 
                 <div class="modal-footer customer-modal-footer">
-
-                    <button type="button"
-                            class="btn customer-cancel-btn"
-                            data-bs-dismiss="modal">
-                        Cancel
+                    <button type="button" class="btn customer-cancel-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn customer-save-btn">
+                        <i class="bi bi-check-lg me-1"></i> Add Customer
                     </button>
+                </div>
 
-                    <form asp-controller="Customers"
-                          asp-action="Delete"
-                          method="post">
+            </form>
 
+        </div>
+    </div>
+</div>
+
+<!-- HISTORY MODAL (body loaded by customer.js) -->
+<div class="modal fade" id="customerHistoryModal" tabindex="-1" aria-labelledby="customerHistoryTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content customer-modal">
+
+            <div class="modal-header customer-modal-header">
+                <div class="customer-modal-title">
+                    <div class="customer-modal-icon"><i class="bi bi-clock-history"></i></div>
+                    <div>
+                        <h5 id="customerHistoryTitle">Customer History</h5>
+                        <p>Transactions and utang records.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body customer-modal-body" id="customerHistoryBody">
+                <!-- loaded by customer.js -->
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@{
+    ViewData["DefaultTransactionType"] = "Cash";
+}
+<partial name="_TransactionModal" model="(mini_store.Models.TransactionFormData)ViewBag.Form" />
+
+<!-- ============================================================
+     EDIT + DELETE MODALS (admin only)
+     ============================================================ -->
+@if (User.IsInRole("Admin"))
+{
+    foreach (var customer in customers)
+    {
+        var hasLogin = !string.IsNullOrEmpty(customer.UserId);
+        var editFields = ($"edit-{customer.CustomerId}", customer, hasLogin);
+
+        <!-- EDIT CUSTOMER MODAL -->
+        <div class="modal fade"
+             id="editCustomerModal-@customer.CustomerId"
+             tabindex="-1"
+             aria-labelledby="editCustomerModalLabel-@customer.CustomerId"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content customer-modal">
+
+                    <form asp-controller="Customers" asp-action="Edit" method="post">
+
+                        <!-- Controller expects Edit(int id, Customer customer),
+                             so BOTH id and CustomerId are posted -->
                         <input type="hidden" name="id" value="@customer.CustomerId" />
+                        <input type="hidden" name="CustomerId" value="@customer.CustomerId" />
 
-                        <button type="submit" class="btn customer-delete-confirm">
-                            <i class="bi bi-trash me-1"></i>
-                            Delete Customer
-                        </button>
+                        <div class="modal-header customer-modal-header">
+                            <div class="customer-modal-title">
+                                <div class="customer-modal-icon"><i class="bi bi-pencil"></i></div>
+                                <div>
+                                    <h5 id="editCustomerModalLabel-@customer.CustomerId">Edit Customer</h5>
+                                    <p>Update customer information.</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body customer-modal-body">
+                            <partial name="_CustomerFields" model="editFields" />
+                        </div>
+
+                        <div class="modal-footer customer-modal-footer">
+                            <button type="button" class="btn customer-cancel-btn" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn customer-save-btn">
+                                <i class="bi bi-check-lg me-1"></i> Save Changes
+                            </button>
+                        </div>
 
                     </form>
 
                 </div>
-
             </div>
-
         </div>
 
-    </div>
-}
+        <!-- DELETE CUSTOMER MODAL -->
+        <div class="modal fade"
+             id="deleteCustomerModal-@customer.CustomerId"
+             tabindex="-1"
+             aria-labelledby="deleteCustomerModalLabel-@customer.CustomerId"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content customer-modal">
+
+                    <div class="modal-header customer-modal-header">
+                        <div class="customer-modal-title">
+                            <div class="customer-modal-icon is-danger"><i class="bi bi-trash"></i></div>
+                            <div>
+                                <h5 id="deleteCustomerModalLabel-@customer.CustomerId">Delete Customer</h5>
+                                <p>This action cannot be undone.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body customer-modal-body">
+                        <p class="customer-delete-text">
+                            Are you sure you want to delete
+                            <strong>@customer.CustomerName</strong>?
+                        </p>
+
+                        @if (hasLogin)
+                        {
+                            <p class="customer-hint">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                This also deletes their customer-portal login.
+                            </p>
+                        }
+                    </div>
+
+                    <div class="modal-footer customer-modal-footer">
+                        <button type="button" class="btn customer-cancel-btn" data-bs-dismiss="modal">Cancel</button>
+
+                        <form asp-controller="Customers" asp-action="Delete" method="post">
+                            <input type="hidden" name="id" value="@customer.CustomerId" />
+                            <button type="submit" class="btn customer-delete-confirm">
+                                <i class="bi bi-trash me-1"></i> Delete Customer
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
 }
 
 @section Scripts {
-
-    <script src="~/js/customer.js"
-            asp-append-version="true"></script>
-
-    <script>
-        // Shows "No matching customers" when customer.js's search hides every row.
-        // It only reads row visibility, so it never fights with that script.
-        (function () {
-            var table = document.getElementById('customerTable');
-            var search = document.getElementById('customerSearch');
-            var none = document.getElementById('customerNoResults');
-            if (!table || !search || !none) return;
-
-            var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'))
-                .filter(function (r) { return !r.querySelector('td[colspan]'); });
-
-            if (!rows.length) return;
-
-            function refresh() {
-                var visible = rows.filter(function (r) {
-                    return window.getComputedStyle(r).display !== 'none';
-                }).length;
-
-                none.hidden = visible !== 0;
-            }
-
-            ['input', 'keyup', 'search'].forEach(function (evt) {
-                search.addEventListener(evt, function () { setTimeout(refresh, 0); });
-            });
-        })();
-    </script>
-
+    <script src="~/js/transactions.js" asp-append-version="true"></script>
+    <script src="~/js/customer.js" asp-append-version="true"></script>
 }

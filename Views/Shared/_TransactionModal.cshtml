@@ -1,399 +1,196 @@
+@model mini_store.Models.TransactionFormData
+@using mini_store.Models
 @{
     var returnTo = ViewData["ReturnTo"]?.ToString() ?? "Sales";
-
-    var defaultType = ViewData["DefaultTransactionType"]?.ToString();
-
-    if (string.IsNullOrWhiteSpace(defaultType))
-    {
-        defaultType = Context.Request.Query["transactionType"].ToString();
-    }
-
-    if (string.IsNullOrWhiteSpace(defaultType))
-    {
-        defaultType = "Cash";
-    }
-
-    bool defaultIsUtang = defaultType.Equals(
-        "Utang",
-        StringComparison.OrdinalIgnoreCase
-    );
+    var defaultType = string.Equals(
+        ViewData["DefaultTransactionType"]?.ToString(), "Utang",
+        StringComparison.OrdinalIgnoreCase) ? "Utang" : "Cash";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
 }
 
-<!-- =========================================================
-     SHARED NEW TRANSACTION MODAL
-     Used by Sales and Utang pages
-========================================================== -->
+<div id="txRoot"
+     data-create-url="@Url.Action("Create", "Sales")"
+     data-pay-url="@Url.Action("Pay", "Sales")"
+     data-details-url="@Url.Action("Details", "Sales")"
+     data-receipt-url="@Url.Action("Receipt", "Sales")"
+     data-return="@returnTo">
 
-<div class="modal fade"
-     id="newSaleModal"
-     tabindex="-1"
-     aria-labelledby="newSaleModalLabel"
-     aria-hidden="true">
+    <!-- ================= NEW TRANSACTION ================= -->
+    <div class="modal fade tx-modal" id="newSaleModal" tabindex="-1"
+         aria-labelledby="newSaleModalLabel" aria-hidden="true"
+         data-default-type="@defaultType">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <form id="saleForm" novalidate autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="IdempotencyKey" id="txKey" />
 
-    <div class="modal-dialog modal-dialog-centered">
-
-        <div class="modal-content transaction-modal">
-
-            <form asp-controller="Sales"
-                  asp-action="Create"
-                  method="post"
-                  id="saleForm">
-
-                @Html.AntiForgeryToken()
-
-                <input type="hidden"
-                       name="ReturnTo"
-                       value="@returnTo" />
-
-                <!-- HEADER -->
-
-                <div class="modal-header transaction-header">
-
-                    <div class="transaction-title">
-
-                        <div class="transaction-icon">
-                            <i class="bi bi-cart-plus"></i>
+                    <div class="modal-header tx-header">
+                        <div class="tx-header-icon"><i class="bi bi-cart-plus"></i></div>
+                        <div class="me-auto">
+                            <h5 class="tx-title" id="newSaleModalLabel">New Transaction</h5>
+                            <p class="tx-sub" id="txStepLabel">Step 1 of 2 · Build the order</p>
                         </div>
-
-                        <div>
-
-                            <h5 id="newSaleModalLabel">
-                                New Transaction
-                            </h5>
-
-                            <p>
-                                Create a sale or record an utang.
-                            </p>
-
-                        </div>
-
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close">
-                    </button>
+                    <div class="modal-body tx-body">
+                        <div id="txError" class="tx-alert" role="alert" hidden></div>
 
-                </div>
+                        <!-- STEP 1 -->
+                        <div id="txStepEdit" class="tx-grid">
 
-                <!-- BODY -->
+                            <section class="tx-catalog">
+                                <div class="tx-search">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" id="txSearch" placeholder="Search products…  (Enter adds the first match)" aria-label="Search products" />
+                                </div>
 
-                <div class="modal-body transaction-body">
+                                <div class="tx-cats" id="txCats">
+                                    <button type="button" class="tx-chip active" data-cat="all">All</button>
+                                    @foreach (var c in Model.Categories)
+                                    {
+                                        <button type="button" class="tx-chip" data-cat="@c.CategoryId">@c.CategoryName</button>
+                                    }
+                                </div>
 
-                    <!-- TRANSACTION TYPE -->
-
-                    <div class="transaction-section">
-
-                        <label class="transaction-label">
-                            Transaction Type
-                        </label>
-
-                        <div class="transaction-type-grid">
-
-                            <!-- CASH -->
-
-                            <label class="transaction-type-option">
-
-                                <input type="radio"
-                                       name="TransactionType"
-                                       value="Cash"
-                                       checked="@(!defaultIsUtang)" />
-
-                                <div class="transaction-type-card">
-
-                                    <div class="transaction-type-icon cash">
-                                        <i class="bi bi-cash"></i>
+                                <div class="tx-products" id="txProducts">
+                                    @foreach (var p in Model.Products)
+                                    {
+                                        <button type="button" class="tx-product"
+                                                data-id="@p.ProductId"
+                                                data-name="@p.ProductName"
+                                                data-price="@p.Price.ToString("0.00", inv)"
+                                                data-stock="@p.Quantity"
+                                                data-cat="@p.CategoryId"
+                                                data-search="@((p.ProductName + " " + p.Category?.CategoryName).ToLowerInvariant())">
+                                            <span class="tx-product-name">@p.ProductName</span>
+                                            <span class="tx-product-cat">@(p.Category?.CategoryName ?? "Uncategorized")</span>
+                                            <span class="tx-product-foot">
+                                                <strong>₱@p.Price.ToString("N2")</strong>
+                                                <em class="@(p.Quantity <= 10 ? "is-low" : "")">@p.Quantity left</em>
+                                            </span>
+                                        </button>
+                                    }
+                                    <div class="tx-empty" id="txNoProducts" hidden>
+                                        <i class="bi bi-search"></i>
+                                        <span>No products match.</span>
                                     </div>
+                                </div>
+                            </section>
 
-                                    <div>
+                            <section class="tx-order">
 
-                                        <strong>
-                                            Cash Sale
-                                        </strong>
-
-                                        <small>
-                                            Customer pays immediately
-                                        </small>
-
+                                <div class="tx-section">
+                                    <span class="tx-label">Transaction type</span>
+                                    <div class="tx-type-grid">
+                                        <label class="tx-type">
+                                            <input type="radio" name="TransactionType" value="Cash" @(defaultType == "Cash" ? "checked" : "") />
+                                            <span class="tx-type-card">
+                                                <i class="bi bi-cash-coin"></i>
+                                                <span><strong>Cash sale</strong><small>Paid in full now</small></span>
+                                            </span>
+                                        </label>
+                                        <label class="tx-type">
+                                            <input type="radio" name="TransactionType" value="Utang" @(defaultType == "Utang" ? "checked" : "") />
+                                            <span class="tx-type-card">
+                                                <i class="bi bi-wallet2"></i>
+                                                <span><strong>Utang</strong><small>Pay later, on credit</small></span>
+                                            </span>
+                                        </label>
                                     </div>
-
-                                    <i class="bi bi-check-circle-fill selected-icon"></i>
-
                                 </div>
 
-                            </label>
+                                <div class="tx-section">
+                                    <label class="tx-label" for="txCustomer">Customer</label>
+                                    <select id="txCustomer" name="CustomerId" class="form-select tx-input">
+<option value="" id="txWalkIn">Walk-in customer</option>                                        @foreach (var c in Model.Customers)
+                                        {
+                                            <option value="@c.CustomerId">@c.CustomerName</option>
+                                        }
+                                    </select>
+                                    <small class="tx-help" id="txCustomerHint">Optional for cash sales.</small>
+                                </div>
 
-                            <!-- UTANG -->
-
-                            <label class="transaction-type-option">
-
-                                <input type="radio"
-                                       name="TransactionType"
-                                       value="Utang"
-                                       checked="@(defaultIsUtang)" />
-
-                                <div class="transaction-type-card">
-
-                                    <div class="transaction-type-icon utang">
-                                        <i class="bi bi-wallet2"></i>
+                                <div class="tx-section">
+                                    <span class="tx-label">Order</span>
+                                    <div class="tx-cart" id="txCart">
+                                        <div class="tx-cart-empty" id="txCartEmpty">
+                                            <i class="bi bi-cart3"></i>
+                                            <span>Tap a product to add it.</span>
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <div>
-
-                                        <strong>
-                                            Utang
-                                        </strong>
-
-                                        <small>
-                                            Record customer balance
-                                        </small>
-
+                                <div class="tx-section" id="txDueWrap" hidden>
+                                    <label class="tx-label" for="txDue">Due date</label>
+                                    <div class="tx-due">
+                                        <input type="date" id="txDue" name="DueDate" class="form-control tx-input" />
+                                        <button type="button" class="tx-chip" data-days="7">7 days</button>
+                                        <button type="button" class="tx-chip" data-days="15">15 days</button>
+                                        <button type="button" class="tx-chip" data-days="30">30 days</button>
                                     </div>
-
-                                    <i class="bi bi-check-circle-fill selected-icon"></i>
-
                                 </div>
 
-                            </label>
-
-                        </div>
-
-                    </div>
-
-                    <!-- CUSTOMER -->
-
-                    <div class="transaction-section">
-
-                        <label for="customerSelect"
-                               class="transaction-label">
-
-                            Customer
-
-                        </label>
-
-                        <select id="customerSelect"
-                                name="CustomerId"
-                                class="form-select transaction-select">
-
-                            <option value="">
-                                Walk-in Customer
-                            </option>
-
-                            @if (ViewBag.Customers != null)
-                            {
-                                foreach (var customer in ViewBag.Customers)
-                                {
-                                    <option value="@customer.CustomerId">
-                                        @customer.CustomerName
-                                    </option>
-                                }
-                            }
-
-                        </select>
-
-                        <small class="transaction-help">
-                            Customer is required when recording an utang.
-                        </small>
-
-                    </div>
-
-                    <!-- PRODUCT SELECTOR -->
-
-                    <div class="transaction-section">
-
-                        <label for="productSelector"
-                               class="transaction-label">
-
-                            Add Product
-
-                        </label>
-
-                        <select id="productSelector"
-                                class="form-select transaction-select">
-
-                            <option value="">
-                                Select a product to add...
-                            </option>
-
-                            @if (ViewBag.Products != null)
-                            {
-                                foreach (var product in ViewBag.Products)
-                                {
-                                    <option value="@product.ProductId"
-                                            data-price="@product.Price.ToString(
-                                                "0.00",
-                                                System.Globalization.CultureInfo.InvariantCulture
-                                            )"
-                                            data-stock="@product.Quantity">
-
-                                        @product.ProductName
-                                        — ₱@product.Price.ToString("N2")
-                                        (@product.Quantity in stock)
-
-                                    </option>
-                                }
-                            }
-
-                        </select>
-
-                        <small class="transaction-help">
-                            Select a product and it will be added automatically.
-                        </small>
-
-                    </div>
-
-                    <!-- SELECTED PRODUCTS -->
-
-                    <div class="transaction-section">
-
-                        <div class="transaction-section-header">
-
-                            <label class="transaction-label mb-0">
-                                Selected Products
-                            </label>
-
-                        </div>
-
-                        <div class="transaction-products">
-
-                            <div class="product-table-head">
-
-                                <div>Product</div>
-                                <div>Quantity</div>
-                                <div>Subtotal</div>
-                                <div></div>
-
-                            </div>
-
-                            <div id="saleProductsContainer">
-
-                                <div id="emptyProductMessage"
-                                     class="empty-products text-center text-muted">
-
-                                    <i class="bi bi-cart3"></i>
-
-                                    <span>
-                                        No products added yet.
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- PAYMENT -->
-
-                    <div class="transaction-section">
-
-                        <div class="transaction-payment">
-
-                            <div class="payment-summary">
-
-                                <!-- TOTAL -->
-
-                                <div class="payment-total">
-
-                                    <span>
-                                        Total Amount
-                                    </span>
-
-                                    <strong id="saleTotal">
-                                        ₱0.00
-                                    </strong>
-
-                                </div>
-
-                                <!-- AMOUNT PAID -->
-
-                                <div class="payment-input-group">
-
-                                    <label for="amountPaid">
-                                        Amount Paid
-                                    </label>
-
-                                    <div class="money-input">
-
-                                        <span>₱</span>
-
-                                        <input type="number"
-                                               id="amountPaid"
-                                               name="AmountPaid"
-                                               min="0"
-                                               step="0.01"
-                                               value="0" />
-
-                                    </div>
-
-                                </div>
-
-                                <!-- CHANGE / BALANCE -->
-
-                                <div class="payment-result">
-
-                                    <span id="paymentResultLabel">
-                                        Change
-                                    </span>
-
-                                    <strong id="paymentResult">
-                                        ₱0.00
-                                    </strong>
-
-                                </div>
-
-                            </div>
-
-                            <!-- UTANG INFORMATION -->
-
-                            <div id="utangPaymentInfo"
-                                 class="transaction-note"
-                                 style="display: none;">
-
-                                <i class="bi bi-info-circle"></i>
-
-                                <div>
-                                    The remaining amount will be recorded
-                                    as the customer's utang balance.
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- FOOTER -->
-
-                <div class="modal-footer transaction-footer">
-
-                    <button type="button"
-                            class="btn transaction-cancel-btn"
-                            data-bs-dismiss="modal">
-
-                        Cancel
-
-                    </button>
-
-                    <button type="submit"
-                            class="btn transaction-submit-btn">
-
-                        <i class="bi bi-check-lg me-1"></i>
-
-                        Complete Sale
-
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
+                                <div class="tx-pay-box">
+    <div class="tx-row tx-row-total">
+        <span>Total</span>
+        <strong id="txTotal">₱0.00</strong>
     </div>
 
+<label class="tx-label" for="txPaid" id="txPaidLabel">Amount paid (cash)</label> 
+   <div class="tx-money">
+        <span>₱</span>
+        <input type="number" id="txPaid" name="AmountPaid" min="0" step="0.01" value="0" inputmode="decimal" />
+    </div>
+    <small class="tx-help" id="txPaidHint" hidden>Make a partial payment now. Leave it at 0 if the customer pays nothing today. The rest becomes the utang balance.</small>
+
+    <div class="tx-quick" id="txQuick">
+        <button type="button" class="tx-chip" data-quick="exact">Exact</button>
+        <button type="button" class="tx-chip" data-quick="100">₱100</button>
+        <button type="button" class="tx-chip" data-quick="500">₱500</button>
+        <button type="button" class="tx-chip" data-quick="1000">₱1,000</button>
+    </div>
+
+    <div class="tx-row tx-row-result">
+        <span id="txResultLabel">Change</span>
+        <strong id="txResult">₱0.00</strong>
+    </div>
+
+    <div class="tx-note" id="txUtangNote" hidden>
+        <i class="bi bi-info-circle"></i>
+        <span>The remaining amount is recorded as the customer's utang balance.</span>
+    </div>
+</div>
+                            </section>
+                        </div>
+
+                        <!-- STEP 2 -->
+                        <div id="txStepReview" class="tx-review" hidden></div>
+                    </div>
+
+                    <div class="modal-footer tx-footer">
+                        <button type="button" class="tx-btn tx-btn-ghost" data-bs-dismiss="modal" id="txCancel">Cancel</button>
+                        <button type="button" class="tx-btn tx-btn-ghost" id="txBack" hidden><i class="bi bi-arrow-left"></i> Back</button>
+                        <button type="button" class="tx-btn tx-btn-primary" id="txReview" disabled>Review order <i class="bi bi-arrow-right"></i></button>
+                        <button type="button" class="tx-btn tx-btn-success" id="txConfirm" hidden><i class="bi bi-check2-circle"></i> Confirm &amp; save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DETAILS (loaded by AJAX) ================= -->
+    <div class="modal fade tx-modal" id="txDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="txDetailsBody"></div>
+        </div>
+    </div>
+
+    <!-- ================= RECEIPT (loaded by AJAX) ================= -->
+    <div class="modal fade tx-modal" id="txReceiptModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="txReceiptBody"></div>
+        </div>
+    </div>
 </div>

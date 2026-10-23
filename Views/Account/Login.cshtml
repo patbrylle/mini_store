@@ -57,14 +57,12 @@
             </div>
 
             <div class="remember-row reveal" style="--i:3">
-                <label class="remember-check">
-                    <input asp-for="RememberMe" />
-                    <span>Remember me</span>
-                </label>
-
-              
-            </div>
-
+    <label class="remember-check">
+        <input asp-for="RememberMe" />
+        <span>Remember me</span>
+    </label>
+    <a href="#" class="forgot-link" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forgot password?</a>
+</div>
             <button type="submit" class="login-button reveal" style="--i:4">
                 <span>Sign In</span>
                 <i class="bi bi-arrow-right"></i>
@@ -78,6 +76,11 @@
 
     </div>
 </div>
+<partial name="_ForgotPasswordModal" />
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/forgot-password.css" asp-append-version="true" />
+}
 
 @section Scripts {
     <script>
@@ -92,4 +95,5 @@
             btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
         }
     </script>
+    <script src="~/js/forgot-password.js" asp-append-version="true"></script>
 }

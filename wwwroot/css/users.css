@@ -753,84 +753,8 @@
     display: none;
 }
 
-/* ---- edit user modal ---- */
-.um-edit-dialog {
-    max-width: 560px;
-}
 
-/* ---- reset password modal ---- */
-.um-reset-field {
-    margin-bottom: 14px;
-}
 
-.um-reset-field label {
-    display: block;
-    margin-bottom: 7px;
-    font-size: .82rem;
-    font-weight: 700;
-    color: var(--color-text);
-}
-
-.um-pw {
-    position: relative;
-}
-
-.um-pw-input {
-    width: 100%;
-    padding: 11px 46px 11px 14px;
-    font-size: .9rem;
-    color: var(--color-text);
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    outline: none;
-    transition: border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease),
-                background-color var(--speed) var(--ease);
-}
-
-.um-pw-input::placeholder {
-    color: var(--color-text-muted);
-    opacity: .7;
-}
-
-.um-pw-input:focus {
-    background: var(--color-surface);
-    border-color: var(--color-primary-light);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
-}
-
-.um-pw-input.is-invalid {
-    background: color-mix(in srgb, var(--color-danger) 5%, var(--color-surface));
-    border-color: var(--color-danger);
-}
-
-.um-pw-input.is-invalid:focus {
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-danger) 14%, transparent);
-}
-
-.um-pw-toggle {
-    position: absolute;
-    top: 50%;
-    right: 6px;
-    width: 34px;
-    height: 34px;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: var(--color-text-muted);
-    background: transparent;
-    border: 0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: color var(--speed) var(--ease), background-color var(--speed) var(--ease);
-}
-
-.um-pw-toggle:hover {
-    color: var(--color-primary-dark);
-    background: var(--color-surface-soft);
-}
 
 /* =========================================================
    ADD / EDIT STAFF FORM
@@ -1118,103 +1042,6 @@
     background: var(--color-surface-soft);
 }
 
-/* =========================================================
-   ROLE PICKER + NOTICE  (used by the edit user modal)
-   ========================================================= */
-
-.um-role-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-}
-
-.um-role-option {
-    position: relative;
-    display: block;
-    margin: 0;
-    cursor: pointer;
-}
-
-/* the real radio stays in the DOM (keyboard + form post) but is invisible */
-.um-role-option input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.um-role-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    background: var(--color-surface);
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: border-color var(--speed) var(--ease), background-color var(--speed) var(--ease),
-                box-shadow var(--speed) var(--ease), transform var(--speed) var(--ease);
-}
-
-.um-role-card strong {
-    display: block;
-    font-size: .9rem;
-    color: var(--color-text);
-}
-
-.um-role-card small {
-    font-size: .76rem;
-    color: var(--color-text-muted);
-}
-
-.um-role-card-icon {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    font-size: 18px;
-}
-
-.um-role-card-icon.staff {
-    color: var(--color-primary-dark);
-    background: var(--color-surface-soft);
-}
-
-.um-role-card-icon.admin {
-    color: var(--color-danger);
-    background: var(--color-danger-bg);
-}
-
-.um-role-check {
-    margin-left: auto;
-    font-size: 19px;
-    color: var(--color-primary);
-    opacity: 0;
-    transform: scale(.6);
-    transition: opacity var(--speed) var(--ease), transform .35s var(--ease-spring);
-}
-
-.um-role-option:hover .um-role-card {
-    border-color: var(--color-primary-light);
-    transform: translateY(-1px);
-}
-
-.um-role-option input:checked + .um-role-card {
-    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent);
-}
-
-.um-role-option input:checked + .um-role-card .um-role-check {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.um-role-option input:focus-visible + .um-role-card {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
 
 /* ---- notice box ---- */
 .um-note {
@@ -1309,3 +1136,15 @@
         animation: none;
     }
 }
+/* customer accounts + temporary lockout */
+.um-role.customer {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+}
+
+.um-status.locked {
+    color: var(--color-gold);
+    background: color-mix(in srgb, var(--color-gold) 14%, var(--color-surface));
+}
+
+.um-modal-body p strong#deleteUserName { display: block; }

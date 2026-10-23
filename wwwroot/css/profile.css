@@ -1,0 +1,189 @@
+/* =========================================================
+   Profile page  (pf- prefix)
+   Uses the tokens + shared form classes from site.css
+   ========================================================= */
+
+.pf-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.pf-main {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+}
+
+/* ---- summary card ---- */
+.pf-summary {
+    padding: 32px 24px;
+    text-align: center;
+    position: sticky;
+    top: calc(var(--topbar-height) + 20px);
+}
+
+.pf-avatar {
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-gold));
+    box-shadow: 0 10px 24px rgba(228, 119, 46, .35);
+}
+
+.pf-name {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+}
+
+.pf-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .4px;
+    border-radius: 999px;
+    color: var(--color-primary-dark);
+    background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+}
+
+.pf-role-staff {
+    color: var(--color-gold);
+    background: color-mix(in srgb, var(--color-gold) 16%, var(--color-surface));
+}
+
+.pf-role-customer {
+    color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+}
+
+.pf-meta {
+    margin: 22px 0 0;
+    padding: 18px 0 0;
+    list-style: none;
+    text-align: left;
+    border-top: 1px dashed var(--color-border);
+}
+
+.pf-meta li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: .84rem;
+    color: var(--color-text-muted);
+}
+
+.pf-meta i {
+    margin-top: 2px;
+    color: var(--color-primary);
+}
+
+.pf-meta span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* ---- section heading inside a card ---- */
+.pf-section-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.pf-section-head h5 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.pf-section-head p {
+    margin: 2px 0 0;
+    font-size: .84rem;
+    color: var(--color-text-muted);
+}
+
+.pf-section-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-size: 18px;
+    color: var(--color-primary-dark);
+    background: var(--color-surface-soft);
+}
+
+/* ---- two-column field rows (one field = full width) ---- */
+.pf-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0 18px;
+}
+
+.pf-note {
+    display: flex;
+    gap: 10px;
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    font-size: .84rem;
+    color: var(--color-text-muted);
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-md);
+}
+
+.pf-note i {
+    color: var(--color-gold);
+}
+
+.pf-rules {
+    margin-bottom: 22px;
+    animation: none;
+}
+
+/* ---- responsive ---- */
+@media (max-width: 991px) {
+    .pf-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pf-summary {
+        position: static;
+    }
+}
+.field-input[readonly] {
+    cursor: not-allowed;
+    color: var(--color-text-muted);
+    background: var(--color-surface-soft);
+}
+
+.pf-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: .78rem;
+    color: var(--color-text-muted);
+}
+
+.pf-hint i {
+    margin-top: 2px;
+    color: var(--color-gold);
+}
