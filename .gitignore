@@ -1,1 +1,19 @@
-appsettings.json
+# .NET build outputs
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# IDE files
+.idea/
+
+# Logs
+*.log
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
