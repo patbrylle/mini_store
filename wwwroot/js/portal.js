@@ -27,3 +27,39 @@
         if (cat) cat.addEventListener('change', apply);
     });
 })();
+(function () {
+    'use strict';
+
+    var modalEl = document.getElementById('ptReceiptModal');
+    if (!modalEl || !window.bootstrap) return;
+
+    var body = document.getElementById('ptReceiptBody');
+    var baseUrl = modalEl.dataset.receiptUrl;
+    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+    document.addEventListener('click', async function (e) {
+        // print button inside the receipt
+        var print = e.target.closest('[data-tx-action="print"]');
+        if (print && modalEl.contains(print)) { window.print(); return; }
+
+        var btn = e.target.closest('[data-receipt-sale]');
+        if (!btn) return;
+        e.preventDefault();
+
+        body.innerHTML = '<div class="tx-loading"><span class="spinner-border spinner-border-sm"></span> Loading…</div>';
+        modal.show();
+
+        var qs = '?id=' + encodeURIComponent(btn.dataset.receiptSale);
+        if (btn.dataset.receiptPayment) qs += '&paymentId=' + encodeURIComponent(btn.dataset.receiptPayment);
+
+        try {
+            var res = await fetch(baseUrl + qs, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!res.ok) throw new Error('Could not load the receipt.');
+            body.innerHTML = await res.text();
+        } catch (err) {
+            body.innerHTML =
+                '<div class="tx-loading">' + err.message + '</div>' +
+                '<div class="modal-footer tx-footer"><button type="button" class="tx-btn tx-btn-primary" data-bs-dismiss="modal">Close</button></div>';
+        }
+    });
+})();

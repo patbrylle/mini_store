@@ -55,7 +55,6 @@ namespace mini_store.Controllers
                 return View("NotLinked");
 
             var utangs = await LoadUtangsAsync(customer.CustomerId);
-            
 
             return View(BuildModel(customer, new(), utangs));
         }
@@ -69,6 +68,47 @@ namespace mini_store.Controllers
                 .ToListAsync();
 
             return View(products);
+        }
+
+        // =========================================================
+        // RECEIPT (modal body, loaded by AJAX)
+        // =========================================================
+        public async Task<IActionResult> Receipt(int id, int? paymentId)
+        {
+            var customer = await GetCurrentCustomerAsync();
+            if (customer == null) return Forbid();
+
+            // Only the customer's own sale can be opened
+            var sale = await _context.Sales
+                .AsNoTracking()
+                .Include(s => s.Customer)
+                .Include(s => s.SaleItems).ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(s => s.SaleId == id && s.CustomerId == customer.CustomerId);
+
+            if (sale == null) return NotFound();
+
+            var payments = await _context.Payments
+                .AsNoTracking()
+                .Where(p => p.SaleId == id)
+                .OrderBy(p => p.Sequence)
+                .ToListAsync();
+
+            // The payment must belong to this sale
+            if (paymentId.HasValue && !payments.Any(p => p.PaymentId == paymentId.Value))
+                return NotFound();
+
+            var utang = await _context.Utangs
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.SaleId == id);
+
+            ViewBag.PaymentId = paymentId;
+
+            return PartialView("_PortalReceipt", new TransactionVm
+            {
+                Sale = sale,
+                Utang = utang,
+                Payments = payments
+            });
         }
 
         // =========================================================
@@ -106,7 +146,7 @@ namespace mini_store.Controllers
                 .AsNoTracking()
                 .Where(u => u.CustomerId == customerId)
                 .Include(u => u.Sale)
-
+                .Include(u => u.Payments)
                 .OrderByDescending(u => u.DateCreated)
                 .ToListAsync();
         }

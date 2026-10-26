@@ -1,0 +1,97 @@
+@model mini_store.Models.TransactionVm
+@using mini_store.Models
+@{
+    var s = Model.Sale;
+    int? paymentId = ViewBag.PaymentId as int?;
+    var pay = paymentId.HasValue ? Model.Payments.FirstOrDefault(p => p.PaymentId == paymentId.Value) : null;
+
+    var paidToDate = pay != null
+        ? Model.Payments.Where(p => p.Sequence <= pay.Sequence).Sum(p => p.Amount)
+        : s.AmountPaid;
+    var balanceAfter = Math.Max(0, s.TotalAmount - paidToDate);
+    var isUtang = s.PaymentMethod == "Utang";
+    var title = pay != null ? "OFFICIAL RECEIPT" : (isUtang ? "UTANG SLIP" : "SALES INVOICE");
+}
+
+<div class="modal-header tx-header">
+    <div class="tx-header-icon is-success"><i class="bi bi-receipt"></i></div>
+    <div class="me-auto">
+        <h5 class="tx-title">@(pay != null ? "Official receipt" : (isUtang ? "Utang slip" : "Sales invoice"))</h5>
+        <p class="tx-sub">Keep this as proof of transaction.</p>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal-body tx-body">
+    <div class="tx-receipt">
+        <div class="tx-r-center">
+            <strong class="tx-r-store">MINI STORE</strong>
+            <span>@title</span>
+        </div>
+
+        <div class="tx-r-dash"></div>
+        <div class="tx-r-row"><span>Transaction</span><span>@s.TransactionNo</span></div>
+        @if (pay != null)
+        {
+            <div class="tx-r-row"><span>Receipt</span><span>@pay.ReceiptNo</span></div>
+        }
+        <div class="tx-r-row"><span>Date</span><span>@((pay?.PaidAt ?? s.SaleDate).ToString("MMM dd, yyyy hh:mm tt"))</span></div>
+        <div class="tx-r-row"><span>Customer</span><span>@(s.Customer?.CustomerName ?? "Walk-in")</span></div>
+        <div class="tx-r-row"><span>Cashier</span><span>@(pay?.ReceivedBy ?? s.CreatedBy ?? "—")</span></div>
+
+        <div class="tx-r-dash"></div>
+        @foreach (var item in s.SaleItems.OrderBy(i => i.AddedAt))
+        {
+            <div class="tx-r-item">
+                <span>@(item.Product?.ProductName ?? "Product")</span>
+                <span>@item.Quantity × ₱@item.UnitPrice.ToString("N2") = <strong>₱@item.Subtotal.ToString("N2")</strong></span>
+            </div>
+        }
+
+        <div class="tx-r-dash"></div>
+        <div class="tx-r-row tx-r-big"><span>TOTAL</span><span>₱@s.TotalAmount.ToString("N2")</span></div>
+
+        @if (pay != null)
+        {
+            <div class="tx-r-row"><span>Paid (@pay.Method)</span><span>₱@pay.Amount.ToString("N2")</span></div>
+            @if (!string.IsNullOrWhiteSpace(pay.ReferenceNo))
+            {
+                <div class="tx-r-row"><span>Reference</span><span>@pay.ReferenceNo</span></div>
+            }
+            @if (pay.ChangeGiven > 0)
+            {
+                <div class="tx-r-row"><span>Tendered</span><span>₱@pay.AmountTendered.ToString("N2")</span></div>
+                <div class="tx-r-row"><span>Change</span><span>₱@pay.ChangeGiven.ToString("N2")</span></div>
+            }
+            @if (isUtang)
+            {
+                <div class="tx-r-row"><span>Total paid to date</span><span>₱@paidToDate.ToString("N2")</span></div>
+            }
+        }
+
+        @if (isUtang)
+        {
+            <div class="tx-r-row tx-r-big"><span>BALANCE</span><span>₱@balanceAfter.ToString("N2")</span></div>
+            @if (Model.Utang?.DueDate != null)
+            {
+                <div class="tx-r-row"><span>Due date</span><span>@Model.Utang.DueDate.Value.ToString("MMM dd, yyyy")</span></div>
+            }
+        }
+
+        @if (isUtang && pay == null)
+        {
+            <div class="tx-r-sign">
+                <div></div>
+                <span>Customer signature</span>
+            </div>
+        }
+
+        <div class="tx-r-dash"></div>
+        <div class="tx-r-center"><span>Thank you for shopping with us!</span></div>
+    </div>
+</div>
+
+<div class="modal-footer tx-footer">
+    <button type="button" class="tx-btn tx-btn-ghost" data-tx-action="print"><i class="bi bi-printer"></i> Print</button>
+    <button type="button" class="tx-btn tx-btn-primary" data-bs-dismiss="modal"><i class="bi bi-check-lg"></i> Done</button>
+</div>

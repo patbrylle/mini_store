@@ -143,6 +143,7 @@ public async Task<IActionResult> History(int id)
 
             return RedirectToAction(nameof(Index));
         }
+       
         // =========================================================
         // POST: Customers/Delete
         // =========================================================

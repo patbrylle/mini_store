@@ -10,8 +10,8 @@
     var kSettled = ("success", "bi-check-circle", "Settled", Model.Utangs.Count(u => u.Balance <= 0).ToString(), "Fully paid");
     var kOver    = ("danger", "bi-exclamation-circle", "Overdue", $"₱{overdueAmount:N2}", $"{Model.OverdueCount} record(s)");
 }
-
 @section Styles {
+    <link rel="stylesheet" href="~/css/transactions.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
 }
 @section Scripts {
@@ -57,7 +57,7 @@
         {
             <table class="pt-table">
                 <thead>
-                    <tr><th>Reference</th><th>Recorded</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Due date</th><th>Status</th></tr>
+<tr><th>Reference</th><th>Recorded</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Due date</th><th>Status</th><th>Receipts</th></tr>
                 </thead>
                 <tbody>
                 @foreach (var u in Model.Utangs)
@@ -78,6 +78,23 @@
                         <td data-label="Balance"><strong class="@(u.Balance > 0 ? "text-danger" : "text-success")">₱@u.Balance.ToString("N2")</strong></td>
                         <td data-label="Due date">@(u.DueDate?.ToString("MMM dd, yyyy") ?? "Not set")</td>
                         <td data-label="Status"><partial name="_StatusPill" model="(u.Status, u.IsOverdue)" /></td>
+                        <td data-label="Receipts">
+    <div class="pt-btn-group">
+        @foreach (var p in u.Payments.OrderBy(p => p.Sequence))
+        {
+            <button type="button" class="pt-btn" title="@p.ReceiptNo"
+                    data-receipt-sale="@u.SaleId" data-receipt-payment="@p.PaymentId">
+                <i class="bi bi-receipt"></i> ₱@p.Amount.ToString("N2")
+            </button>
+        }
+        @if (!u.Payments.Any())
+        {
+            <button type="button" class="pt-btn" data-receipt-sale="@u.SaleId">
+                <i class="bi bi-receipt"></i> Slip
+            </button>
+        }
+    </div>
+</td>
                     </tr>
                 }
                 </tbody>
@@ -99,3 +116,4 @@
         }
     </section>
 </div>
+<partial name="_ReceiptModal" />

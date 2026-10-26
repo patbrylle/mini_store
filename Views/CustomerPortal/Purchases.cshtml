@@ -10,8 +10,8 @@
     var kCount = ("gold", "bi-bag-check", "Transactions", Model.Transactions.Count.ToString(), "Recorded by the store");
     var kUnpaid = ("danger", "bi-hourglass-split", "Still Unpaid", $"₱{unpaid:N2}", "Across all purchases");
 }
-
 @section Styles {
+    <link rel="stylesheet" href="~/css/transactions.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
 }
 @section Scripts {
@@ -56,7 +56,7 @@
         {
             <table class="pt-table">
                 <thead>
-                    <tr><th>Transaction</th><th>Date</th><th>Items</th><th>Total</th><th>Paid</th><th>Type</th><th>Status</th></tr>
+<tr><th>Transaction</th><th>Date</th><th>Items</th><th>Total</th><th>Paid</th><th>Type</th><th>Status</th><th>Receipt</th></tr>
                 </thead>
                 <tbody>
                 @foreach (var sale in Model.Transactions)
@@ -82,6 +82,11 @@
                         <td data-label="Paid">₱@sale.AmountPaid.ToString("N2")</td>
                         <td data-label="Type">@(sale.PaymentMethod == "Utang" ? "Credit" : sale.PaymentMethod)</td>
                         <td data-label="Status"><partial name="_StatusPill" model="(sale.Status, false)" /></td>
+                        <td data-label="Receipt">
+    <button type="button" class="pt-btn" data-receipt-sale="@sale.SaleId">
+        <i class="bi bi-receipt"></i> View
+    </button>
+</td>
                     </tr>
                 }
                 </tbody>
@@ -103,3 +108,4 @@
         }
     </section>
 </div>
+<partial name="_ReceiptModal" />
